@@ -1,0 +1,130 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #032539; 
+  padding: 1.25rem;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(165, 94, 234, 0.3); 
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-style: italic;
+  margin: 0;
+
+  background: linear-gradient(to right, #123249, #a55eea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header p {
+  font-size: 0.875rem;
+  color: #667781;
+  margin-top: 0.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.813rem;
+  font-weight: 600;
+  color: #123249;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d7db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  text-align: center; 
+}
+
+.input:focus {
+  border-color: #a55eea;
+  box-shadow: 0 0 0 3px rgba(165, 94, 234, 0.1);
+  outline: none;
+}
+
+.button {
+  width: 100%;
+  padding: 0.875rem;
+  background-color: #123249;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.button:hover {
+  background-color: #061222;
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.error {
+  background-color: #fff5f5;
+  color: #e03131;
+  border: 1px solid #ffa8a8;
+}
+
+.success {
+  background-color: #f4fce3;
+  color: #2b8a3e;
+  border: 1px solid #b2f2bb;
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 2rem 1.25rem;
+    border-radius: 0.75rem;
+  }
+  
+  .header h2 {
+    font-size: 1.5rem;
+  }
+}

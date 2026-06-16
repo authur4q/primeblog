@@ -2,22 +2,25 @@ import { NextResponse } from "next/server"
 import connectMongoDb from "../../../../lib/mongodb"
 import Post from "../../../../models/post"
 
+
 export const POST = async (req) => {
-    const {title,description,content,name,userId} = await req.json()
+    const {title,description,content,userId,name} = await req.json()
 
     try {
         await connectMongoDb()
         const post = {
-            title,
+        title,
         description,
         content,
-        name,
-        userId
+        userId,
+        name
         }
         await Post.create(post)
         
+        
+        
         return NextResponse.json({message:"post created successfully"},{status:201})
-
+        
     } catch (error) {
                 return NextResponse.json({message:"post not created successfully"},{status:500})
     }
@@ -25,16 +28,17 @@ export const POST = async (req) => {
 
 export const GET = async (req) => {
     const url = new URL(req.url)
-    const name =  url.searchParams.get("name")
+    const userId =  url.searchParams.get("userId")
     
 
     try {
         await connectMongoDb()
 
-        const posts = await Post.find(name? {name}: {}).sort({createdAt:-1})
+        const posts = await Post.find(userId ? { userId } : {}).sort({createdAt:-1})
         return NextResponse.json(posts,{status:200})
 
     } catch (error) {
                 return NextResponse.json({status:500})
     }
+    
 }

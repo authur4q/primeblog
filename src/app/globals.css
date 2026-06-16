@@ -1,40 +1,10 @@
 
 
-
-
-
-
-:root {
-  --font-primary: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  
-  /* Font sizes */
-  --fs-xs: 0.75rem;    /* 12px */
-  --fs-sm: 0.875rem;   /* 14px */
-  --fs-base: 1rem;     /* 16px */
-  --fs-lg: 1.125rem;   /* 18px */
-  --fs-xl: 1.25rem;    /* 20px */
-  --fs-2xl: 1.5rem;    /* 24px */
-  --fs-3xl: 1.875rem;  /* 30px */
-  --fs-4xl: 2.25rem;   /* 36px */
-  
-  /* Line heights */
-  --lh-tight: 1.25;
-  --lh-normal: 1.5;
-  --lh-relaxed: 1.75;
-  
-  /* Font weights */
-  --fw-normal: 400;
-  --fw-medium: 500;
-  --fw-semibold: 600;
-  --fw-bold: 700;
-}
-
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background-color:rgba(255, 255, 255, 0.357);
+
   font-family: var(--font-primary);
   font-size: var(--fs-base);
   line-height: var(--lh-normal);
@@ -43,19 +13,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-primary);
-  font-weight: var(--fw-bold);
-  line-height: var(--lh-tight);
-  letter-spacing: -0.02em;
-}
 
-h1 { font-size: var(--fs-4xl); }
-h2 { font-size: var(--fs-3xl); }
-h3 { font-size: var(--fs-2xl); }
-h4 { font-size: var(--fs-xl); }
-h5 { font-size: var(--fs-lg); }
-h6 { font-size: var(--fs-base); }
 
 
 

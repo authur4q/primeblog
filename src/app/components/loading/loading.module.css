@@ -1,0 +1,34 @@
+.loaderContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; 
+  width: 100%;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: antiquewhite;
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  
+ 
+  border: 4px solid rgba(223, 182, 178, 0.1);
+  border-top-color: #dfb6b2;
+  
+ 
+  will-change: transform;
+  animation: rotation 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

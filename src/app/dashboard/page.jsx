@@ -6,70 +6,38 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-
-const page = () => {
-    const [title,setTitle] = useState("")
-   
-    const [description,setDescription] = useState("")
-    const [content,setContent] = useState("")
-    const [error, setError] = useState(null)
-   
+const DashboardPage = () => {
     const router = useRouter()
-    const [data,setData] = useState([])
-    
-
-    const {data:session,status} = useSession()
+    const { data: session, status } = useSession()
     const name = session?.user?.name
-    useEffect(()=>{
-            if(status == "unauthenticated"){
-        router.push("/login")
-    }
-    },[status])
+    const userId = session?.user?.id
+
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        content: "",
+    })
+    const [data, setData] = useState([])
+    const [error, setError] = useState(null)
 
     
-    const handleOnSubmit = async (e) => {
-        e.preventDefault()
-
-        // simple client-side validation
-        if(!title || !description || !content){
-            setError("All fields are required")
-            return
+    useEffect(() => {
+        if (status === "authenticated" && session?.user) {
+            console.log("Logged User:", name, "| ID:", userId)
         }
+    }, [session, status, name, userId])
 
-        try {
-            const res = await fetch('/api/posts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({title,description,content,name})
-            })
-
-            const body = await res.json().catch(() => ({}))
-            if (res.ok) {
-            
-                setTitle("")
-                setDescription("")
-                setContent("")
-                setError(null)
-
-            } else {
-                setError('Failed to create post')
-                
-            }
-
-        } catch (err) {
-            console.log(err)
-            setError('Network error')
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/login")
         }
+    }, [status, router])
 
-    }
-
-    useEffect(()=>{
+    useEffect(() => {
         const getData = async () => {
             try {
-                const res = await fetch(`/api/posts?name=${name}`)
-                const json =  await res.json()
+                const res = await fetch(`/api/posts?userId=${encodeURIComponent(userId)}`)
+                const json = await res.json()
               
                 if (res.ok && Array.isArray(json)) {
                     setData(json)
@@ -83,67 +51,122 @@ const page = () => {
             }
         }
 
-        if (name) getData()
-    },[name])
+        if (userId) getData()
+    }, [userId])
 
-    console.log(data)
+    const handleInputChange = (e) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
 
+    const handleOnSubmit = async (e) => {
+        e.preventDefault()
+        const { title, description, content } = formData
 
- 
- const handleDelete = async (postId) => {
-    const res = await fetch(`api/posts/${postId}`,{
-        method:"DELETE"
-    })
-    setData(prevData => prevData.filter(data => data._id !== postId))
- }
-    if(status == "authenticated"){
-         return (
-    <div className={styles.container}>
-        <Navbar />
-        <div className={styles.wrapper}>
-            <div className={styles.posts}> 
-                <h1>{name}</h1>
-                <div className={styles.scroll}>
+        
+        if (!title || !description || !content || !userId || !name) {
+            setError("All fields are required. Please verify you are logged in.")
+            return
+        }
 
-                
-                                {Array.isArray(data) && data.length > 0 ?    
-                                (
-                                    data.map(item => (
-                                        <div key={item._id} className={styles.post}>
-                <Link  href={`blogs/${item._id}`} >
-                    
-                    <h2>{item.title}</h2>
-            
-                        
-                </Link>
-                <button className={styles.btn} onClick={() => handleDelete(item._id)}>Delete</button>
+        try {
+            const res = await fetch('/api/posts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, description, content, userId , name})
+            })
+
+            if (res.ok) {
+                setFormData({ title: "", description: "", content: "" })
+                setError(null)
+                router.push("/blogs")
+            } else {
+                setError('Failed to create post')
+            }
+        } catch (err) {
+            console.error(err)
+            setError('Network error')
+        }
+    }
+
+    const handleDelete = async (postId) => {
+        try {
+            const res = await fetch(`/api/posts/${postId}`, {
+                method: "DELETE"
+            })
+            if (res.ok) {
+                setData(prevData => prevData.filter(item => item._id !== postId))
+            }
+        } catch (err) {
+            console.error('Error deleting post:', err)
+        }
+    }
+
+    if (status === "loading") {
+        return <div className={styles.container}>Loading...</div>
+    }
+
+    if (status === "authenticated") {
+        return (
+            <div className={styles.container}>
+                <Navbar />
+                <div className={styles.wrapper}>
+                    <div className={styles.form}>
+                        <h1>Create New Post</h1>
+                        {error && <p style={{color: 'salmon', marginTop: 8}}>{error}</p>}
+                        <form onSubmit={handleOnSubmit}>
+                            <input 
+                                className={styles.input} 
+                                name="title"
+                                value={formData.title} 
+                                onChange={handleInputChange} 
+                                required 
+                                type="text" 
+                                placeholder='Title' 
+                            />
+                            <input 
+                                className={styles.input} 
+                                name="description"
+                                value={formData.description} 
+                                onChange={handleInputChange} 
+                                type="text" 
+                                placeholder='Description' 
+                            />
+                            <textarea 
+                                className={styles.textarea} 
+                                name="content"
+                                value={formData.content} 
+                                onChange={handleInputChange} 
+                                required 
+                                placeholder='Content'
+                            ></textarea>
+                            <button className={styles.button} type='submit'>Create Post</button>
+                        </form>
                     </div>
-                
-                 ))) :
-                     (<h2 className={styles.nopost}>You haven't posted yet...</h2>)}
+                    <div className={styles.posts}> 
+                        <div className={styles.scroll}>
+                            {data.length > 0 ? (
+                                data.map(item => (
+                                    <div key={item._id} className={styles.post}>
+                                        <Link href={`/blogs/${item._id}`}>
+                                            <h2>{item.title}</h2>
+                                        </Link>
+                                        <button className={styles.btn} onClick={() => handleDelete(item._id)}>Delete</button>
+                                    </div>
+                                ))
+                            ) : (
+                                <h2 className={styles.nopost}>You haven't posted yet...</h2>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div className={styles.form}>
-                <h1>Create New Post</h1>
-                {error && <p style={{color: 'salmon', marginTop: 8}}>{error}</p>}
-                <form onSubmit={handleOnSubmit}>
-                    <input className={styles.input} value={title} onChange={e => setTitle(e.target.value)} required type="text" placeholder='Post Title' />
-                    <input className={styles.input} value={description} onChange={e => setDescription(e.target.value)} type="text" placeholder='Post Description' />
-                    <textarea className={styles.textarea} value={content} onChange={e => setContent(e.target.value)} required placeholder='Post Content'></textarea>
-                    <button className={styles.button} type='submit'>Create Post</button>
-                </form>
-            </div>
-        </div>
-      
-    </div>
-  )
+        )
     }
-    
-    
-    
 
-
- 
+    return null
 }
 
-export default page
+export default DashboardPage

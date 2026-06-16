@@ -85,11 +85,11 @@ const page = () => {
             <div className={styles.form}>
                 <form onSubmit={handleOnSubmit}>
                     <h2 className={styles.formTitle}>Register here</h2>
-                    <input className={styles.input} onChange={e => setName(e.target.value)} type="text" placeholder='Enter your name' />
-                    <input className={styles.input} onChange={e => setEmail(e.target.value)}  type="email" placeholder='Enter your email' />
-                    <input className={styles.input} onChange={e => setStreet(e.target.value)}  type="text" placeholder='Street (optional)' />
-                    <input className={styles.input} onChange={e => setCity(e.target.value)}  type="text" placeholder='City (optional)' />
-                    <input className={styles.input} onChange={e => setPassword(e.target.value)} type="password" placeholder='Enter your password' />
+                    <input className={styles.input} onChange={e => setName(e.target.value)} type="text" placeholder='Username' />
+                    <input className={styles.input} onChange={e => setEmail(e.target.value)}  type="email" placeholder='Email' />
+                   
+                   
+                    <input className={styles.input} onChange={e => setPassword(e.target.value)} type="password" placeholder='Password' />
                     {error && <p className={styles.error}>{error}</p>}
                     {success && <p className={styles.success}>{success}</p>}
 

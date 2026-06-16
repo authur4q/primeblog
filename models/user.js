@@ -36,6 +36,12 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength:6,
     },
+  forgotPasswordToken: String,
+  forgotPasswordTokenExpiry: Date,
+    role: {
+    type: String,
+    default: "user"
+  },
 },{timestamps:true})
 
 
