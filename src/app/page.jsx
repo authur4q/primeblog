@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 
 async function getLatestPosts() {
   try {
-    const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/posts`, { 
+    const res = await fetch(`/api/posts`, { 
       next: { revalidate: 60 } 
     });
     if (!res.ok) return [];
