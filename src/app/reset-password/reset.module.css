@@ -4,6 +4,7 @@
   align-items: center;
   min-height: 100vh;
   background-color: #032539; 
+  background-attachment: fixed;
   padding: 1.25rem;
 }
 

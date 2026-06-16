@@ -3,6 +3,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   min-height: 100dvh;
   box-sizing: border-box;
   padding: 100px 24px 40px 24px;

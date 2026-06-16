@@ -2,6 +2,7 @@
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.742), rgba(0, 0, 0, 0.194)), url('../../../public/cube.png');
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   height: 100dvh;
   width: 100vw;
   padding: 0;
@@ -20,6 +21,7 @@
   width: 100%;
   gap: 16px;
   margin: 0 20px;
+  margin-top: 57px;
 }
 
 .text {

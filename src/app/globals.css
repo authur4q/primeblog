@@ -1,9 +1,9 @@
-
-
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 
   font-family: var(--font-primary);
   font-size: var(--fs-base);
@@ -12,10 +12,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
-
-
-
-
 
 * {
   box-sizing: border-box;
@@ -26,16 +22,22 @@ body {
 .page-container {
   min-height: 100vh;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+
 }
 
 .content-wrapper {
-  padding-top: 80px; /* Same as navbar height */
-  min-height: calc(100vh - 80px);
+  padding-top: 0px; 
+  min-height: 100vh;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 a {
-  color:white;
+  color: white;
   text-decoration: none;
 }
 

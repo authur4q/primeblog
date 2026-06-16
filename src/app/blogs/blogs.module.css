@@ -2,6 +2,7 @@
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.938), rgba(0, 0, 0, 0.884)), url('../../../public/cube.png');
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   height: 100dvh;
   width: 100vw;
   padding: 80px 20px 0 20px;
@@ -72,7 +73,7 @@
 .searchContainer {
   width: 100%;
   flex-shrink: 0;
-  margin-top: -30px;
+  margin-top: 0px;
 }
 
 .searchInput {
