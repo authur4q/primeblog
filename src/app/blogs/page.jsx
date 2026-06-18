@@ -72,20 +72,28 @@ const Blogs = () => {
             {!loading && !error && filteredPosts.map((item) => {
               const authorName = item.name || "Anonymous";
               const initial = authorName.charAt(0).toUpperCase();
+              const profileId = typeof item.userId === 'object' ? item.userId?._id : item.userId;
 
               return (
                 <div key={item._id} className={styles.post}>
                   <div className={styles.postHeader}>
                     <div className={styles.authorMeta}>
-                      <Link href={`/profile/${item.userId}`} className={styles.avatarLink}>
+                      <Link href={`/profile/${profileId}`} className={styles.avatarLink}>
                         <div className={styles.avatar}>
                           {initial}
                         </div>
                       </Link>
                       
-                      <Link href={`/profile/${item.userId}`} className={styles.author}>
-                        pb/{authorName}
-                      </Link>
+                      <div className={styles.authorBadgeWrapper}>
+                        <Link href={`/profile/${profileId}`} className={styles.author}>
+                          pb/{authorName}
+                        </Link>
+                        {item.isPremium && (
+                          <span className={styles.verifiedTick} title="Premium Creator">
+                            ✓
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
                     {item.createdAt && (

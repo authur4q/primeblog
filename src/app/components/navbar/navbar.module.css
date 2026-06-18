@@ -47,6 +47,7 @@
 
 .links a:hover {
     opacity: 0.8;
+    color:#108601;
 }
 
 .btn {
@@ -143,6 +144,7 @@
 
     .linksActive {
         right: 0;
+        color: rgb(18, 221, 0);
     }
     
     .links a {

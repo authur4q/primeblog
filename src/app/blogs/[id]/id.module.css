@@ -46,6 +46,75 @@
   opacity: 0.9;
 }
 
+/* Audio Narrator Card Privileges */
+.audioNarratorCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(251, 228, 216, 0.15);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.audioMeta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.audioWaveIcon {
+  font-size: 1.3rem;
+  color: #dfb6b2;
+}
+
+.audioTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.audioStatus {
+  font-size: 0.8rem;
+  color: rgba(251, 228, 216, 0.6);
+  margin: 2px 0 0 0;
+}
+
+.audioActionControls {
+  display: flex;
+  gap: 10px;
+}
+
+.audioBtnPrimary, .audioBtnSecondary {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s ease;
+}
+
+.audioBtnPrimary {
+  background-color: #dfb6b2;
+  color: #1a1a1a;
+}
+
+.audioBtnSecondary {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.audioBtnPrimary:hover, .audioBtnSecondary:hover {
+  opacity: 0.9;
+}
+
 .content {
   color: #ffffff;
   font-size: 1.05rem;
@@ -180,7 +249,6 @@
   padding-bottom: 8px;
 }
 
-
 .commenterMeta {
   display: flex;
   align-items: center;
@@ -190,7 +258,6 @@
 .avatarLink {
   text-decoration: none;
 }
-
 
 .avatar {
   width: 30px;
@@ -275,6 +342,21 @@
 
   .description {
     font-size: 1rem;
+  }
+
+  .audioNarratorCard {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .audioActionControls {
+    width: 100%;
+  }
+
+  .audioBtnPrimary, .audioBtnSecondary {
+    flex: 1;
+    text-align: center;
   }
 
   .content {

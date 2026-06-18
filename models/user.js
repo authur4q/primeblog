@@ -1,5 +1,4 @@
-import mongoose from "mongoose";      
-
+import mongoose from "mongoose";       
 
 if (mongoose.models.User) {
     delete mongoose.models.User;
@@ -19,6 +18,12 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email address']
     },
+    username: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true
+    },
     city:{
         type: String,
         required: false,
@@ -36,14 +41,32 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength:6,
     },
-  forgotPasswordToken: String,
-  forgotPasswordTokenExpiry: Date,
+    forgotPasswordToken: String,
+    forgotPasswordTokenExpiry: Date,
     role: {
-    type: String,
-    default: "user"
-  },
+        type: String,
+        default: "user"
+    },
+    isPremium: { type: Boolean, default: false },
+    subscriptionPlan: {
+         type: String,
+         default: "free"
+    },
+    premiumUntil: { type: Date, default: null },
+    phoneNumber: { type: String, sparse: true },
+    primaryPhone: { type: String, unique: true, sparse: true },
+    lastTransactionId: { type: String, unique: true, sparse: true },
+    twitter: {
+        type: String,
+        trim: true,
+        default: ""
+    },
+    Instagram: {
+        type: String,
+        trim: true,
+        default: ""
+    }
 },{timestamps:true})
-
 
 const User = mongoose.model("User", userSchema);
 

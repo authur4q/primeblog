@@ -15,6 +15,8 @@ const BlogPost = () => {
   const [comments, setComments] = useState([])
   const [commentText, setCommentText] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
 
   useEffect(() => {
     const getData = async () => {
@@ -35,6 +37,46 @@ const BlogPost = () => {
       getComments()
     }
   }, [id])
+
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis?.cancel()
+    }
+  }, [])
+
+  const handleSpeechControl = () => {
+    if (!data?.content) return
+
+    const synth = window.speechSynthesis
+
+    if (!isPlaying) {
+      const cleanText = data.content.replace(/```[\s\S]*?```/g, "[Code Fragment Block Placeholder]")
+      const utterance = new SpeechSynthesisUtterance(cleanText)
+      
+      utterance.onend = () => {
+        setIsPlaying(false)
+        setIsPaused(false)
+      }
+
+      setIsPlaying(true)
+      setIsPaused(false)
+      synth.speak(utterance)
+    } else {
+      if (!isPaused) {
+        synth.pause()
+        setIsPaused(true)
+      } else {
+        synth.resume()
+        setIsPaused(false)
+      }
+    }
+  }
+
+  const handleStopSpeech = () => {
+    window.speechSynthesis?.cancel()
+    setIsPlaying(false)
+    setIsPaused(false)
+  }
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
@@ -88,12 +130,37 @@ const BlogPost = () => {
 
   return (
     <div className={styles.container}>
-      <Navbar />
+      <Navbar/>
       <div className={styles.wrapper}>
         {data ? (
           <>
             <h1 className={styles.title}>{data.title}</h1>
             <h2 className={styles.description}>{data.description}</h2>
+
+            {session?.user?.isPremium && (
+              <div className={styles.audioNarratorCard}>
+                <div className={styles.audioMeta}>
+                  <span className={styles.audioWaveIcon}>🔊</span>
+                  <div>
+                    <h4 className={styles.audioTitle}>Prime Voice Narrator</h4>
+                    <p className={styles.audioStatus}>
+                      {isPlaying ? (isPaused ? "Paused" : "Speaking...") : "Listen to this breakdown hands-free"}
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.audioActionControls}>
+                  <button onClick={handleSpeechControl} className={styles.audioBtnPrimary}>
+                    {isPlaying ? (isPaused ? "Resume" : "Pause") : "Play Audio"}
+                  </button>
+                  {isPlaying && (
+                    <button onClick={handleStopSpeech} className={styles.audioBtnSecondary}>
+                      Stop
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             <p className={styles.content}>{data.content}</p>
 
             <hr className={styles.divider} />
@@ -170,7 +237,7 @@ const BlogPost = () => {
             </div>
           </>
         ) : (
-          <Loading />
+          <Loading/>
         )}
       </div>
     </div>

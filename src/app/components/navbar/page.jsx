@@ -15,6 +15,12 @@ const publicLinks = [
     label: 'Blogs',
     id: 2
   },
+  {
+    href: '/premium',
+    label: 'Premium',
+    id: 3
+  },
+
 ]
 
 const Navbar = () => {
@@ -48,6 +54,12 @@ const Navbar = () => {
             {link.label}
           </Link>
         ))}
+
+        {session?.user?.role === "admin" && (
+          <Link href="/admin" onClick={() => setIsOpen(false)}>
+            Admin 
+          </Link>
+        )}
 
         {status === "authenticated" && (
           <>
