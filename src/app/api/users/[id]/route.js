@@ -2,8 +2,7 @@ import { NextResponse } from "next/server"
 import User from "../../../../../models/user" 
 import mongoose from "mongoose"
 import connectMongoDb from "../../../../../lib/mongodb"
-import { getServerSession } from "next-auth/next"
-import authOptions from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/api/auth/[...nextauth]/options"
 
 export const GET = async (req, { params }) => {
     try {
@@ -32,7 +31,7 @@ export const GET = async (req, { params }) => {
 
 export async function PATCH(req, { params }) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -86,7 +85,7 @@ export async function PATCH(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

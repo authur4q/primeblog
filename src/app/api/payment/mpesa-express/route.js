@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import authOptions from "../../auth/[...nextauth]/options"; // Double-check this relative path matches your directory structure
+import { auth } from "@/app/api/auth/[...nextauth]/options";
 import connectMongoDb from "../../../../../lib/mongodb";
 import User from "../../../../../models/user";
 
@@ -12,7 +11,7 @@ const getMpesaTimestamp = () => {
 
 export async function POST(request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user?.email) {
       return new NextResponse("Unauthorized operational access.", { status: 401 });
     }

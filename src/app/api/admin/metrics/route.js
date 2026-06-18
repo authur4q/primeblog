@@ -1,22 +1,17 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
+import { auth } from "@/app/api/auth/[...nextauth]/options"
 import connectMongoDb from "../../../../../lib/mongodb"
-
 import User from "../../../../../models/user"
-
 import Post from "../../../../../models/post"
-
-import authOptions from "@/app/api/auth/[...nextauth]/options"
 
 export const GET = async (req) => {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session || session.user?.role !== "admin") {
       return NextResponse.json({ message: "Unauthorized access profile" }, { status: 403 })
     }
 
-    
     await connectMongoDb()
 
     const [totalUsers, premiumUsers, totalPosts, usersList] = await Promise.all([

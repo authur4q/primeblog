@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Prime",
   description: "spark new ideas on prime",
+  manifest: "/manifest.json",
+};
+
+export const viewport = {
+  themeColor: "#04c21e",
 };
 
 export default function RootLayout({ children }) {

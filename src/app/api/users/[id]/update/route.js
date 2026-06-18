@@ -1,21 +1,16 @@
 import { NextResponse } from "next/server";
-
-import { getServerSession } from "next-auth/next";
-
-
-import authOptions from "@/app/api/auth/[...nextauth]/options";
-
+import { auth } from "@/app/api/auth/[...nextauth]/options";
 import connectMongoDb from "../../../../../../lib/mongodb";
 import User from "../../../../../../models/user";
 
 export async function PUT(req, { params }) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
+    const session = await auth();
+    if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     if (session.user.id !== id) {
       return NextResponse.json({ error: "Forbidden: Account mismatch" }, { status: 403 });
     }
@@ -35,7 +30,7 @@ export async function PUT(req, { params }) {
     user.username = username || "";
     user.primaryPhone = phone || undefined;
 
-    if (user.isPremium) {
+    if (user.isPremium || session.user.role === "admin") {
       user.twitter = twitter || "";
       user.Instagram = Instagram || "";
     }

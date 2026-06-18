@@ -1,27 +1,28 @@
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "../../../../../models/user";
 import connectMongoDb from "../../../../../lib/mongodb";
 
-const authOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [  
     CredentialsProvider({
       name: 'credentials',
-      credentials:{},
+      credentials: {},
       async authorize(credentials) {
-        const {email, password} = credentials ;
+        const { email, password } = credentials;
         await connectMongoDb();
         
-        if(!email || !password) {
+        if (!email || !password) {
           throw new Error("Please fill all the fields");
         }
-        const user = await User.findOne({email});
-        if(!user) {
+        const user = await User.findOne({ email });
+        if (!user) {
           throw new Error("User not found");
         }
         
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        if(!isPasswordCorrect) {
+        if (!isPasswordCorrect) {
           throw new Error("Incorrect password");
         }
         return user;
@@ -38,16 +39,20 @@ const authOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = user._id.toString();
+        token.id = user.id || user._id?.toString();
         token.name = user.name;
         token.username = user.username || "";
         token.isPremium = user.isPremium || false;
         token.role = user.role || "user";
         token.twitter = user.twitter || "";
         token.Instagram = user.Instagram || "";
-        token.premiumUntil = user.premiumUntil ? user.premiumUntil.toISOString() : null;
+        token.premiumUntil = user.premiumUntil ? new Date(user.premiumUntil).toISOString() : null;
       }
       
+      if (process.env.NEXT_PHASE === "phase-production-build") {
+        return token;
+      }
+
       if (trigger === "update" && session) {
         token.name = session.name || token.name;
         token.username = session.username !== undefined ? session.username : token.username;
@@ -66,7 +71,7 @@ const authOptions = {
         } catch (error) {
           console.error("JWT update trigger verification database fallback error:", error);
         }
-      } else {
+      } else if (token?.id) {
         try {
           await connectMongoDb();
           const dbUser = await User.findById(token.id).select("isPremium premiumUntil");
@@ -93,7 +98,11 @@ const authOptions = {
         session.user.primaryPhone = token.primaryPhone;
         session.user.premiumUntil = token.premiumUntil;
 
-        if (session.user.isPremium) {
+        if (process.env.NEXT_PHASE === "phase-production-build") {
+          return session;
+        }
+
+        if (session.user.isPremium && token.id) {
           try {
             await connectMongoDb();
             const dbUser = await User.findById(token.id);
@@ -117,6 +126,4 @@ const authOptions = {
       return session;
     }
   }
-};
-
-export default authOptions;
+});

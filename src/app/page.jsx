@@ -1,8 +1,7 @@
 import styles from "./page.module.css";
 import Navbar from "./components/navbar/page";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import authOptions from "./api/auth/[...nextauth]/options";
+import { auth } from "./api/auth/[...nextauth]/options";
 
 import User from "../../models/user";
 import connectMongoDb from "../../lib/mongodb";
@@ -53,7 +52,7 @@ async function getActiveAd() {
 }
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const latestPosts = await getLatestPosts();
   const daysRemaining = session?.user?.email ? await getPremiumExpiration(session.user.email) : null;
   
