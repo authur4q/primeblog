@@ -6,7 +6,7 @@ import authOptions from "./api/auth/[...nextauth]/options";
 
 import User from "../../models/user";
 import connectMongoDb from "../../lib/mongodb";
-import RotatingAd from "./components/rotatingAds/page";
+import RotatingAd from "./components/RotatingAds/page";
 
 async function getLatestPosts() {
   try {
