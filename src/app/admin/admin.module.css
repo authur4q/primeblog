@@ -4,12 +4,13 @@
   background-position: center;
   background-attachment: fixed;
   min-height: 100dvh;
-  width: 100vw;
+  width: 100%;
   padding: 80px 20px 40px 20px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   color: #ffffff;
+  overflow-x: hidden;
 }
 
 .wrapper {
@@ -58,10 +59,10 @@
   background-color: rgba(4, 194, 30, 0.05);
 }
 
-/* Metrics Section Layout */
+
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   width: 100%;
 }
@@ -118,13 +119,14 @@
   margin: 0;
 }
 
-/* Ads Management Layout */
+
 .adsManagementGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
   gap: 24px;
   margin: 40px 0;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .adFormLayout {
@@ -132,12 +134,16 @@
   flex-direction: column;
   gap: 16px;
   padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .formGroup label {
@@ -156,6 +162,8 @@
   font-size: 0.9rem;
   font-family: inherit;
   transition: border-color 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .formGroup input:focus,
@@ -171,6 +179,8 @@
   padding: 12px;
   border-radius: 6px;
   font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .alertSuccess {
@@ -189,12 +199,15 @@
   padding: 20px;
   max-height: 420px;
   overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .adInventoryList {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
 }
 
 .adminAdItemCard {
@@ -206,6 +219,8 @@
   padding: 16px;
   border-radius: 8px;
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .adminAdCardData {
@@ -240,9 +255,10 @@
   white-space: nowrap;
 }
 
-/* User Registration Content Layout */
+
 .contentLayout {
   width: 100%;
+  box-sizing: border-box;
 }
 
 .tableCard {
@@ -250,6 +266,8 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 14px;
   padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tableHeader {
@@ -277,6 +295,7 @@
   font-size: 0.9rem;
   width: 240px;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
 .tableSearch:focus {
@@ -286,6 +305,7 @@
 .tableResponsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dataTable {
@@ -349,7 +369,7 @@
   justify-content: center;
 }
 
-/* Badges styling */
+
 .badge {
   display: inline-flex;
   padding: 4px 10px;
@@ -384,6 +404,7 @@
 .actionBtnDelete { color: #ef4444; }
 .actionBtnDelete:hover { background-color: rgba(239, 68, 68, 0.1); }
 
+
 @media screen and (max-width: 992px) {
   .adsManagementGrid {
     grid-template-columns: 1fr;
@@ -391,15 +412,57 @@
 }
 
 @media screen and (max-width: 768px) {
+  .container {
+    padding: 60px 14px 30px 14px;
+  }
+
   .header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
+  
+  .tableCard {
+    padding: 16px 12px;
+  }
+
   .tableHeader {
     flex-direction: column;
     align-items: flex-start;
   }
+  
   .tableSearch {
     width: 100%;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .adFormLayout,
+  .activeAdsWrapper {
+    padding: 12px;
+  }
+
+  .adminAdItemCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .adminAdItemCard .actionsGroup {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 10px;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  
+  .metricCard {
+    padding: 16px;
   }
 }

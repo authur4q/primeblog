@@ -2,7 +2,7 @@
 .adSection {
   width: 100%;
   max-width: 1200px;
-  background-color: #a7050569;
+  
   margin: 10px auto 30px auto;
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  background-color: rgba(151, 5, 5, 0.664);
+  background-color: rgba(151, 5, 5, 0.486);
 
   border-left: 4px solid #04c21e;
   border-radius: 12px;
