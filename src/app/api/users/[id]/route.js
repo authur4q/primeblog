@@ -38,13 +38,13 @@ export async function PATCH(req, { params }) {
     }
 
     const { id } = await params;
-    if (session.user.id !== id) {
-      return NextResponse.json({ error: "Forbidden: Account mismatch" }, { status: 403 });
+    const isAdmin = session.user.role === "admin";
+
+    if (session.user.id !== id && !isAdmin) {
+      return NextResponse.json({ error: "Forbidden: Account mismatch access denied" }, { status: 403 });
     }
 
     const body = await req.json();
-    const { name, username, primaryPhone, twitter, Instagram } = body;
-
     await connectMongoDb();
 
     const user = await User.findById(id);
@@ -52,14 +52,19 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ error: "User instance not found" }, { status: 404 });
     }
 
-    if (name) user.name = name;
-    
-    user.username = username || "";
-    user.primaryPhone = primaryPhone || undefined;
+    if (isAdmin) {
+      if (body.role) user.role = body.role;
+      if (body.hasOwnProperty('isPremium')) user.isPremium = body.isPremium;
+      if (body.subscriptionPlan) user.subscriptionPlan = body.subscriptionPlan;
+    }
 
-    if (user.isPremium) {
-      user.twitter = twitter || "";
-      user.Instagram = Instagram || "";
+    if (body.name) user.name = body.name;
+    if (body.hasOwnProperty('username')) user.username = body.username || "";
+    if (body.hasOwnProperty('primaryPhone')) user.primaryPhone = body.primaryPhone || undefined;
+
+    if (user.isPremium || isAdmin) {
+      if (body.hasOwnProperty('twitter')) user.twitter = body.twitter || "";
+      if (body.hasOwnProperty('Instagram')) user.Instagram = body.Instagram || "";
     }
 
     await user.save();
@@ -76,5 +81,38 @@ export async function PATCH(req, { params }) {
     }
     
     return NextResponse.json({ error: "Internal Server error processing sync update" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req, { params }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const isAdmin = session.user.role === "admin";
+
+    if (session.user.id !== id && !isAdmin) {
+      return NextResponse.json({ error: "Forbidden: Insufficient operation access permissions" }, { status: 403 });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Invalid target identifier profile string format" }, { status: 400 });
+    }
+
+    await connectMongoDb();
+
+    const deletedUser = await User.findOneAndDelete({ _id: id });
+    
+    if (!deletedUser) {
+      return NextResponse.json({ error: "Target profile account not found in database memory" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Account context and cascade records purged successfully" }, { status: 200 });
+  } catch (error) {
+    console.error("API Deletion Error:", error);
+    return NextResponse.json({ error: "Internal server processing failure executing purge block" }, { status: 500 });
   }
 }

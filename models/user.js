@@ -1,4 +1,4 @@
-import mongoose from "mongoose";       
+import mongoose from "mongoose";
 
 if (mongoose.models.User) {
     delete mongoose.models.User;
@@ -66,7 +66,29 @@ const userSchema = new mongoose.Schema({
         trim: true,
         default: ""
     }
-},{timestamps:true})
+},{timestamps:true});
+
+userSchema.pre("findOneAndDelete", async function (next) {
+    try {
+        const query = this.getQuery();
+        const user = await this.model.findOne(query);
+
+        if (user) {
+            const userId = user._id;
+
+            if (mongoose.models.Post) {
+                await mongoose.models.Post.deleteMany({ userId: userId });
+            }
+
+            if (mongoose.models.Comment) {
+                await mongoose.models.Comment.deleteMany({ user: userId });
+            }
+        }
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 const User = mongoose.model("User", userSchema);
 

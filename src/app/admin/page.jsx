@@ -20,6 +20,10 @@ const AdminDashboard = () => {
   const [formSubmitting, setFormSubmitting] = useState(false)
   const [formMessage, setFormMessage] = useState({ text: "", type: "" })
 
+  const [editingUser, setEditingUser] = useState(null)
+  const [modalForm, setModalForm] = useState({ role: "user", isPremium: false })
+  const [modalSubmitting, setModalSubmitting] = useState(false)
+
   const fetchDashboardData = async () => {
     try {
       setLoadingMetrics(true)
@@ -106,6 +110,71 @@ const AdminDashboard = () => {
       if (!res.ok) throw new Error("Failed to terminate ad instance")
       
       setAds(prev => prev.filter(ad => ad._id !== adId))
+    } catch (error) {
+      alert(error.message)
+    }
+  }
+
+  const handleOpenModifyModal = (user) => {
+    setEditingUser(user)
+    setModalForm({
+      role: user.role || "user",
+      isPremium: !!(user.tier === "premium" || user.isPremium)
+    })
+  }
+
+  const handleUpdateUserPermissions = async (e) => {
+    e.preventDefault()
+    if (!editingUser) return
+    setModalSubmitting(true)
+
+    try {
+      const res = await fetch(`/api/users/${editingUser._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: modalForm.role,
+          isPremium: modalForm.isPremium,
+          subscriptionPlan: modalForm.isPremium ? "premium" : "free"
+        })
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.message || "Failed to save user account alterations")
+      }
+
+      setRecentUsers(prev => prev.map(u => 
+        u._id === editingUser._id 
+          ? { ...u, role: modalForm.role, isPremium: modalForm.isPremium, tier: modalForm.isPremium ? "premium" : "free" }
+          : u
+      ))
+
+      setEditingUser(null)
+      fetchDashboardData()
+    } catch (error) {
+      alert(error.message)
+    } finally {
+      setModalSubmitting(false)
+    }
+  }
+
+  const handleSuspendUser = async (userId, userName) => {
+    const confirmation = confirm(`Are you sure you want to suspend ${userName || "this user"}?\n. All posts and comments linked to this account will be permanently deleted from system memory.`)
+    if (!confirmation) return
+
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "DELETE"
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.message || "Database rejected account suspension query")
+      }
+
+      setRecentUsers(prev => prev.filter(user => user._id !== userId))
+      fetchDashboardData()
     } catch (error) {
       alert(error.message)
     }
@@ -334,8 +403,8 @@ const AdminDashboard = () => {
                           </td>
                           <td>
                             <div className={styles.actionsGroup}>
-                              <button className={styles.actionBtnEdit}>Modify</button>
-                              <button className={styles.actionBtnDelete}>Suspend</button>
+                              <button onClick={() => handleOpenModifyModal(user)} className={styles.actionBtnEdit}>Modify</button>
+                              <button onClick={() => handleSuspendUser(user._id, user.name)} className={styles.actionBtnDelete}>Suspend</button>
                             </div>
                           </td>
                         </tr>
@@ -347,6 +416,48 @@ const AdminDashboard = () => {
             </div>
           </div>
         </section>
+
+        {editingUser && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
+            <div style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.1)', padding: '28px', borderRadius: '12px', width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <h3 style={{ margin: 0, color: '#fff', fontSize: '1.25rem' }}>Modify User Profile</h3>
+                <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>Altering metadata permissions for <strong>{editingUser.name || editingUser.email}</strong></p>
+              </div>
+              <form onSubmit={handleUpdateUserPermissions} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>System Role Assignment</label>
+                  <select 
+                    value={modalForm.role}
+                    onChange={e => setModalForm(prev => ({ ...prev, role: e.target.value }))}
+                    style={{ padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#fff', outline: 'none' }}
+                  >
+                    <option value="user" style={{ background: '#121214' }}>User (Standard Access)</option>
+                    <option value="admin" style={{ background: '#121214' }}>Admin (Elevated Access)</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <input 
+                    type="checkbox"
+                    id="modalPremiumCheckbox"
+                    checked={modalForm.isPremium}
+                    onChange={e => setModalForm(prev => ({ ...prev, isPremium: e.target.checked }))}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="modalPremiumCheckbox" style={{ fontSize: '0.9rem', color: '#fff', cursor: 'pointer', userSelect: 'none' }}>Grant Premium Tier Status</label>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
+                  <button type="button" onClick={() => setEditingUser(null)} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={modalSubmitting} className={styles.refreshBtn} style={{ padding: '10px 20px', minWidth: '100px' }}>
+                    {modalSubmitting ? "Saving..." : "Save Alterations"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

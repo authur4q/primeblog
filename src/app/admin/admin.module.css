@@ -59,6 +59,13 @@
   background-color: rgba(4, 194, 30, 0.05);
 }
 
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
 
 .metricsGrid {
   display: grid;
