@@ -6,7 +6,7 @@ import authOptions from "./api/auth/[...nextauth]/options";
 
 import User from "../../models/user";
 import connectMongoDb from "../../lib/mongodb";
-
+import RotatingAd from "./components/rotatingAds/page";
 
 async function getLatestPosts() {
   try {
@@ -40,16 +40,31 @@ async function getPremiumExpiration(email) {
   }
 }
 
+async function getActiveAd() {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL;
+    const res = await fetch(`${baseUrl}/api/ads`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error("Error loading homepage ad:", error);
+    return null;
+  }
+}
+
 export default async function Home() {
   const session = await getServerSession(authOptions);
   const latestPosts = await getLatestPosts();
   const daysRemaining = session?.user?.email ? await getPremiumExpiration(session.user.email) : null;
+  
+  const isPremium = session?.user?.isPremium;
+  const activeAd = !isPremium ? await getActiveAd() : null;
 
   return (
     <div className={styles.container}>
       <Navbar />
       
-      {session?.user?.isPremium ? (
+      {isPremium ? (
         <div className={styles.reminderBanner}>
           <p>
             <strong>Pro Account Active:</strong> You have <span>{daysRemaining ?? 0} days</span> remaining on your current subscription Plan. 
@@ -85,6 +100,8 @@ export default async function Home() {
           </Link>
         )}  
       </div>
+
+      {!isPremium && <RotatingAd initialAd={activeAd} />}
 
       {latestPosts.length > 0 && (
         <div className={styles.feedShowcase}>

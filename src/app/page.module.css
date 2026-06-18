@@ -160,6 +160,10 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
+
+
+
+
 .feedShowcase {
   width: 100%;
   max-width: 1100px;
@@ -330,6 +334,24 @@
     max-width: 180px;
   }
 
+  .adWrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .adActions {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .adBtn {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
   .feedShowcase {
     padding: 0;
     margin-top: 40px;
@@ -351,6 +373,10 @@
 @media screen and (max-width: 480px) {
   .container {
     padding: 20px 12px 40px 12px;
+  }
+
+  .adSection {
+    padding: 0;
   }
 
   .button {

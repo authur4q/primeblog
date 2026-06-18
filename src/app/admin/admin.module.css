@@ -118,7 +118,129 @@
   margin: 0;
 }
 
+/* Ads Management Layout */
+.adsManagementGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 24px;
+  margin: 40px 0;
+  width: 100%;
+}
 
+.adFormLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.formGroup input,
+.formGroup textarea {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  outline: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  border-color: #04c21e;
+}
+
+.formGroup textarea {
+  resize: vertical;
+}
+
+.formAlert {
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.alertSuccess {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  color: #10b981;
+}
+
+.alertError {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+}
+
+.activeAdsWrapper {
+  padding: 20px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.adInventoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.adminAdItemCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 8px;
+  gap: 16px;
+}
+
+.adminAdCardData {
+  flex: 1;
+  min-width: 0;
+}
+
+.adminAdCardData h4 {
+  margin: 0 0 4px 0;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.adminAdCardData p {
+  margin: 0 0 6px 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.adminAdCardData a {
+  font-size: 0.8rem;
+  color: #04c21e;
+  text-decoration: none;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* User Registration Content Layout */
 .contentLayout {
   width: 100%;
 }
@@ -198,12 +320,20 @@
   align-items: center;
   gap: 12px;
 }
+
 .loadingMessage {
   text-align: center;
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.6);
   padding: 60px 0;
   font-style: italic;
+}
+
+.tableMessage {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+  padding: 24px 0;
 }
 
 .miniAvatar {
@@ -254,6 +384,11 @@
 .actionBtnDelete { color: #ef4444; }
 .actionBtnDelete:hover { background-color: rgba(239, 68, 68, 0.1); }
 
+@media screen and (max-width: 992px) {
+  .adsManagementGrid {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media screen and (max-width: 768px) {
   .header {

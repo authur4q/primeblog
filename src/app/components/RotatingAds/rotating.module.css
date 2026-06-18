@@ -1,0 +1,116 @@
+
+.adSection {
+  width: 100%;
+  max-width: 1200px;
+  background-color: #a7050569;
+  margin: 10px auto 30px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.adLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.3);
+  padding-left: 4px;
+}
+
+.adWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  background-color: rgba(151, 5, 5, 0.664);
+
+  border-left: 4px solid #04c21e;
+  border-radius: 12px;
+  padding: 24px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.adWrapper:hover {
+
+  background-color: rgba(192, 1, 1, 0.712);
+}
+
+.adContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.adContent h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #d9e900d0;
+  margin: 0 0 6px 0;
+}
+
+.adContent p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+
+.adActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.adBtn {
+  background-color: #04c21e;
+  color: #022000;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.adBtn:hover {
+  background-color: #07a602;
+}
+
+.adBtn:active {
+  transform: scale(0.98);
+}
+
+.adRemoveLink {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.adRemoveLink:hover {
+  color: #ef4444;
+}
+
+
+@media screen and (max-width: 768px) {
+  .adWrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .adActions {
+    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
+  }
+}
