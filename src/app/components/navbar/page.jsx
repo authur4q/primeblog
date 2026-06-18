@@ -20,7 +20,6 @@ const publicLinks = [
     label: 'Premium',
     id: 3
   },
-
 ]
 
 const Navbar = () => {
@@ -75,7 +74,7 @@ const Navbar = () => {
               className={styles.btn} 
               onClick={() => {
                 setIsOpen(false)
-                signOut({ callbackUrl: '/login' })
+                signOut({ callbackUrl: `${window.location.origin}/login` })
               }}
             >
               Logout
