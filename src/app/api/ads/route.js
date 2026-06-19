@@ -37,7 +37,7 @@ export async function GET() {
   try {
     await connectMongoDb();
 
-    const randomAd = await Ad.aggregate([{ $sample: { size: 3 } }]);
+    const randomAd = await Ad.aggregate([{ $sample: { size: 10 } }]);
 
     if (randomAd.length === 0) {
       return NextResponse.json(null, { status: 200 });

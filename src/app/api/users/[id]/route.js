@@ -74,7 +74,19 @@ export async function PATCH(req, { params }) {
     if (isAdmin) {
       if (body.role) user.role = body.role
       if (body.hasOwnProperty('isPremium')) user.isPremium = body.isPremium
-      if (body.subscriptionPlan) user.subscriptionPlan = body.subscriptionPlan
+      
+      if (body.subscriptionPlan) {
+        const normalizedPlan = body.subscriptionPlan.toLowerCase().trim()
+        user.subscriptionPlan = normalizedPlan
+        
+        if (normalizedPlan === "premium") {
+          const expirationDate = new Date()
+          expirationDate.setDate(expirationDate.getDate() + 30) 
+          user.premiumUntil = expirationDate
+        } else {
+          user.premiumUntil = null
+        }
+      }
     }
 
     if (body.name) user.name = body.name

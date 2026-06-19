@@ -39,7 +39,7 @@ export default function PremiumPage() {
     e.preventDefault();
     setUpdating(true);
     try {
-      const res = await fetch("/api/user/update-premium-profile", {
+      const res = await fetch("/api/users/update-premium-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, whatsapp }),

@@ -22,7 +22,7 @@ export default function RotatingAd({ initialAd }) {
   useEffect(() => {
     const adRotationInterval = setInterval(() => {
       rotateAd()
-    }, 20000)
+    }, 9000)
 
     return () => clearInterval(adRotationInterval)
   }, [])
