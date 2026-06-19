@@ -6,6 +6,7 @@ import { auth } from "./api/auth/[...nextauth]/options";
 import User from "../../models/user";
 import connectMongoDb from "../../lib/mongodb";
 import RotatingAd from "./components/RotatingAds/page";
+import UserSearch from "./components/UserSearch/page";
 
 async function getLatestPosts() {
   try {
@@ -89,6 +90,8 @@ export default async function Home() {
         <h2 className={styles.subtext}>Share Ideas. Spark Conversations. Inspire Minds.</h2>
         <p>Join a community where your thoughts matter. Post freely, explore what others are thinking, and connect with like-minded thinkers.</p>
         
+        <UserSearch />
+
         {session ? (
           <Link href="/dashboard">
             <button className={styles.button}>Go to Dashboard</button>
@@ -146,6 +149,29 @@ export default async function Home() {
           <p>Custom creator profiles</p>
         </div>
       </div>
+
+      <footer className={styles.footerContainer}>
+        <div className={styles.footerDivider} />
+        <div className={styles.footerContent}>
+          <p className={styles.footerText}>Need assistance with your premium activation or profile configurations?</p>
+          <div className={styles.supportLinks}>
+            <a 
+              href="https://wa.me/254711466962?text=Hi%20PrimeSupport,%20I%20need%20help%20with%20my%20Premium%20Account" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className={styles.supportLinkWhatsapp}
+            >
+              WhatsApp Help Desk
+            </a>
+            <a 
+              href="mailto:authurbass@gmail.com?subject=Premium%20Account%20Assistance" 
+              className={styles.supportLinkEmail}
+            >
+            Email Support
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

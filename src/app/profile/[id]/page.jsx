@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Navbar from '@/app/components/navbar/page'
 import Link from 'next/link'
 import styles from './profile.module.css'
+import MessageButton from '../../components/messageButton/page'
 
 const UserProfile = ({ params: paramsPromise }) => {
   const params = React.use(paramsPromise)
@@ -25,7 +26,9 @@ const UserProfile = ({ params: paramsPromise }) => {
   const [editInstagram, setEditInstagram] = useState("")
   const [saving, setSaving] = useState(false)
 
-  const isOwnProfile = currentUserId === profileId
+  const isOwnProfile = currentUserId && profileUser?._id
+    ? String(currentUserId) === String(profileUser._id) || String(currentUserId) === String(profileId)
+    : false
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -46,7 +49,7 @@ const UserProfile = ({ params: paramsPromise }) => {
         setEditTwitter(userData.twitter || "")
         setEditInstagram(userData.Instagram || "")
 
-        const postsRes = await fetch(`/api/posts?userId=${profileId}`)
+        const postsRes = await fetch(`/api/posts?userId=${userData._id}`)
         if (postsRes.ok) {
           const postsData = await postsRes.json()
           setUserPosts(postsData)
@@ -64,6 +67,7 @@ const UserProfile = ({ params: paramsPromise }) => {
 
   const handleSaveChanges = async (e) => {
     e.preventDefault()
+    if (!profileUser?._id) return
     setSaving(true)
     try {
       const payload = {
@@ -76,7 +80,7 @@ const UserProfile = ({ params: paramsPromise }) => {
         })
       }
 
-      const res = await fetch(`/api/users/${profileId}`, {
+      const res = await fetch(`/api/users/${profileUser._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -134,9 +138,15 @@ const UserProfile = ({ params: paramsPromise }) => {
               {profileUser?.name ? profileUser.name.charAt(0).toUpperCase() : "U"}
             </div>
             <div className={styles.metaInfo}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                 <h1 className={styles.username}>{profileUser?.name}</h1>
                 {profileUser?.isPremium && <span className={styles.premiumBadge}>PRO</span>}
+                
+                {!isOwnProfile && currentUserId && profileUser && (
+                  <div className={styles.profileMessageBtnWrapper}>
+                    <MessageButton recipientId={profileUser._id} recipientName={profileUser.name} />
+                  </div>
+                )}
               </div>
               <p className={styles.userEmail}>
                 {profileUser?.username ? `@${profileUser.username}` : "No unique identifier handle claimed"}
@@ -159,7 +169,7 @@ const UserProfile = ({ params: paramsPromise }) => {
                 )}
               </div>
 
-              {profileUser?.isPremium && (profileUser?.twitter || profileUser?.github) && (
+              {profileUser?.isPremium && (profileUser?.twitter || profileUser?.Instagram) && (
                 <div className={styles.socialsDisplayRow} style={{ display: "flex", gap: "12px", marginTop: "10px" }}>
                   {profileUser.twitter && <span className={styles.socialTab}>{profileUser.twitter}</span>}
                   {profileUser.Instagram && <span className={styles.socialTab}>{profileUser.Instagram}</span>}
@@ -222,7 +232,7 @@ const UserProfile = ({ params: paramsPromise }) => {
 
             {profileUser?.isPremium ? (
               <div style={{ borderTop: "1px solid #222533", paddingTop: "1rem", marginTop: "1rem" }}>
-                <span style={{ display: "block", fontSize: "0.8rem", color: "#6366f1", fontWeight: "700", textTransform: "uppercase", marginBottom: "1rem" }}>✨ Premium Social Integrations</span>
+                <span style={{ display: "block", fontSize: "0.8px", color: "#6366f1", fontWeight: "700", textTransform: "uppercase", marginBottom: "1rem" }}>✨ Premium Social Integrations</span>
                 <div className={styles.inputGroup} style={{ marginBottom: "1rem" }}>
                   <label className={styles.label} style={{ display: "block", fontSize: "0.85rem", marginBottom: "0.5rem", color: "#94a3b8" }}>Twitter / X Handle</label>
                   <input type="text" className={styles.dashboardInput} placeholder="e.g the_greatest" value={editTwitter} onChange={(e) => setEditTwitter(e.target.value)} style={{ width: "100%", padding: "0.75rem", background: "#0f111a", border: "1px solid #222533", borderRadius: "6px", color: "#fff" }} />

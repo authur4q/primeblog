@@ -70,7 +70,7 @@
 .searchContainer {
   width: 100%;
   flex-shrink: 0;
-  margin-top: 0px;
+  margin-top: -45px;
 }
 
 .searchInput {

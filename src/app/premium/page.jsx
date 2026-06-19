@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import styles from "./premium.module.css";
@@ -14,11 +14,24 @@ export default function PremiumPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [updating, setUpdating] = useState(false);
 
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("mpesa");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [processingUpgrade, setProcessingUpgrade] = useState(false);
+
+  useEffect(() => {
+    if (session?.user) {
+      setUsername(session.user.username || "");
+      setWhatsapp(session.user.primaryPhone || "");
+      setPhoneNumber(session.user.primaryPhone || "");
+    }
+  }, [session]);
+
   const handleSubscribeClick = () => {
     if (!session) {
       router.push("/login");
     } else {
-      router.push("/checkout");
+      setShowUpgradeModal(true);
     }
   };
 
@@ -41,6 +54,31 @@ export default function PremiumPage() {
       alert("Error running profile sync.");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleProcessUpgrade = async (e) => {
+    e.preventDefault();
+    if (!session?.user?.id) return;
+    setProcessingUpgrade(true);
+    try {
+      const res = await fetch(`/api/users/${session.user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPremium: true, primaryPhone: phoneNumber }),
+      });
+
+      if (res.ok) {
+        setShowUpgradeModal(false);
+        await update();
+        alert("Welcome to Prime Pro! Your subscription has been activated successfully.");
+      } else {
+        alert("Payment initialization failed.M-Pesa integration currently in development.Contact support for manual upgrade processing.");
+      }
+    } catch (err) {
+      alert("Error processing your payment payload request.");
+    } finally {
+      setProcessingUpgrade(false);
     }
   };
 
@@ -103,7 +141,7 @@ export default function PremiumPage() {
           <div className={styles.grid}>
             <div className={styles.card}>
               <h3 className={styles.tierName}>Standard Read</h3>
-              <p style={{ color: "#888" }}>Great for casual readers starting out.</p>
+              <p className={styles.tierDescription}>Great for casual readers starting out.</p>
 
               <div className={styles.priceBlock}>
                 <span className={styles.currency}>KES</span>
@@ -115,9 +153,9 @@ export default function PremiumPage() {
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Read all public blog posts</li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Leave comments on articles</li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Base custom user profile card</li>
-                <li className={styles.featureItem} style={{ color: "#666" }}><span className={styles.iconCross}>✕</span> Custom unique profile tracking handle</li>
-                <li className={styles.featureItem} style={{ color: "#666" }}><span className={styles.iconCross}>✕</span> Instant integration links for socials</li>
-                <li className={styles.featureItem} style={{ color: "#666" }}><span className={styles.iconCross}>✕</span> Exclusive Audio Narration</li>
+                <li className={styles.featureDisabledItem}><span className={styles.iconCross}>✕</span> Custom unique profile tracking handle</li>
+                <li className={styles.featureDisabledItem}><span className={styles.iconCross}>✕</span> Instant integration links for socials</li>
+                <li className={styles.featureDisabledItem}><span className={styles.iconCross}>✕</span> Exclusive Audio Narration</li>
               </ul>
 
               <button className={styles.freeButton} disabled>
@@ -128,7 +166,7 @@ export default function PremiumPage() {
             <div className={styles.premiumCard}>
               <div className={styles.popularTag}>RECOMMENDED</div>
               <h3 className={styles.tierName}>Prime Pro</h3>
-              <p style={{ color: "#aaa" }}>For dedicated creators and writers.</p>
+              <p className={styles.premiumTierDescription}>For dedicated creators and writers.</p>
 
               <div className={styles.priceBlock}>
                 <span className={styles.currency}>KES</span>
@@ -151,6 +189,84 @@ export default function PremiumPage() {
             </div>
           </div>
         </>
+      )}
+
+      {showUpgradeModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalCard}>
+            <button onClick={() => setShowUpgradeModal(false)} className={styles.modalCloseBtn}>&times;</button>
+            
+            <div className={styles.modalHeader}>
+              
+              <h3 className={styles.modalTitle}>Upgrade to Prime Pro</h3>
+              <p className={styles.modalSubtitle}>Unlock professional integrations</p>
+            </div>
+
+            <div className={styles.perksBox}>
+              <ul className={styles.perksList}>
+                <li><strong>Live WhatsApp </strong> link generation</li>
+                <li>Custom social network configurations (Twitter/Instagram)</li>
+                <li>Verified profile badge status placement</li>
+              </ul>
+              <div className={styles.pricingRow}>
+                <span className={styles.pricingLabel}>Premium Subscription Tier:</span>
+                <span className={styles.pricingValue}>KES 49 / month</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleProcessUpgrade}>
+              <div className={styles.providerGroup}>
+                <label className={styles.providerLabel}>Select Payment Provider</label>
+                <div className={styles.providerSelectorGrid}>
+                  <button 
+                    type="button" 
+                    onClick={() => setPaymentMethod("mpesa")} 
+                    className={paymentMethod === "mpesa" ? styles.providerTabActive : styles.providerTabInactive}
+                  >
+                    M-Pesa Express
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setPaymentMethod("card")} 
+                    className={paymentMethod === "card" ? styles.providerTabActive : styles.providerTabInactive}
+                  >
+                    Credit / Debit Card
+                  </button>
+                </div>
+              </div>
+
+              {paymentMethod === "mpesa" ? (
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>M-Pesa Mobile Line</label>
+                  <input 
+                    type="tel" 
+                    value={phoneNumber} 
+                    onChange={(e) => setPhoneNumber(e.target.value)} 
+                    placeholder="e.g. 2547XXXXXXXX" 
+                    className={styles.modalInput} 
+                    required 
+                  />
+                </div>
+              ) : (
+                <div className={styles.fieldGroup}>
+                  <label className={styles.fieldLabel}>Standard Secure API Gateway</label>
+                  <div className={styles.sandboxNotice}>
+                    Card verification engine initialized in test-sandbox.
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.modalActionRow}>
+                <button type="button" onClick={() => setShowUpgradeModal(false)} className={styles.modalCancelBtn}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={processingUpgrade} className={styles.modalSubmitBtn}>
+                  {processingUpgrade ? "Validating push checkout request..." : `Pay KES 49 with ${paymentMethod === "mpesa" ? "M-Pesa" : "Card"}`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

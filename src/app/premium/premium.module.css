@@ -1,15 +1,14 @@
 .container {
   min-height: 100vh;
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.938), rgba(0, 0, 0, 0.884)), url('../../../public/cube.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   background-color: #0f111a56;
   color: #ffffff;
   padding-bottom: 4rem;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-
 
 .headerSection {
   text-align: center;
@@ -43,7 +42,6 @@
   color: #94a3b8;
   line-height: 1.6;
 }
-
 
 .grid {
   display: grid;
@@ -100,6 +98,17 @@
   margin-bottom: 0.5rem;
 }
 
+.tierDescription {
+  color: #888888;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.premiumTierDescription {
+  color: #aaaaaa;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
 
 .priceBlock {
   margin: 2rem 0;
@@ -126,7 +135,6 @@
   margin-left: 0.4rem;
 }
 
-
 .featureList {
   list-style: none;
   padding: 0;
@@ -143,6 +151,15 @@
   line-height: 1.4;
 }
 
+.featureDisabledItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #666666;
+  line-height: 1.4;
+}
+
 .iconCheck {
   color: #10b981;
   font-weight: bold;
@@ -154,7 +171,6 @@
   font-weight: bold;
   margin-right: 0.75rem;
 }
-
 
 .freeButton, .premiumButton {
   width: 100%;
@@ -181,7 +197,6 @@
 .premiumButton:hover {
   background-color: #4f46e5;
 }
-
 
 .dashboardWrapper {
   max-width: 650px;
@@ -211,7 +226,6 @@
   border-bottom: 1px solid #222533;
   padding-bottom: 0.75rem;
 }
-
 
 .inputGroup {
   margin-bottom: 1.25rem;
@@ -271,4 +285,261 @@
   min-height: 80vh;
   color: #94a3b8;
   font-size: 1.1rem;
+}
+
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalCard {
+  background-color: #161925;
+  border: 1px solid #2b2f44;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  padding: 2.5rem 2rem;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modalCloseBtn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.75rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.modalCloseBtn:hover {
+  color: #ffffff;
+}
+
+.modalHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.modalIcon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.modalSubtitle {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.perksBox {
+  background-color: #0f111a;
+  border: 1px solid #222533;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.perksList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.perksList li {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.perksList li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: #a855f7;
+}
+
+.pricingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #222533;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.pricingLabel {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pricingValue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.providerGroup {
+  margin-bottom: 1.5rem;
+}
+
+.providerLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 0.75rem;
+}
+
+.providerSelectorGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.providerTabActive, .providerTabInactive {
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.providerTabActive {
+  background-color: rgba(99, 102, 241, 0.15);
+  border: 1px solid #6366f1;
+  color: #ffffff;
+}
+
+.providerTabInactive {
+  background-color: #0f111a;
+  border: 1px solid #222533;
+  color: #64748b;
+}
+
+.providerTabInactive:hover {
+  border-color: #33374d;
+  color: #cbd5e1;
+}
+
+.fieldGroup {
+  margin-bottom: 1.75rem;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #0f111a;
+  border: 1px solid #222533;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.sandboxNotice {
+  background-color: rgba(245, 158, 11, 0.05);
+  border: 1px dashed rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.modalActionRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.modalCancelBtn {
+  padding: 0.85rem;
+  background-color: #222533;
+  color: #cbd5e1;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.modalCancelBtn:hover {
+  background-color: #2d3144;
+}
+
+.modalSubmitBtn {
+  padding: 0.85rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.modalSubmitBtn:hover {
+  opacity: 0.95;
+}
+
+.modalSubmitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -232,7 +232,11 @@
 .postMeta {
   margin-bottom: 0.75rem;
 }
-
+.profileMessageBtnWrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+}
 .postDate {
   font-size: 0.8rem;
   color: #64748b;

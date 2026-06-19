@@ -23,9 +23,9 @@ const DashboardPage = () => {
     
     useEffect(() => {
         if (status === "authenticated" && session?.user) {
-            console.log("Logged User:", name, "| ID:", userId)
+            console.log("Logged User:")
         }
-    }, [session, status, name, userId])
+    }, [session, status])
 
     useEffect(() => {
         if (status === "unauthenticated") {

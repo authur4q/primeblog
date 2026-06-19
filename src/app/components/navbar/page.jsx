@@ -20,6 +20,11 @@ const publicLinks = [
     label: 'Premium',
     id: 3
   },
+  {
+    href: '/chat',
+    label: 'Chat',
+    id: 4
+  }
 
 ]
 

@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Loading from '@/app/components/loading/page'
 import Link from 'next/link'
+import MessageButton from '../../components/messageButton/page'
 
 const BlogPost = () => {
   const { data: session, status } = useSession()  
@@ -134,8 +135,19 @@ const BlogPost = () => {
       <div className={styles.wrapper}>
         {data ? (
           <>
-            <h1 className={styles.title}>{data.title}</h1>
-            <h2 className={styles.description}>{data.description}</h2>
+            <div className={styles.metaRow}>
+              <div className={styles.metaLeft}>
+                <h1 className={styles.title}>{data.title}</h1>
+                <h2 className={styles.description}>{data.description}</h2>
+                <p className={styles.authorTag}>Published by: <strong>@{data.name || "Anonymous"}</strong></p>
+              </div>
+              
+              {session?.user?.id && data.userId && session.user.id !== data.userId && (
+                <div className={styles.metaRight}>
+                  <MessageButton recipientId={data.userId} recipientName={data.name} />
+                </div>
+              )}
+            </div>
 
             {session?.user?.isPremium && (
               <div className={styles.audioNarratorCard}>

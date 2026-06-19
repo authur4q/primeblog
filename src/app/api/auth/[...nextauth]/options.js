@@ -43,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id || user._id?.toString();
         token.name = user.name;
         token.username = user.username || "";
+        token.primaryPhone = user.primaryPhone || "";
         token.isPremium = user.isPremium || false;
         token.role = user.role || "user";
         token.twitter = user.twitter || "";
