@@ -2,21 +2,16 @@ import { NextResponse } from "next/server";
 import { auth } from "@/app/api/auth/[...nextauth]/options";
 import connectMongoDb from "../../../../../lib/mongodb";
 import Conversation from "../../../../../models/conversation";
-import User from "../../../../../models/user";
 
 export async function POST(req) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
-    }
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const currentUserId = session.user.id;
+    const currentUserId = String(session.user.id);
     const { recipientId } = await req.json();
 
-    if (!recipientId || currentUserId === recipientId) {
-      return NextResponse.json({ error: "Invalid recipient ID handle" }, { status: 400 });
-    }
+    if (!recipientId || currentUserId === recipientId) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
     await connectMongoDb();
 
@@ -25,42 +20,32 @@ export async function POST(req) {
     }).populate("participants", "name username isPremium");
 
     if (!conversation) {
-      const newConv = await Conversation.create({
+      conversation = await Conversation.create({
         participants: [currentUserId, recipientId]
       });
-      
-      conversation = await newConv.populate("participants", "name username isPremium");
+      conversation = await conversation.populate("participants", "name username isPremium");
     }
 
     return NextResponse.json(conversation, { status: 200 });
   } catch (error) {
-    console.error("Conversation route failure node:", error);
-    return NextResponse.json({ error: "Internal server error execution" }, { status: 500 });
+    return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 }
 
 export async function GET(req) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
-    }
+    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectMongoDb();
-
-    const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get("limit"), 10) || 20;
-
     const conversations = await Conversation.find({
-      participants: session.user.id
+      participants: String(session.user.id)
     })
       .populate("participants", "name username isPremium")
-      .sort({ updatedAt: -1 })
-      .limit(limit);
+      .sort({ updatedAt: -1 });
 
     return NextResponse.json(conversations, { status: 200 });
   } catch (error) {
-    console.error("Failed to load conversations:", error);
-    return NextResponse.json({ error: "Failed to load dynamic conversation clusters" }, { status: 500 });
+    return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 }

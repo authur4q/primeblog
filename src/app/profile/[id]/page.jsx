@@ -134,7 +134,8 @@ const UserProfile = ({ params: paramsPromise }) => {
               <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
                 {isOwnProfile && <button onClick={() => setIsEditing(!isEditing)} className={styles.editBtn}>{isEditing ? "Close Edit" : "Edit Profile"}</button>}
                 {isOwnProfile && <button className={styles.logoutBtn} onClick={() => signOut()}>Logout</button>}
-                {!isOwnProfile && <MessageButton targetUserId={profileUser?._id} />}
+                {!isOwnProfile && <MessageButton recipientId={profileUser?._id} 
+    recipientName={profileUser?.name} />}
               </div>
 
               {isEditing && (

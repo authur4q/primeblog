@@ -64,7 +64,7 @@ const Navbar = () => {
     <div className={styles.navbar}>
       <div className={styles.logo}>
         <h1>
-          <Link href="https://www.instagram.com/authurprime_?igsh=aDF0OWp6M2djODFs">
+          <Link href="/">
             Prime
           </Link>
         </h1>
