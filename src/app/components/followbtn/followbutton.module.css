@@ -1,0 +1,41 @@
+.followBtn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.followBtn:hover {
+  opacity: 0.9;
+}
+
+.followBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.followingBtn {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #222533;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.followingBtn:hover {
+  background: #161925;
+  color: #fff;
+  border-color: #6366f1;
+}
+
+.followingBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

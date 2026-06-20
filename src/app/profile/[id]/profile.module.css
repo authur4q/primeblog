@@ -1,9 +1,9 @@
 .container {
   min-height: 100vh;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.938), rgba(0, 0, 0, 0.884)), url('../../../../public/cube.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.938), rgba(0, 0, 0, 0.884)), url('../../../../public/cube.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   background-color: #0f111a5e;
   color: #ffffff;
   padding-bottom: 4rem;
@@ -15,7 +15,6 @@
   margin: 0 auto;
   padding: 4rem 1.5rem 0 1.5rem;
 }
-
 
 .profileCard {
   background-color: #161925;
@@ -56,6 +55,27 @@
   flex-direction: column;
 }
 
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: #0f111a;
+  border-radius: 12px;
+  border: 1px solid #222533;
+}
+
+.inputLabel {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.5rem;
+}
+
 .username {
   font-size: 1.75rem;
   font-weight: 800;
@@ -68,7 +88,6 @@
   color: #94a3b8;
   margin: 0.25rem 0 0.5rem 0;
 }
-
 
 .premiumBadge {
   background: linear-gradient(135deg, #a855f7, #6366f1);
@@ -117,7 +136,6 @@
   border: 1px solid #222533;
 }
 
-
 .editBtn, .logoutBtn {
   display: inline-flex;
   align-items: center;
@@ -152,7 +170,6 @@
   border-color: rgba(239, 68, 68, 0.4);
 }
 
-
 .statsGrid {
   display: flex;
   gap: 2rem;
@@ -178,34 +195,114 @@
   margin-top: 0.15rem;
 }
 
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: #161925;
+  border: 1px solid #222533;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.connectionList {
+  margin-top: 1.5rem;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.connectionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #222533;
+}
+
+.connectionLink {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.connectionLink:hover {
+  opacity: 0.8;
+}
+
+.avatarMini {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.unfollowBtn {
+  background: transparent;
+  border: 1px solid #33374d;
+  color: #94a3b8;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.unfollowBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #ef4444;
+}
 
 .dashboardInput {
   width: 100%;
   padding: 0.75rem 1rem;
-  background-color: #0f111a;
+  background-color: #161925;
   border: 1px solid #222533;
   border-radius: 6px;
   color: #ffffff;
   font-size: 0.95rem;
-  transition: border-color 0.15s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
 .dashboardInput:focus {
   outline: none;
   border-color: #6366f1;
+  background-color: #1a1e2e;
 }
-
 
 .contentSection {
   margin-top: 3.5rem;
-}
-
-.sectionTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 1.75rem;
 }
 
 .postsGrid {
@@ -221,101 +318,14 @@
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.postCard:hover {
-  transform: translateY(-2px);
-  border-color: #33374d;
-}
-
-.postMeta {
-  margin-bottom: 0.75rem;
-}
-.profileMessageBtnWrapper {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 5px;
-}
-.postDate {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.postTitle {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
 }
 
 .postDesc {
-  font-size: 0.9rem;
   color: #94a3b8;
-  line-height: 1.5;
-  margin: 0 0 1.5rem 0;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
   flex-grow: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
-
-.readLink {
-  color: #6366f1;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: color 0.15s ease;
-}
-
-.readLink:hover {
-  color: #818cf8;
-}
-
-.readLink svg {
-  transition: transform 0.15s ease;
-}
-
-.readLink:hover svg {
-  transform: translateX(3px);
-}
-
-
-.emptyState {
-  background-color: #161925;
-  border: 1px dashed #222533;
-  border-radius: 12px;
-  padding: 4rem 2rem;
-  text-align: center;
-}
-
-.emptyState p {
-  color: #94a3b8;
-  margin: 0 0 1.5rem 0;
-  font-size: 0.95rem;
-}
-
-.createBtn, .loginBtn {
-  display: inline-block;
-  background-color: #6366f1;
-  color: #ffffff;
-  padding: 0.7rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 0.15s ease;
-}
-
-.createBtn:hover, .loginBtn:hover {
-  background-color: #4f46e5;
-}
-
 
 .loaderContainer {
   display: flex;
@@ -333,35 +343,15 @@
   animation: spin 0.8s linear infinite;
 }
 
-.errorWrapper {
-  max-width: 500px;
-  margin: 6rem auto 0 auto;
-  text-align: center;
-  padding: 2rem;
-}
-
-.errorText {
-  color: #ef4444;
-  font-size: 1.05rem;
-  margin-bottom: 1.5rem;
-}
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
 
 @media (max-width: 768px) {
   .profileCard {
     flex-direction: column;
     align-items: flex-start;
-    padding: 1.75rem;
   }
-  
-  .avatarSection {
-    gap: 1.25rem;
-  }
-  
   .statsGrid {
     width: 100%;
     justify-content: space-between;

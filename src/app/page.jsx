@@ -9,13 +9,14 @@ import Post from "../../models/post";
 import connectMongoDb from "../../lib/mongodb";
 import RotatingAd from "./components/RotatingAds/page";
 import UserSearch from "./components/UserSearch/page";
+import UserCarousel from "./components/UserCarousel/UserCarousel";
 
 async function getLatestPostsDirectly() {
   try {
     await connectMongoDb();
     return await Post.find({})
       .sort({ createdAt: -1 })
-      .limit(3)
+      .limit(4)
       .select("title description name")
       .lean();
   } catch (error) {
@@ -96,6 +97,7 @@ export default async function Home() {
         <p>Join a community where your thoughts matter. Post freely, explore what others are thinking, and connect with like-minded thinkers.</p>
         
         <UserSearch />
+        <UserCarousel />
 
         {session ? (
           <Link href="/dashboard">
