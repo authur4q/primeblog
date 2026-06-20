@@ -109,7 +109,7 @@ const Navbar = () => {
                 className={notifStyles.notifButton}
                 aria-label="Toggle notifications"
               >
-                🔔 {unreadCount > 0 && <span className={notifStyles.badge}>{unreadCount}</span>}
+                Notifications🔔 {unreadCount > 0 && <span className={notifStyles.badge}>{unreadCount}</span>}
               </button>
 
               {isNotifOpen && (

@@ -37,7 +37,6 @@ export const GET = async (req) => {
       Post.estimatedDocumentCount(),
       User.find()
         .sort({ createdAt: -1 })
-        .limit(10)
         .select("-password")
         .lean()
     ])

@@ -72,9 +72,9 @@ const UserProfile = ({ params: paramsPromise }) => {
     try {
       const payload = {
         name: editName,
-        username: editUsername,
         primaryPhone: editPhone,
         ...(profileUser?.isPremium && {
+          username: editUsername,
           twitter: editTwitter,
           Instagram: editInstagram
         })
@@ -219,8 +219,25 @@ const UserProfile = ({ params: paramsPromise }) => {
             </div>
 
             <div className={styles.inputGroup} style={{ marginBottom: "1rem" }}>
-              <label className={styles.label} style={{ display: "block", fontSize: "0.85rem", marginBottom: "0.5rem", color: "#94a3b8" }}>Platform @username</label>
-              <input type="text" className={styles.dashboardInput} value={editUsername} onChange={(e) => setEditUsername(e.target.value)} style={{ width: "100%", padding: "0.75rem", background: "#0f111a", border: "1px solid #222533", borderRadius: "6px", color: "#fff" }} />
+              <label className={styles.label} style={{ display: "block", fontSize: "0.85rem", marginBottom: "0.5rem", color: "#94a3b8" }}>
+                Platform @username {!profileUser?.isPremium && "(Premium Only)"}
+              </label>
+              <input 
+                type="text" 
+                className={styles.dashboardInput} 
+                value={editUsername} 
+                onChange={(e) => setEditUsername(e.target.value)} 
+                disabled={!profileUser?.isPremium}
+                style={{ 
+                  width: "100%", 
+                  padding: "0.75rem", 
+                  background: profileUser?.isPremium ? "#0f111a" : "#0a0c12", 
+                  border: "1px solid #222533", 
+                  borderRadius: "6px", 
+                  color: profileUser?.isPremium ? "#fff" : "#64748b",
+                  cursor: profileUser?.isPremium ? "text" : "not-allowed"
+                }} 
+              />
             </div>
 
             <div className={styles.inputGroup} style={{ marginBottom: "1.5rem" }}>

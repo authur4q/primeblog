@@ -72,6 +72,17 @@ export async function PATCH(req, { params }) {
 
     const body = await req.json()
 
+    if (body.isPremium === true && !isAdmin) {
+      return NextResponse.json(
+        { error: "Payment initialization failed. M-Pesa integration currently in development. Contact support for manual upgrade processing." },
+        { status: 501 }
+      )
+    }
+
+    if (body.hasOwnProperty('username') && !user.isPremium && !isAdmin) {
+       return NextResponse.json({ error: "Forbidden: Only premium users can set custom usernames" }, { status: 403 })
+    }
+
     if (isAdmin) {
       if (body.role) user.role = body.role
       if (body.hasOwnProperty('isPremium')) user.isPremium = body.isPremium
