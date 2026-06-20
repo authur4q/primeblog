@@ -1,13 +1,14 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useTransition } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Navbar from '../components/navbar/page'
+import Navbar from '../components/navbar/navbar'
 import styles from "./admin.module.css"
 
 const AdminDashboard = () => {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   
   const [stats, setStats] = useState({ users: 0, premium: 0, posts: 0 })
   const [recentUsers, setRecentUsers] = useState([])
@@ -52,11 +53,7 @@ const AdminDashboard = () => {
       if (!res.ok) throw new Error("Failed to load ads")
       const data = await res.json()
       
-      if (data) {
-        setAds(Array.isArray(data) ? data : [data])
-      } else {
-        setAds([])
-      }
+      setAds(data ? (Array.isArray(data) ? data : [data]) : [])
     } catch (error) {
       console.error("Error fetching ads registry:", error)
     } finally {
@@ -69,12 +66,15 @@ const AdminDashboard = () => {
 
     if (!session || session.user?.role !== "admin") {
       router.push("/")
-      return
     }
-
-    fetchDashboardData()
-    fetchAds()
   }, [session, status, router])
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.role === "admin") {
+      fetchDashboardData()
+      fetchAds()
+    }
+  }, [status, session?.user?.role])
 
   const handleCreateAd = async (e) => {
     e.preventDefault()
@@ -89,7 +89,6 @@ const AdminDashboard = () => {
       })
 
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.message || "Failed to launch advertisement campaign")
 
       setFormMessage({ text: "Ad broadcast started successfully! Expires in 24 hours.", type: "success" })
@@ -105,12 +104,14 @@ const AdminDashboard = () => {
   const handleDeleteAd = async (adId) => {
     if (!confirm("Are you sure you want to pull this advertisement from rotation?")) return
 
+    const originalAds = [...ads]
+    setAds(prev => prev.filter(ad => ad._id !== adId))
+
     try {
       const res = await fetch(`/api/ads?id=${adId}`, { method: "DELETE" })
       if (!res.ok) throw new Error("Failed to terminate ad instance")
-      
-      setAds(prev => prev.filter(ad => ad._id !== adId))
     } catch (error) {
+      setAds(originalAds)
       alert(error.message)
     }
   }
@@ -128,14 +129,25 @@ const AdminDashboard = () => {
     if (!editingUser) return
     setModalSubmitting(true)
 
+    const updatedRole = modalForm.role
+    const updatedPremium = modalForm.isPremium
+    const originalUsers = [...recentUsers]
+
+    setRecentUsers(prev => prev.map(u => 
+      u._id === editingUser._id 
+        ? { ...u, role: updatedRole, isPremium: updatedPremium, tier: updatedPremium ? "premium" : "free" }
+        : u
+    ))
+    setEditingUser(null)
+
     try {
       const res = await fetch(`/api/users/${editingUser._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          role: modalForm.role,
-          isPremium: modalForm.isPremium,
-          subscriptionPlan: modalForm.isPremium ? "premium" : "free"
+          role: updatedRole,
+          isPremium: updatedPremium,
+          subscriptionPlan: updatedPremium ? "premium" : "free"
         })
       })
 
@@ -143,16 +155,9 @@ const AdminDashboard = () => {
         const errorData = await res.json()
         throw new Error(errorData.message || "Failed to save user account alterations")
       }
-
-      setRecentUsers(prev => prev.map(u => 
-        u._id === editingUser._id 
-          ? { ...u, role: modalForm.role, isPremium: modalForm.isPremium, tier: modalForm.isPremium ? "premium" : "free" }
-          : u
-      ))
-
-      setEditingUser(null)
       fetchDashboardData()
     } catch (error) {
+      setRecentUsers(originalUsers)
       alert(error.message)
     } finally {
       setModalSubmitting(false)
@@ -160,34 +165,43 @@ const AdminDashboard = () => {
   }
 
   const handleSuspendUser = async (userId, userName) => {
-    const confirmation = confirm(`Are you sure you want to suspend ${userName || "this user"}?\n. All posts and comments linked to this account will be permanently deleted from system memory.`)
+    const confirmation = confirm(`Are you sure you want to suspend ${userName || "this user"}?\nAll posts and comments linked to this account will be permanently deleted from system memory.`)
     if (!confirmation) return
 
+    const originalUsers = [...recentUsers]
+    setRecentUsers(prev => prev.filter(user => user._id !== userId))
+
     try {
-      const res = await fetch(`/api/users/${userId}`, {
-        method: "DELETE"
-      })
+      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" })
 
       if (!res.ok) {
         const errorData = await res.json()
         throw new Error(errorData.message || "Database rejected account suspension query")
       }
-
-      setRecentUsers(prev => prev.filter(user => user._id !== userId))
       fetchDashboardData()
     } catch (error) {
+      setRecentUsers(originalUsers)
       alert(error.message)
     }
   }
 
-  const filteredUsers = recentUsers.filter(user => {
-    const query = searchQuery.toLowerCase()
-    return (
+  const filteredUsers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return recentUsers
+
+    return recentUsers.filter(user => 
       user.name?.toLowerCase().includes(query) ||
       user.email?.toLowerCase().includes(query) ||
       user.role?.toLowerCase().includes(query)
     )
-  })
+  }, [recentUsers, searchQuery])
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value
+    startTransition(() => {
+      setSearchQuery(val)
+    })
+  }
 
   if (status === "loading" || !session || session.user?.role !== "admin") {
     return (
@@ -347,12 +361,12 @@ const AdminDashboard = () => {
         <section className={styles.contentLayout}>
           <div className={styles.tableCard}>
             <div className={styles.tableHeader}>
-              <h3>Recent Account Registrations</h3>
+              <h3>Recent Account Registrations {isPending && <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>(Filtering...)</span>}</h3>
               <input 
                 type="text" 
                 placeholder="Filter recent users..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                defaultValue={searchQuery}
+                onChange={handleSearchChange}
                 className={styles.tableSearch} 
               />
             </div>

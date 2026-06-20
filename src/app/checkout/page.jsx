@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styles from "./checkoutbtn.module.css";
-import Navbar from "../components/navbar/page";
+import Navbar from "../components/navbar/navbar";
 import {useRouter} from "next/navigation";
 
 export default function MpesaCheckout() {

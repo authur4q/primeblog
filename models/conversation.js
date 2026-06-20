@@ -21,5 +21,10 @@ const ConversationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ConversationSchema.index({ participants: 1 });
+
+ConversationSchema.index({ participants: 1, updatedAt: -1 });
+ConversationSchema.index({ participants: 1, lastMessageAt: -1 });
+
 const Conversation = mongoose.models.Conversation || mongoose.model("Conversation", ConversationSchema);
 export default Conversation;

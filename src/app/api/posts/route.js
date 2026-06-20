@@ -44,12 +44,16 @@ export const GET = async (req) => {
         const posts = await Post.find(userId ? { userId } : {})
             .populate("userId", "isPremium")
             .sort({ createdAt: -1 })
+            .lean()
 
         const flatPosts = posts.map((post) => {
-            const postObj = post.toObject ? post.toObject() : post
+            const hasPopulatedUser = post.userId && typeof post.userId === 'object'
+            const isPremiumStatus = post.isPremium || (hasPopulatedUser && post.userId.isPremium) || false
+
             return {
-                ...postObj,
-                isPremium: postObj.isPremium || postObj.userId?.isPremium || false
+                ...post,
+                isPremium: isPremiumStatus,
+                userId: hasPopulatedUser ? post.userId : (post.userId || null)
             }
         })
 

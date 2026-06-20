@@ -24,5 +24,7 @@ const MessageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+MessageSchema.index({ conversationId: 1, _id: -1 });
+
 const Message = mongoose.models.Message || mongoose.model("Message", MessageSchema);
 export default Message;

@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import Navbar from '@/app/components/navbar/page'
+import Navbar from '@/app/components/navbar/navbar'
 import Link from 'next/link'
 import styles from './profile.module.css'
 import MessageButton from '../../components/messageButton/page'

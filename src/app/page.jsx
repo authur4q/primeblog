@@ -1,33 +1,34 @@
 import styles from "./page.module.css";
-import Navbar from "./components/navbar/page";
+import Navbar from "./components/navbar/navbar";
 import Link from "next/link";
 import { auth } from "./api/auth/[...nextauth]/options";
+import mongoose from "mongoose";
 
 import User from "../../models/user";
+import Post from "../../models/post"; 
 import connectMongoDb from "../../lib/mongodb";
 import RotatingAd from "./components/RotatingAds/page";
 import UserSearch from "./components/UserSearch/page";
 
-async function getLatestPosts() {
+async function getLatestPostsDirectly() {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL;
-    const res = await fetch(`${baseUrl}/api/posts`, { 
-      next: { revalidate: 60 } 
-    });
-    if (!res.ok) return [];
-    const posts = await res.json();
-    return posts.slice(0, 3); 
+    await connectMongoDb();
+    return await Post.find({})
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .select("title description name")
+      .lean();
   } catch (error) {
-    console.error("Error loading homepage posts:", error);
+    console.error("Error loading homepage posts safely:", error);
     return [];
   }
 }
 
-async function getPremiumExpiration(email) {
+async function getPremiumExpirationDirectly(email) {
   if (!email) return null;
   try {
     await connectMongoDb();
-    const user = await User.findOne({ email }).select("premiumUntil isPremium");
+    const user = await User.findOne({ email }).select("premiumUntil isPremium").lean();
     if (user && user.isPremium && user.premiumUntil) {
       const diffTime = new Date(user.premiumUntil) - new Date();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -35,30 +36,34 @@ async function getPremiumExpiration(email) {
     }
     return null;
   } catch (e) {
-    console.error("Error calculating plan days:", e);
+    console.error("Error calculating plan days safely:", e);
     return null;
   }
 }
 
-async function getActiveAd() {
+async function getActiveAdDirectly() {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL;
-    const res = await fetch(`${baseUrl}/api/ads`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return await res.json();
+    await connectMongoDb();
+    if (mongoose?.models?.Ad) {
+      return await mongoose.models.Ad.findOne({ active: true }).lean();
+    }
+    return null;
   } catch (error) {
-    console.error("Error loading homepage ad:", error);
+    console.error("Error loading homepage ad safely:", error);
     return null;
   }
 }
 
 export default async function Home() {
   const session = await auth();
-  const latestPosts = await getLatestPosts();
-  const daysRemaining = session?.user?.email ? await getPremiumExpiration(session.user.email) : null;
+
+  const [latestPosts, daysRemaining, activeAd] = await Promise.all([
+    getLatestPostsDirectly(),
+    session?.user?.email ? getPremiumExpirationDirectly(session.user.email) : Promise.resolve(null),
+    !session?.user?.isPremium ? getActiveAdDirectly() : Promise.resolve(null)
+  ]);
   
-  const isPremium = session?.user?.isPremium;
-  const activeAd = !isPremium ? await getActiveAd() : null;
+  const isPremium = session?.user?.isPremium || (daysRemaining !== null);
 
   return (
     <div className={styles.container}>
@@ -116,7 +121,7 @@ export default async function Home() {
             {latestPosts.map((post) => {
               const initial = (post.name || "A").charAt(0).toUpperCase();
               return (
-                <div key={post._id} className={styles.homeCard}>
+                <div key={post._id.toString()} className={styles.homeCard}>
                   <div className={styles.cardHeader}>
                     <div className={styles.authorGroup}>
                       <div className={styles.miniAvatar}>{initial}</div>
@@ -125,7 +130,7 @@ export default async function Home() {
                   </div>
                   <h3>{post.title}</h3>
                   <p>{post.description}</p>
-                  <Link href={`/blogs/${post._id}`} className={styles.readMore}>
+                  <Link href={`/blogs/${post._id.toString()}`} className={styles.readMore}>
                     Read post
                   </Link>
                 </div>
@@ -167,7 +172,7 @@ export default async function Home() {
               href="mailto:authurbass@gmail.com?subject=Premium%20Account%20Assistance" 
               className={styles.supportLinkEmail}
             >
-            Email Support
+              Email Support
             </a>
           </div>
         </div>

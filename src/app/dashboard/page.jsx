@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import styles from "./dashboard.module.css"
-import Navbar from '../components/navbar/page'
+import Navbar from '../components/navbar/navbar'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'

@@ -1,6 +1,6 @@
 import mongoose, { models, Schema } from "mongoose";        
 
-const postSchema = new  Schema({
+const postSchema = new Schema({
     title:{
         type: String,
         required: true
@@ -16,18 +16,23 @@ const postSchema = new  Schema({
     },
     name:{
         type: String,
-        required:true,
+        required: true,
     },  
     userId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     createdAt:{
         type: Date,
         default: Date.now
     }
     
-},{timestamps:true})
+},{timestamps: true})
+
+postSchema.index({ userId: 1, createdAt: -1 });
+
+postSchema.index({ createdAt: -1 });
 
 const Post = models.Post || mongoose.model("Post", postSchema);
 

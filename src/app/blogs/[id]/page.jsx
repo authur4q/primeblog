@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import styles from "./id.module.css"
-import Navbar from '@/app/components/navbar/page'
+import Navbar from '@/app/components/navbar/navbar'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Loading from '@/app/components/loading/page'

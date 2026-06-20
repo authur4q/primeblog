@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import styles from "./premium.module.css";
-import Navbar from "../components/navbar/page";
+import Navbar from "../components/navbar/navbar";
 
 export default function PremiumPage() {
   const { data: session, update } = useSession();

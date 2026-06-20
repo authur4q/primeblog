@@ -25,10 +25,11 @@ export async function POST(req) {
     }).populate("participants", "name username isPremium");
 
     if (!conversation) {
-      conversation = await Conversation.create({
+      const newConv = await Conversation.create({
         participants: [currentUserId, recipientId]
       });
-      conversation = await Conversation.findById(conversation._id).populate("participants", "name username isPremium");
+      
+      conversation = await newConv.populate("participants", "name username isPremium");
     }
 
     return NextResponse.json(conversation, { status: 200 });
@@ -47,14 +48,19 @@ export async function GET(req) {
 
     await connectMongoDb();
 
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit"), 10) || 20;
+
     const conversations = await Conversation.find({
       participants: session.user.id
     })
       .populate("participants", "name username isPremium")
-      .sort({ lastMessageAt: -1 });
+      .sort({ updatedAt: -1 })
+      .limit(limit);
 
     return NextResponse.json(conversations, { status: 200 });
   } catch (error) {
+    console.error("Failed to load conversations:", error);
     return NextResponse.json({ error: "Failed to load dynamic conversation clusters" }, { status: 500 });
   }
 }

@@ -1,9 +1,5 @@
 import mongoose from "mongoose";
 
-if (mongoose.models.User) {
-    delete mongoose.models.User;
-}
-
 const userSchema = new mongoose.Schema({
     name:{
         type: String,
@@ -39,7 +35,7 @@ const userSchema = new mongoose.Schema({
     password:{
         type: String,
         required: true,
-        minlength:6,
+        minlength: 6,
     },
     forgotPasswordToken: String,
     forgotPasswordTokenExpiry: Date,
@@ -66,30 +62,31 @@ const userSchema = new mongoose.Schema({
         trim: true,
         default: ""
     }
-},{timestamps:true});
+},{timestamps: true});
 
-userSchema.pre("findOneAndDelete", async function (next) {
-    try {
-        const query = this.getQuery();
-        const user = await this.model.findOne(query);
-
-        if (user) {
-            const userId = user._id;
-
-            if (mongoose.models.Post) {
-                await mongoose.models.Post.deleteMany({ userId: userId });
-            }
-
-            if (mongoose.models.Comment) {
-                await mongoose.models.Comment.deleteMany({ user: userId });
-            }
-        }
-        next();
-    } catch (error) {
-        next(error);
-    }
+userSchema.pre("save", function (next) {
+    if (this.username === "") this.username = undefined;
+    if (this.primaryPhone === "") this.primaryPhone = undefined;
+    if (this.lastTransactionId === "") this.lastTransactionId = undefined;
+    next();
 });
 
-const User = mongoose.model("User", userSchema);
+userSchema.pre(["updateOne", "findOneAndReplace", "findOneAndUpdate"], function (next) {
+    const update = this.getUpdate();
+    if (update) {
+        if (update.username === "") update.username = undefined;
+        if (update.primaryPhone === "") update.primaryPhone = undefined;
+        if (update.lastTransactionId === "") update.lastTransactionId = undefined;
+        
+        if (update.$set) {
+            if (update.$set.username === "") update.$set.username = undefined;
+            if (update.$set.primaryPhone === "") update.$set.primaryPhone = undefined;
+            if (update.$set.lastTransactionId === "") update.$set.lastTransactionId = undefined;
+        }
+    }
+    next();
+});
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;

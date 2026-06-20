@@ -14,18 +14,43 @@ export const GET = async (req) => {
 
     await connectMongoDb()
 
-    const [totalUsers, premiumUsers, totalPosts, usersList] = await Promise.all([
-      User.countDocuments(),
-      User.countDocuments({ isPremium: true }),
-      Post.countDocuments(),
-      User.find().sort({ createdAt: -1 }).limit(10).select("-password")
+    const [aggregationResults, estimatedPosts, usersList] = await Promise.all([
+      User.aggregate([
+        {
+          $facet: {
+            totalCount: [{ $count: "count" }],
+            premiumCount: [
+              { 
+                $match: { 
+                  $or: [
+                    { isPremium: true }, 
+                    { tier: "premium" }, 
+                    { subscriptionPlan: "premium" }
+                  ] 
+                } 
+              },
+              { $count: "count" }
+            ]
+          }
+        }
+      ]),
+      Post.estimatedDocumentCount(),
+      User.find()
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select("-password")
+        .lean()
     ])
+
+    const facet = aggregationResults[0]
+    const totalUsers = facet?.totalCount[0]?.count || 0
+    const premiumUsers = facet?.premiumCount[0]?.count || 0
 
     return NextResponse.json({
       stats: {
         users: totalUsers,
         premium: premiumUsers,
-        posts: totalPosts
+        posts: estimatedPosts
       },
       recentUsers: usersList
     }, { status: 200 })

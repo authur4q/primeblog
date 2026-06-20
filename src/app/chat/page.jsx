@@ -1,10 +1,12 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react'
 import styles from "./chat.module.css"
-import Navbar from '../components/navbar/page'
+import Navbar from '../components/navbar/navbar'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Pusher from 'pusher-js'
+
+let pusherClient;
 
 const ChatPage = () => {
     const router = useRouter()
@@ -16,6 +18,16 @@ const ChatPage = () => {
     const [messages, setMessages] = useState([])
     const [newMessageText, setNewMessageText] = useState("")
     const messagesEndRef = useRef(null)
+
+    const [searchQuery, setSearchQuery] = useState("")
+    const [searchResults, setSearchResults] = useState([])
+    const [isSearching, setIsSearching] = useState(false)
+
+    if (!pusherClient && typeof window !== "undefined") {
+        pusherClient = new Pusher(process.env.PUSHER_KEY || '', {
+            cluster: process.env.PUSHER_CLUSTER || '',
+        })
+    }
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -41,7 +53,71 @@ const ChatPage = () => {
     }, [userId])
 
     useEffect(() => {
-        if (!selectedChat) return
+        if (!searchQuery.trim()) {
+            setSearchResults([])
+            setIsSearching(false)
+            return
+        }
+
+        const delayDebounce = setTimeout(async () => {
+            setIsSearching(true)
+            try {
+                const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`)
+                if (res.ok) {
+                    const data = await res.json()
+                    setSearchResults(data)
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setIsSearching(false)
+            }
+        }, 300)
+
+        return () => clearTimeout(delayDebounce)
+    }, [searchQuery])
+
+    useEffect(() => {
+        if (!userId || !pusherClient || conversations.length === 0) return
+
+        const activeChannels = []
+
+        conversations.forEach(chat => {
+            const channelName = `chat_${chat._id}`
+            const channel = pusherClient.subscribe(channelName)
+            activeChannels.push({ name: channelName, instance: channel })
+
+            channel.bind('incoming-message', (data) => {
+                if (selectedChat?._id === data.conversationId) {
+                    setMessages((prev) => {
+                        if (prev.some(msg => msg._id === data._id || msg.tempId === data.tempId)) return prev
+                        return [...prev, data]
+                    })
+                }
+
+                setConversations((prevChats) => {
+                    const targetChat = prevChats.find(c => c._id === data.conversationId)
+                    if (!targetChat) return prevChats
+                    const updatedChat = { ...targetChat, lastMessage: data.text }
+                    const rest = prevChats.filter(c => c._id !== data.conversationId)
+                    return [updatedChat, ...rest]
+                })
+            })
+        })
+
+        return () => {
+            activeChannels.forEach(ch => {
+                ch.instance.unbind('incoming-message')
+                pusherClient.unsubscribe(ch.name)
+            })
+        }
+    }, [conversations.length, selectedChat?._id, userId])
+
+    useEffect(() => {
+        if (!selectedChat || !selectedChat._id) {
+            setMessages([])
+            return
+        }
 
         const fetchMessages = async () => {
             try {
@@ -56,44 +132,51 @@ const ChatPage = () => {
         }
 
         fetchMessages()
-
-        const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY || '', {
-            cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || '',
-        })
-
-        const channel = pusher.subscribe(`chat_${selectedChat._id}`)
-        channel.bind('incoming-message', (data) => {
-            setMessages((prev) => {
-                if (prev.some(msg => msg._id === data._id)) return prev
-                return [...prev, data]
-            })
-            
-            setConversations((prevChats) => 
-                prevChats.map(chat => 
-                    chat._id === selectedChat._id 
-                        ? { ...chat, lastMessage: data.text } 
-                        : chat
-                )
-            )
-        })
-
-        return () => {
-            channel.unbind_all()
-            channel.unsubscribe()
-            pusher.disconnect()
-        }
-    }, [selectedChat])
+    }, [selectedChat?._id])
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
 
+    const handleSelectUserFromSearch = (targetUser) => {
+        const existingChat = conversations.find(chat => 
+            chat.participants.some(p => p._id === targetUser._id)
+        )
+
+        if (existingChat) {
+            setSelectedChat(existingChat)
+        } else {
+            setSelectedChat({
+                participants: [
+                    { _id: userId },
+                    { _id: targetUser._id, name: targetUser.name, isPremium: targetUser.isPremium }
+                ]
+            })
+        }
+        setSearchQuery("")
+    }
+
     const handleSendMessage = async (e) => {
         e.preventDefault()
         if (!newMessageText.trim() || !selectedChat || !userId) return
 
+        const targetUser = selectedChat.participants.find(p => p._id !== userId)
+        const recipientId = targetUser?._id
+
         const originalText = newMessageText
         setNewMessageText("")
+
+        const tempId = Date.now().toString()
+        const optimisticMessage = {
+            _id: tempId,
+            tempId: tempId,
+            conversationId: selectedChat._id || "temp_room",
+            senderId: userId,
+            text: originalText.trim(),
+            createdAt: new Date().toISOString()
+        }
+
+        setMessages((prev) => [...prev, optimisticMessage])
 
         try {
             const res = await fetch("/api/chats/messages", {
@@ -102,26 +185,42 @@ const ChatPage = () => {
                 body: JSON.stringify({
                     conversationId: selectedChat._id,
                     senderId: userId,
-                    text: originalText
+                    text: originalText,
+                    tempId: tempId,
+                    recipientId: recipientId
                 })
             })
 
             if (res.ok) {
                 const savedMsg = await res.json()
-                setMessages((prev) => [...prev, savedMsg])
                 
-                setConversations((prevChats) => 
-                    prevChats.map(chat => 
-                        chat._id === selectedChat._id 
-                            ? { ...chat, lastMessage: savedMsg.text } 
-                            : chat
-                    )
+                if (!selectedChat._id && savedMsg.conversation) {
+                    const initializedChat = savedMsg.conversation
+                    setSelectedChat(initializedChat)
+                    setConversations((prevChats) => [
+                        { ...initializedChat, lastMessage: savedMsg.text },
+                        ...prevChats
+                    ])
+                } else {
+                    setConversations((prevChats) => {
+                        const targetChat = prevChats.find(chat => chat._id === selectedChat._id)
+                        if (!targetChat) return prevChats
+                        const updatedChat = { ...targetChat, lastMessage: savedMsg.text }
+                        const rest = prevChats.filter(chat => chat._id !== selectedChat._id)
+                        return [updatedChat, ...rest]
+                    })
+                }
+
+                setMessages((prev) => 
+                    prev.map(msg => msg.tempId === tempId ? savedMsg : msg)
                 )
             } else {
+                setMessages((prev) => prev.filter(msg => msg.tempId !== tempId))
                 setNewMessageText(originalText)
             }
         } catch (err) {
             console.error(err)
+            setMessages((prev) => prev.filter(msg => msg.tempId !== tempId))
             setNewMessageText(originalText)
         }
     }
@@ -146,8 +245,39 @@ const ChatPage = () => {
                 <div className={`${styles.chatWrapper} ${hasActiveChat ? styles.wrapperHasActive : ''}`}>
                     <div className={styles.chatSidebar}>
                         <h3 className={styles.sidebarHeading}>Chats</h3>
+                        
+                        <div className={styles.searchWrapper}>
+                            <input 
+                                type="text"
+                                placeholder="Search users to chat..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className={styles.sidebarSearchInput}
+                            />
+                        </div>
+
                         <div className={styles.conversationsList}>
-                            {conversations.length > 0 ? (
+                            {searchQuery.trim().length > 0 ? (
+                                isSearching ? (
+                                    <p className={styles.searchStatusText}>Searching...</p>
+                                ) : searchResults.length > 0 ? (
+                                    searchResults.map(user => (
+                                        <div 
+                                            key={user._id}
+                                            onClick={() => handleSelectUserFromSearch(user)}
+                                            className={styles.chatCard}
+                                        >
+                                            <div className={styles.cardHeader}>
+                                                <strong className={styles.username}>{user.name}</strong>
+                                                {user.isPremium && <span className={styles.proBadge}>PRO</span>}
+                                            </div>
+                                            <p className={styles.lastMessage}>Click to start messaging</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className={styles.emptyStateText}>No users found</p>
+                                )
+                            ) : conversations.length > 0 ? (
                                 conversations.map(chat => {
                                     const secondaryUser = chat.participants.find(p => p._id !== userId)
                                     const isSelected = selectedChat?._id === chat._id

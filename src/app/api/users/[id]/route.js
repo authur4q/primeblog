@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import User from "../../../../../models/user" 
+import Notification from "../../../../../models/Notification"
 import mongoose from "mongoose"
 import connectMongoDb from "../../../../../lib/mongodb"
 import { auth } from "@/app/api/auth/[...nextauth]/options"
@@ -99,6 +100,21 @@ export async function PATCH(req, { params }) {
     }
 
     await user.save()
+
+    if (isAdmin && !isOwner) {
+      try {
+        await Notification.create({
+          recipient: user._id,
+          sender: session.user.id,
+          type: "ADMIN_ACTION",
+          title: "Account Status Updated",
+          message: `An administrator has updated your profile permissions. Subscription: ${user.subscriptionPlan ? user.subscriptionPlan.toUpperCase() : "FREE"} | System Role: ${user.role.toUpperCase()}.`,
+          read: false
+        })
+      } catch (notifError) {
+        console.error("Non-terminal failure dispatching administrative notification:", notifError)
+      }
+    }
 
     return NextResponse.json(user, { status: 200 })
   } catch (error) {

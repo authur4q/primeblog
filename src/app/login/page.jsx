@@ -1,6 +1,6 @@
 "use client"
 import React, { useState } from 'react'
-import Navbar from '../components/navbar/page'
+import Navbar from '../components/navbar/navbar'
 import styles from "./login.module.css"
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'

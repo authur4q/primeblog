@@ -53,7 +53,7 @@ export default function UserSearch() {
                 </svg>
                 <input
                     type="text"
-                    placeholder="Search creators by name or @username..."
+                    placeholder="Search users by name or username..."
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value)
@@ -92,7 +92,7 @@ export default function UserSearch() {
                             )
                         })
                     ) : (
-                        !loading && <div className={styles.noResults}>No creators found</div>
+                        !loading && <div className={styles.noResults}>No users found</div>
                     )}
                 </div>
             )}

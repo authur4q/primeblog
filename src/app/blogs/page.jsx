@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react'
-import Navbar from '../components/navbar/page'
+import Navbar from '../components/navbar/navbar'
 import styles from "./blogs.module.css"
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
@@ -22,7 +22,7 @@ const Blogs = () => {
         }
         
         const json = await res.json()
-        if (json && json.length !== 0) {
+        if (json && Array.isArray(json)) {
           setData(json)
         }
       } catch (err) {
@@ -38,9 +38,9 @@ const Blogs = () => {
 
   const filteredPosts = data.filter((item) => {
     const query = searchQuery.toLowerCase()
-    const matchesTitle = item.title?.toLowerCase().includes(query)
-    const matchesDesc = item.description?.toLowerCase().includes(query)
-    const matchesAuthor = item.name?.toLowerCase().includes(query)
+    const matchesTitle = item.title?.toLowerCase().includes(query) || false
+    const matchesDesc = item.description?.toLowerCase().includes(query) || false
+    const matchesAuthor = item.name?.toLowerCase().includes(query) || false
     
     return matchesTitle || matchesDesc || matchesAuthor
   })
@@ -70,24 +70,38 @@ const Blogs = () => {
             )}
 
             {!loading && !error && filteredPosts.map((item) => {
-              const authorName = item.name || "Anonymous";
-              const initial = authorName.charAt(0).toUpperCase();
-              const profileId = typeof item.userId === 'object' ? item.userId?._id : item.userId;
+              const authorName = item.name || "Anonymous"
+              const initial = authorName.charAt(0).toUpperCase()
+              
+              const profileId = item.userId && typeof item.userId === 'object' 
+                ? item.userId?._id 
+                : item.userId
 
               return (
-                <div key={item._id} className={styles.post}>
+                <div key={item._id || Math.random().toString()} className={styles.post}>
                   <div className={styles.postHeader}>
                     <div className={styles.authorMeta}>
-                      <Link href={`/profile/${profileId}`} className={styles.avatarLink}>
+                      {profileId ? (
+                        <Link href={`/profile/${profileId}`} className={styles.avatarLink}>
+                          <div className={styles.avatar}>
+                            {initial}
+                          </div>
+                        </Link>
+                      ) : (
                         <div className={styles.avatar}>
                           {initial}
                         </div>
-                      </Link>
+                      )}
                       
                       <div className={styles.authorBadgeWrapper}>
-                        <Link href={`/profile/${profileId}`} className={styles.author}>
-                          pb/{authorName}
-                        </Link>
+                        {profileId ? (
+                          <Link href={`/profile/${profileId}`} className={styles.author}>
+                            pb/{authorName}
+                          </Link>
+                        ) : (
+                          <span className={styles.author}>pb/{authorName}</span>
+                        )}
+                        
                         {item.isPremium && (
                           <span className={styles.verifiedTick} title="Premium Creator">
                             ✓
@@ -98,14 +112,20 @@ const Blogs = () => {
                     
                     {item.createdAt && (
                       <p className={styles.time}>
-                        {format(parseISO(item.createdAt), 'MM/dd/yyyy HH:mm')}
+                        {(() => {
+                          try {
+                            return format(parseISO(item.createdAt), 'MM/dd/yyyy HH:mm')
+                          } catch (e) {
+                            return ""
+                          }
+                        })()}
                       </p>
                     )}
                   </div>
                   
                   <Link href={`/blogs/${item._id}`} className={styles.postContentLink}>
-                    <h1>{item.title}</h1>
-                    <h3>{item.description}</h3>
+                    <h1>{item.title || "Untitled"}</h1>
+                    <h3>{item.description || ""}</h3>
                   </Link>
                 </div>
               )
