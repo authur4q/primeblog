@@ -10,6 +10,7 @@ import connectMongoDb from "../../lib/mongodb";
 import RotatingAd from "./components/RotatingAds/page";
 import UserSearch from "./components/UserSearch/page";
 import UserCarousel from "./components/UserCarousel/UserCarousel";
+import MiniAvatar from "./components/MiniAvatar/MiniAvatar";
 
 async function getLatestPostsDirectly() {
   try {
@@ -120,24 +121,21 @@ export default async function Home() {
           </div>
           
           <div className={styles.grid}>
-            {latestPosts.map((post) => {
-              const initial = (post.name || "A").charAt(0).toUpperCase();
-              return (
-                <div key={post._id.toString()} className={styles.homeCard}>
-                  <div className={styles.cardHeader}>
-                    <div className={styles.authorGroup}>
-                      <div className={styles.miniAvatar}>{initial}</div>
-                      <span>pb/{post.name || "Anonymous"}</span>
-                    </div>
+            {latestPosts.map((post) => (
+              <div key={post._id.toString()} className={styles.homeCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.authorGroup}>
+                    <MiniAvatar name={post.name} className={styles.miniAvatar} />
+                    <span>pb/{post.name || "Anonymous"}</span>
                   </div>
-                  <h3>{post.title}</h3>
-                  <p>{post.description}</p>
-                  <Link href={`/blogs/${post._id.toString()}`} className={styles.readMore}>
-                    Read post
-                  </Link>
                 </div>
-              );
-            })}
+                <h3>{post.title}</h3>
+                <p>{post.description}</p>
+                <Link href={`/blogs/${post._id.toString()}`} className={styles.readMore}>
+                  Read post
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       )}
