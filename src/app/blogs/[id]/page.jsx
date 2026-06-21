@@ -9,10 +9,10 @@ import Link from 'next/link'
 import MessageButton from '../../components/messageButton/page'
 
 const BlogPost = () => {
-  const { data: session, status } = useSession()  
-  console.log("Session data:", session)
+  const { data: session, status } = useSession()
   const { id } = useParams()
   const [data, setData] = useState()
+  const [isBookmarked, setIsBookmarked] = useState(false)
   const [comments, setComments] = useState([])
   const [commentText, setCommentText] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -24,11 +24,13 @@ const BlogPost = () => {
       const res = await fetch(`/api/posts/${id}`)
       const json = await res.json()
       setData(json)
+      if (session?.user?.id && json.bookmarkedBy) {
+        setIsBookmarked(json.bookmarkedBy.includes(session.user.id))
+      }
     }
 
     const getComments = async () => {
       const res = await fetch(`/api/comments?postId=${id}`)
-      console.log("Comments response:", res)
       const json = await res.json()
       setComments(json)
     }
@@ -37,39 +39,32 @@ const BlogPost = () => {
       getData()
       getComments()
     }
-  }, [id])
+  }, [id, session?.user?.id])
 
   useEffect(() => {
-    return () => {
-      window.speechSynthesis?.cancel()
-    }
+    return () => { window.speechSynthesis?.cancel() }
   }, [])
+
+  const toggleBookmark = async () => {
+    const res = await fetch(`/api/posts/${id}/bookmarks`, { method: "PATCH" })
+    if (res.ok) {
+      setIsBookmarked(!isBookmarked)
+    }
+  }
 
   const handleSpeechControl = () => {
     if (!data?.content) return
-
     const synth = window.speechSynthesis
-
     if (!isPlaying) {
-      const cleanText = data.content.replace(/```[\s\S]*?```/g, "[Code Fragment Block Placeholder]")
+      const cleanText = data.content.replace(/```[\s\S]*?```/g, "[Code Fragment]")
       const utterance = new SpeechSynthesisUtterance(cleanText)
-      
-      utterance.onend = () => {
-        setIsPlaying(false)
-        setIsPaused(false)
-      }
-
+      utterance.onend = () => { setIsPlaying(false); setIsPaused(false) }
       setIsPlaying(true)
       setIsPaused(false)
       synth.speak(utterance)
     } else {
-      if (!isPaused) {
-        synth.pause()
-        setIsPaused(true)
-      } else {
-        synth.resume()
-        setIsPaused(false)
-      }
+      if (!isPaused) { synth.pause(); setIsPaused(true) }
+      else { synth.resume(); setIsPaused(false) }
     }
   }
 
@@ -82,56 +77,29 @@ const BlogPost = () => {
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
     if (!commentText.trim() || !session?.user?.id) return
-
     setIsSubmitting(true)
-
     const res = await fetch('/api/comments', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text: commentText,
-        postId: id, 
-        userId: session.user.id 
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: commentText, postId: id, userId: session.user.id }),
     })
-
     if (res.ok) {
       const newComment = await res.json()
-      
-      const populatedNewComment = {
-        ...newComment,
-        user: {
-          _id: session.user.id, 
-          name: session.user.name
-        }
-      }
-
-      setComments((prev) => [populatedNewComment, ...prev]) 
-      setCommentText("") 
+      setComments((prev) => [{ ...newComment, user: { _id: session.user.id, name: session.user.name } }, ...prev])
+      setCommentText("")
     }
-
     setIsSubmitting(false)
   }
 
   const handleCommentDelete = async (commentId) => {
-    if (!confirm("Are you sure you want to delete this comment?")) return
-
-    const res = await fetch(`/api/comments?id=${commentId}`, {
-      method: 'DELETE',
-    })
-
-    if (res.ok) {
-      setComments((prev) => prev.filter((comment) => comment._id !== commentId))
-    } else {
-      alert("Failed to delete comment.")
-    }
+    if (!confirm("Are you sure?")) return
+    const res = await fetch(`/api/comments?id=${commentId}`, { method: 'DELETE' })
+    if (res.ok) setComments((prev) => prev.filter((c) => c._id !== commentId))
   }
 
   return (
     <div className={styles.container}>
-      <Navbar/>
+      <Navbar />
       <div className={styles.wrapper}>
         {data ? (
           <>
@@ -142,11 +110,16 @@ const BlogPost = () => {
                 <p className={styles.authorTag}>Published by: <strong>@{data.name || "Anonymous"}</strong></p>
               </div>
               
-              {session?.user?.id && data.userId && session.user.id !== data.userId && (
-                <div className={styles.metaRight}>
+              <div className={styles.metaRight}>
+                {session?.user?.id && (
+                  <button onClick={toggleBookmark} className={styles.bookmarkBtn}>
+                    {isBookmarked ? "★ Bookmarked" : "☆ Bookmark"}
+                  </button>
+                )}
+                {session?.user?.id && data.userId && session.user.id !== data.userId && (
                   <MessageButton recipientId={data.userId} recipientName={data.name} />
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {session?.user?.isPremium && (
@@ -156,7 +129,7 @@ const BlogPost = () => {
                   <div>
                     <h4 className={styles.audioTitle}>Prime Voice Narrator</h4>
                     <p className={styles.audioStatus}>
-                      {isPlaying ? (isPaused ? "Paused" : "Speaking...") : "Listen to this breakdown hands-free"}
+                      {isPlaying ? (isPaused ? "Paused" : "Speaking...") : "Listen hands-free"}
                     </p>
                   </div>
                 </div>
@@ -164,92 +137,52 @@ const BlogPost = () => {
                   <button onClick={handleSpeechControl} className={styles.audioBtnPrimary}>
                     {isPlaying ? (isPaused ? "Resume" : "Pause") : "Play Audio"}
                   </button>
-                  {isPlaying && (
-                    <button onClick={handleStopSpeech} className={styles.audioBtnSecondary}>
-                      Stop
-                    </button>
-                  )}
+                  {isPlaying && <button onClick={handleStopSpeech} className={styles.audioBtnSecondary}>Stop</button>}
                 </div>
               </div>
             )}
 
             <p className={styles.content}>{data.content}</p>
-
             <hr className={styles.divider} />
 
             <div className={styles.commentsSection}>
-              <h3>{comments.length} Comments </h3>
-
+              <h3>{comments.length} Comments</h3>
               {status === "authenticated" ? (
                 <form onSubmit={handleCommentSubmit} className={styles.commentForm}>
-                  <textarea
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Write a comment..."
-                    rows="4"
-                    className={styles.textarea}
-                    disabled={isSubmitting}
-                  />
-                  <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-                    {isSubmitting ? "Posting..." : "Post Comment"}
-                  </button>
+                  <textarea value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Write a comment..." rows="4" className={styles.textarea} disabled={isSubmitting} />
+                  <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>{isSubmitting ? "Posting..." : "Post Comment"}</button>
                 </form>
               ) : (
                 <p className={styles.loginPrompt}>Please log in to share your thoughts.</p>
               )}
 
               <div className={styles.commentsList}>
-                {comments.length === 0 ? (
-                  <p>No comments yet. Be the first to comment!</p>
-                ) : (
-                  comments.map((comment) => {
-                    const commentUser = comment.user;
-                    const userIdString = commentUser?._id || commentUser; 
-                    const userNameString = commentUser?.name || "Anonymous";
-                    const initial = userNameString.charAt(0).toUpperCase();
-
-                    return (
-                      <div key={comment._id} className={styles.commentCard}>
-                        <div className={styles.commentHeader}>
-                         
-                          <div className={styles.commenterMeta}>
-                            <Link href={`/profile/${userIdString}`} className={styles.avatarLink}>
-                              <div className={styles.avatar}>
-                                {initial}
-                              </div>
-                            </Link>
-                            
-                            <Link href={`/profile/${userIdString}`} className={styles.commenterName}>
-                              @{userNameString}
-                            </Link>
-                          </div>
-                          
-                          <div className={styles.commentMeta}>
-                            <span className={styles.commentDate}>
-                              {new Date(comment.createdAt).toLocaleDateString()}
-                            </span>
-                            
-                            {session?.user?.id && (commentUser?._id === session.user.id || commentUser === session.user.id) && (
-                              <button 
-                                onClick={() => handleCommentDelete(comment._id)} 
-                                className={styles.deleteBtn}
-                                title="Delete comment"
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <p className={styles.commentText}>{comment.text}</p>
+                {comments.map((comment) => (
+                  <div key={comment._id} className={styles.commentCard}>
+                    <div className={styles.commentHeader}>
+                      <div className={styles.commenterMeta}>
+                        <Link href={`/profile/${comment.user?._id || comment.user}`} className={styles.avatarLink}>
+                          <div className={styles.avatar}>{comment.user?.name?.charAt(0).toUpperCase() || "A"}</div>
+                        </Link>
+                        <Link href={`/profile/${comment.user?._id || comment.user}`} className={styles.commenterName}>
+                          @{comment.user?.name || "Anonymous"}
+                        </Link>
                       </div>
-                    )
-                  })
-                )}
+                      <div className={styles.commentMeta}>
+                        <span className={styles.commentDate}>{new Date(comment.createdAt).toLocaleDateString()}</span>
+                        {session?.user?.id && (comment.user?._id === session.user.id || comment.user === session.user.id) && (
+                          <button onClick={() => handleCommentDelete(comment._id)} className={styles.deleteBtn}>✕</button>
+                        )}
+                      </div>
+                    </div>
+                    <p className={styles.commentText}>{comment.text}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </>
         ) : (
-          <Loading/>
+          <Loading />
         )}
       </div>
     </div>

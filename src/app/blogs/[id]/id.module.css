@@ -74,7 +74,26 @@
   opacity: 0.9;
 }
 
-/* Audio Narrator Card Privileges */
+.bookmarkBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(251, 228, 216, 0.2);
+  color: #dfb6b2;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
+.bookmarkBtn:hover {
+  background: rgba(223, 182, 178, 0.1);
+  border-color: #dfb6b2;
+  color: #fbe4d8;
+}
+
 .audioNarratorCard {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(251, 228, 216, 0.15);
@@ -372,43 +391,34 @@
   .container {
     padding: 80px 16px 20px 16px;
   }
-
   .wrapper {
     gap: 16px;
   }
-
   .title {
     font-size: 1.75rem;
   }
-
   .description {
     font-size: 1rem;
   }
-
   .audioNarratorCard {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
     padding: 14px;
   }
-
   .audioActionControls {
     width: 100%;
   }
-
   .audioBtnPrimary, .audioBtnSecondary {
     flex: 1;
     text-align: center;
   }
-
   .content {
     font-size: 1rem;
   }
-
   .commentsSection h3 {
     font-size: 1.25rem;
   }
-
   .submitBtn {
     width: 100%;
     align-self: stretch;
@@ -421,10 +431,13 @@
     align-items: stretch;
     gap: 12px;
   }
-
   .metaRight {
     padding-top: 0;
     align-self: flex-start;
+  }
+  .bookmarkBtn {
+    margin-right: 0;
+    padding: 8px 12px;
   }
 }
 
@@ -434,12 +447,10 @@
     align-items: flex-start;
     gap: 8px;
   }
-
   .commentMeta {
     width: 100%;
     justify-content: space-between;
   }
-
   .commentText {
     padding-left: 0;
     margin-top: 4px;

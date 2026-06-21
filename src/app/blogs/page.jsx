@@ -22,9 +22,11 @@ const Blogs = () => {
         }
         
         const json = await res.json()
-        if (json && Array.isArray(json)) {
-          setData(json)
-        }
+        
+        // Ensure we are working with an array
+        const postsArray = Array.isArray(json) ? json : (json.posts || []);
+        setData(postsArray)
+        
       } catch (err) {
         console.error(err)
         setError("Error loading posts. Please try again later.")
@@ -53,7 +55,7 @@ const Blogs = () => {
         <div className={styles.searchContainer}>
           <input
             type="text"
-            placeholder="Search posts by title, description, or author..."
+            placeholder="Search posts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}
@@ -66,64 +68,35 @@ const Blogs = () => {
             {error && <p className={styles.errorMessage}>{error}</p>}
             
             {!loading && !error && filteredPosts.length === 0 && (
-              <p className={styles.message}>No posts found matching "{searchQuery}"</p>
+              <p className={styles.message}>No posts found.</p>
             )}
 
             {!loading && !error && filteredPosts.map((item) => {
               const authorName = item.name || "Anonymous"
               const initial = authorName.charAt(0).toUpperCase()
-              
-              const profileId = item.userId && typeof item.userId === 'object' 
-                ? item.userId?._id 
-                : item.userId
+              const profileId = typeof item.userId === 'object' ? item.userId?._id : item.userId
 
               return (
-                <div key={item._id || Math.random().toString()} className={styles.post}>
+                <div key={item._id || Math.random()} className={styles.post}>
                   <div className={styles.postHeader}>
                     <div className={styles.authorMeta}>
-                      {profileId ? (
-                        <Link href={`/profile/${profileId}`} className={styles.avatarLink}>
-                          <div className={styles.avatar}>
-                            {initial}
-                          </div>
-                        </Link>
-                      ) : (
-                        <div className={styles.avatar}>
-                          {initial}
-                        </div>
-                      )}
-                      
+                      <div className={styles.avatar}>{initial}</div>
                       <div className={styles.authorBadgeWrapper}>
-                        {profileId ? (
-                          <Link href={`/profile/${profileId}`} className={styles.author}>
-                            pb/{authorName}
-                          </Link>
-                        ) : (
-                          <span className={styles.author}>pb/{authorName}</span>
-                        )}
-                        
-                        {item.isPremium && (
-                          <span className={styles.verifiedTick} title="Premium Creator">
-                            ✓
-                          </span>
-                        )}
+                        <span className={styles.author}>pb/{authorName}</span>
+                        {item.isPremium && <span className={styles.verifiedTick}>✓</span>}
                       </div>
                     </div>
-                    
                     {item.createdAt && (
                       <p className={styles.time}>
                         {(() => {
-                          try {
-                            return format(parseISO(item.createdAt), 'MM/dd/yyyy HH:mm')
-                          } catch (e) {
-                            return ""
-                          }
+                          try { return format(parseISO(item.createdAt), 'MM/dd/yyyy HH:mm') } 
+                          catch (e) { return "" }
                         })()}
                       </p>
                     )}
                   </div>
                   
-                  <Link href={`/blogs/${item._id}`} className={styles.postContentLink}>
+                  <Link href={`/blogs/${item._id || ''}`} className={styles.postContentLink}>
                     <h1>{item.title || "Untitled"}</h1>
                     <h3>{item.description || ""}</h3>
                   </Link>
@@ -136,7 +109,6 @@ const Blogs = () => {
             <h2>Get up-to-date with latest catchy posts</h2>
           </div>
         </div>
-
       </div>
     </div>
   )

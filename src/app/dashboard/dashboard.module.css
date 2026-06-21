@@ -6,7 +6,7 @@
   background-attachment: fixed;
   min-height: 100dvh;
   box-sizing: border-box;
-  padding: 80px 24px 24px 24px; 
+  padding: 80px 24px 24px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,13 +36,37 @@
   height: 100%;
 }
 
+.dashboardTabs {
+  display: flex;
+  gap: 10px;
+  padding: 20px 32px 0 32px;
+}
+
+.dashboardTabs button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.dashboardTabs button:hover, 
+.dashboardTabs button:focus {
+  background: #10b981;
+  color: #052e16;
+  border-color: #10b981;
+}
+
 .posts h1 {
   text-align: left;
-  color: #10b981; 
+  color: #10b981;
   font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  padding: 24px;
+  padding: 24px 32px;
   margin: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -54,25 +78,13 @@
   gap: 16px;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 24px;
+  padding: 24px 32px;
 }
 
-.scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-}
-
-.scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.3);
-}
+.scroll::-webkit-scrollbar { width: 6px; }
+.scroll::-webkit-scrollbar-track { background: transparent; }
+.scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 10px; }
+.scroll::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.3); }
 
 .post {
   padding: 20px;
@@ -81,42 +93,42 @@
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  will-change: transform, border-color, background-color;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 10px;
+  transition: all 0.2s ease;
 }
 
 .post:hover {
-  background-color: rgba(16, 185, 129, 0.02);
-  border-color: rgba(16, 185, 129, 0.2);
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
 
 .post h2 {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 500;
   color: #f1f5f9;
   margin: 0;
-  overflow-wrap: break-word;
-  line-height: 1.4;
 }
 
 .btn {
-  color: #ef4444; 
-  background: none;
-  border: none;
-  font-size: 0.85rem;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  max-width: fit-content;
-  padding: 4px 0;
-  letter-spacing: 0.01em;
-  transition: color 0.2s ease, opacity 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn:hover {
-  color: #f87171;
-  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.btn:nth-child(2):hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .form {
@@ -124,7 +136,7 @@
   flex-direction: column;
   padding: 32px;
   width: 45%;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.2);
   height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
@@ -135,7 +147,6 @@
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 24px 0;
-  letter-spacing: -0.01em;
 }
 
 .form form {
@@ -145,158 +156,45 @@
 }
 
 .input, .textarea {
-  padding: 14px 16px;
+  padding: 14px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   outline: none;
   color: #ffffff;
-  font-family: inherit;
   font-size: 0.95rem;
   background-color: rgba(255, 255, 255, 0.04);
-  will-change: border-color, box-shadow, background-color;
   transition: all 0.2s ease;
 }
 
-.input::placeholder, .textarea::placeholder {
-  color: rgba(255, 255, 255, 0.35);
-}
-
 .input:focus, .textarea:focus {
-  border-color: rgba(16, 185, 129, 0.4);
+  border-color: #10b981;
   background-color: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
-.textarea {
-  height: 180px;
-  resize: vertical;
-  min-height: 120px;
-  line-height: 1.5;
-}
+.textarea { height: 180px; resize: vertical; }
 
 .button {
-  padding: 14px;
+  padding: 12px;
   border-radius: 8px;
   border: none;
-  outline: none;
-  color: #052e16; 
+  color: #052e16;
   background-color: #10b981;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.01em;
-  will-change: transform, background-color, box-shadow;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 8px;
+  flex: 1;
 }
 
-.button:hover {
-  background-color: #059669;
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
-}
-
-.button:active {
-  transform: translateY(0);
-}
+.button:hover { background-color: #059669; }
 
 .nopost {
-  margin: auto;
-  color: rgba(255, 255, 255, 0.25);
-  font-style: italic;
+  margin-top: 40px;
+  color: rgba(255, 255, 255, 0.3);
   text-align: center;
-  font-size: 1rem;
-}
-
-.link {
-  margin-top: 32px;
 }
 
 @media screen and (max-width: 1024px) {
-  .container {
-    padding: 100px 16px 16px 16px;
-  }
-
-  .wrapper {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .form, .posts {
-    width: 100%;
-    height: auto;
-  }
-
-  .posts {
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  .scroll {
-    max-height: 400px;
-    padding: 20px;
-  }
-
-  .form {
-    padding: 28px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .container {
-    padding: 92px 12px 12px 12px;
-  }
-
-  .posts h1 {
-    font-size: 1.3rem;
-    padding: 18px 20px;
-  }
-
-  .scroll {
-    max-height: 350px;
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .input, .textarea {
-    font-size: 0.9rem;
-    padding: 12px;
-  }
-
-  .textarea {
-    height: 140px;
-  }
-
-  .form {
-    padding: 20px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .container {
-    padding: 84px 8px 8px 8px;
-  }
-
-  .wrapper {
-    border-radius: 12px;
-  }
-
-  .posts h1 {
-    font-size: 1.2rem;
-  }
-
-  .scroll {
-    max-height: 300px;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .form h1 {
-    font-size: 1.25rem;
-    margin-bottom: 18px;
-  }
-
-  .form form {
-    gap: 16px;
-  }
+  .container { padding: 100px 16px 16px 16px; }
+  .wrapper { flex-direction: column; height: auto; }
+  .form, .posts { width: 100%; height: auto; }
+  .scroll { max-height: 400px; }
 }

@@ -15,7 +15,8 @@ import MiniAvatar from "./components/MiniAvatar/MiniAvatar";
 async function getLatestPostsDirectly() {
   try {
     await connectMongoDb();
-    return await Post.find({})
+    // Filter out posts where status is "draft"
+    return await Post.find({ status: { $ne: "draft" } })
       .sort({ createdAt: -1 })
       .limit(4)
       .select("title description name")
