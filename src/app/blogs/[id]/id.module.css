@@ -44,6 +44,7 @@
   align-items: center;
   padding-top: 8px;
   flex-shrink: 0;
+  gap: 8px;
 }
 
 .authorTag {
@@ -74,7 +75,17 @@
   opacity: 0.9;
 }
 
-.bookmarkBtn {
+.postImage {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: block;
+}
+
+.bookmarkBtn, .likeBtn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(251, 228, 216, 0.2);
   color: #dfb6b2;
@@ -84,14 +95,26 @@
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-right: 12px;
   white-space: nowrap;
 }
 
-.bookmarkBtn:hover {
+.bookmarkBtn:hover, .likeBtn:hover {
   background: rgba(223, 182, 178, 0.1);
   border-color: #dfb6b2;
   color: #fbe4d8;
+}
+
+.liked {
+  background:transparent;
+  border: 1px solid #dfb6b2;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .audioNarratorCard {
@@ -435,7 +458,7 @@
     padding-top: 0;
     align-self: flex-start;
   }
-  .bookmarkBtn {
+  .bookmarkBtn, .likeBtn {
     margin-right: 0;
     padding: 8px 12px;
   }

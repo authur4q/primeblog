@@ -11,7 +11,7 @@ import MessageButton from '../../components/messageButton/page'
 const BlogPost = () => {
   const { data: session, status } = useSession()
   const { id } = useParams()
-  const [data, setData] = useState()
+  const [data, setData] = useState(null)
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [comments, setComments] = useState([])
   const [commentText, setCommentText] = useState("")
@@ -19,16 +19,20 @@ const BlogPost = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
 
-  useEffect(() => {
-    const getData = async () => {
-      const res = await fetch(`/api/posts/${id}`)
+  const getData = async () => {
+    try {
+      const res = await fetch(`/api/posts/${id}?t=${Date.now()}`)
       const json = await res.json()
       setData(json)
       if (session?.user?.id && json.bookmarkedBy) {
         setIsBookmarked(json.bookmarkedBy.includes(session.user.id))
       }
+    } catch (err) {
+      console.error("Failed to fetch post:", err)
     }
+  }
 
+  useEffect(() => {
     const getComments = async () => {
       const res = await fetch(`/api/comments?postId=${id}`)
       const json = await res.json()
@@ -39,7 +43,7 @@ const BlogPost = () => {
       getData()
       getComments()
     }
-  }, [id, session?.user?.id])
+  }, [id])
 
   useEffect(() => {
     return () => { window.speechSynthesis?.cancel() }
@@ -47,8 +51,41 @@ const BlogPost = () => {
 
   const toggleBookmark = async () => {
     const res = await fetch(`/api/posts/${id}/bookmarks`, { method: "PATCH" })
-    if (res.ok) {
-      setIsBookmarked(!isBookmarked)
+    if (res.ok) setIsBookmarked(!isBookmarked)
+  }
+
+  const handleLike = async () => {
+    if (!session?.user?.id || !data) return;
+
+    const previousLikes = Array.isArray(data.likes) ? data.likes : [];
+    const isCurrentlyLiked = previousLikes.includes(session.user.id);
+    
+    const updatedLikes = isCurrentlyLiked
+      ? previousLikes.filter((uid) => uid !== session.user.id)
+      : [...previousLikes, session.user.id];
+      
+    setData((prev) => ({ ...prev, likes: updatedLikes }));
+
+    try {
+      const res = await fetch("/api/posts/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          postId: id, 
+          userId: session.user.id, 
+          action: isCurrentlyLiked ? 'unlike' : 'like' 
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error("Update failed");
+
+      if (result && result.likes) {
+        setData((prev) => ({ ...prev, likes: Array.isArray(result.likes) ? result.likes : [] }));
+      }
+    } catch (err) {
+      console.error("Like action failed", err);
+      setData((prev) => ({ ...prev, likes: previousLikes }));
     }
   }
 
@@ -56,7 +93,7 @@ const BlogPost = () => {
     if (!data?.content) return
     const synth = window.speechSynthesis
     if (!isPlaying) {
-      const cleanText = data.content.replace(/```[\s\S]*?```/g, "[Code Fragment]")
+      const cleanText = data.content.replace(/```[\s\S]*?```/g, "[Code Fragment]");
       const utterance = new SpeechSynthesisUtterance(cleanText)
       utterance.onend = () => { setIsPlaying(false); setIsPaused(false) }
       setIsPlaying(true)
@@ -107,10 +144,21 @@ const BlogPost = () => {
               <div className={styles.metaLeft}>
                 <h1 className={styles.title}>{data.title}</h1>
                 <h2 className={styles.description}>{data.description}</h2>
+                {data.imageUrl && <img src={data.imageUrl} alt={data.title} className={styles.postImage} />}
                 <p className={styles.authorTag}>Published by: <strong>@{data.name || "Anonymous"}</strong></p>
               </div>
               
               <div className={styles.metaRight}>
+                {session?.user?.id && (
+                  <button 
+                    onClick={handleLike} 
+                    className={`${styles.likeBtn} ${data.likes?.includes(session.user.id) ? styles.liked : ""}`}
+                    disabled={!data}
+                  >
+                    {data.likes?.includes(session.user.id) ? "❤️ Liked" : "🤍 Like"} 
+                    <span> {data.likes?.length || 0}</span>
+                  </button>
+                )}
                 {session?.user?.id && (
                   <button onClick={toggleBookmark} className={styles.bookmarkBtn}>
                     {isBookmarked ? "★ Bookmarked" : "☆ Bookmark"}

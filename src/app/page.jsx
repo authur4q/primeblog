@@ -15,11 +15,11 @@ import MiniAvatar from "./components/MiniAvatar/MiniAvatar";
 async function getLatestPostsDirectly() {
   try {
     await connectMongoDb();
-    // Filter out posts where status is "draft"
+    // Added imageUrl to the select list
     return await Post.find({ status: { $ne: "draft" } })
       .sort({ createdAt: -1 })
       .limit(4)
-      .select("title description name")
+      .select("title description name imageUrl")
       .lean();
   } catch (error) {
     console.error("Error loading homepage posts safely:", error);
@@ -124,6 +124,9 @@ export default async function Home() {
           <div className={styles.grid}>
             {latestPosts.map((post) => (
               <div key={post._id.toString()} className={styles.homeCard}>
+                {post.imageUrl && (
+                  <img src={post.imageUrl} alt={post.title} className={styles.cardImage} />
+                )}
                 <div className={styles.cardHeader}>
                   <div className={styles.authorGroup}>
                     <MiniAvatar name={post.name} className={styles.miniAvatar} />

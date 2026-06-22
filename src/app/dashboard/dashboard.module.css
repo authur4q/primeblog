@@ -152,11 +152,11 @@
 .form form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .input, .textarea {
-  padding: 14px;
+  padding: 12px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   outline: none;
@@ -164,6 +164,7 @@
   font-size: 0.95rem;
   background-color: rgba(255, 255, 255, 0.04);
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 .input:focus, .textarea:focus {
@@ -171,7 +172,29 @@
   background-color: rgba(255, 255, 255, 0.07);
 }
 
-.textarea { height: 180px; resize: vertical; }
+.select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  outline: none;
+  color: #ffffff;
+  font-size: 0.95rem;
+  background-color: rgba(255, 255, 255, 0.04);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.select:focus {
+  border-color: #10b981;
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.selectOption {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.textarea { height: 140px; resize: vertical; }
 
 .button {
   padding: 12px;

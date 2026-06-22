@@ -5,6 +5,9 @@ import Navbar from '../components/navbar/navbar';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UploadButton } from "@uploadthing/react";
+
+const CATEGORY_OPTIONS = ["Sports", "Beauty", "Tech", "Lifestyle", "Finance", "Education"];
 
 const DashboardPage = () => {
     const router = useRouter();
@@ -12,7 +15,9 @@ const DashboardPage = () => {
     const userId = session?.user?.id;
 
     const [view, setView] = useState("published");
-    const [formData, setFormData] = useState({ title: "", description: "", content: "", id: "" });
+    const [formData, setFormData] = useState({ 
+        title: "", description: "", content: "", id: "", imageUrl: "", category: "", tags: "" 
+    });
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -49,7 +54,10 @@ const DashboardPage = () => {
             title: post.title,
             description: post.description,
             content: post.content,
-            id: post._id
+            id: post._id,
+            imageUrl: post.imageUrl || "",
+            category: post.category || "",
+            tags: post.tags ? post.tags.join(", ") : ""
         });
     };
 
@@ -58,14 +66,22 @@ const DashboardPage = () => {
         const postStatus = actionType === "save" ? "draft" : "published";
         const isEditing = !!formData.id;
         
+        const payload = { 
+            ...formData, 
+            tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+            userId, 
+            name: session?.user?.name, 
+            status: postStatus 
+        };
+
         const res = await fetch(isEditing ? `/api/posts/${formData.id}` : '/api/posts', {
             method: isEditing ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...formData, userId, name: session?.user?.name, status: postStatus })
+            body: JSON.stringify(payload)
         });
 
         if (res.ok) {
-            setFormData({ title: "", description: "", content: "", id: "" });
+            setFormData({ title: "", description: "", content: "", id: "", imageUrl: "", category: "", tags: "" });
             setView(postStatus);
             getData(); 
         }
@@ -94,10 +110,7 @@ const DashboardPage = () => {
                             <div key={item._id} className={styles.post}>
                                 <Link href={`/blogs/${item._id}`}><h2>{item.title}</h2></Link>
                                 <div style={{ display: 'flex', gap: '5px' }}>
-                            
-                                    {view === "draft" && (
-                                        <button className={styles.btn} onClick={() => handleEdit(item)}>Edit</button>
-                                    )}
+                                    {view === "draft" && <button className={styles.btn} onClick={() => handleEdit(item)}>Edit</button>}
                                     <button className={styles.btn} onClick={() => handleDelete(item._id)}>Delete</button>
                                 </div>
                             </div>
@@ -109,19 +122,34 @@ const DashboardPage = () => {
                     <div className={styles.form}>
                         <h1>{formData.id ? "Edit Post" : "Create Post"}</h1>
                         <form onSubmit={(e) => handleAction(e, view === "draft" ? "save" : "publish")}>
+                            <UploadButton
+                                endpoint="imageUploader"
+                               onClientUploadComplete={(res) => setFormData({ ...formData, imageUrl: res[0].ufsUrl })}
+                                onUploadError={(error) => alert(`Error: ${error.message}`)}
+                            />
+                            {formData.imageUrl && <img src={formData.imageUrl} alt="Preview" style={{width: '100px', borderRadius: '8px'}} />}
+                            
                             <input className={styles.input} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Title" required />
                             <input className={styles.input} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Description" required />
+                            
+                            <select 
+                                className={styles.select} 
+                                value={formData.category} 
+                                onChange={e => setFormData({...formData, category: e.target.value})} 
+                                required
+                            >
+                                <option className={styles.selectOption} value="" disabled>Select a Category</option>
+                                {CATEGORY_OPTIONS.map((cat) => (
+                                    <option className={styles.selectOption} key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+
+                            <input className={styles.input} value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} placeholder="Tags (comma separated)" />
                             <textarea className={styles.textarea} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} placeholder="Content" required></textarea>
                             
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <button className={styles.button} type='submit'>
-                                    {formData.id ? "Update" : (view === "draft" ? "Save Draft" : "Publish")}
-                                </button>
-                                {formData.id && (
-                                    <button type="button" className={styles.button} style={{background: '#475569'}} onClick={() => setFormData({ title: "", description: "", content: "", id: "" })}>
-                                        Cancel
-                                    </button>
-                                )}
+                                <button className={styles.button} type='submit'>{formData.id ? "Update" : (view === "draft" ? "Save Draft" : "Publish")}</button>
+                                {formData.id && <button type="button" className={styles.button} style={{background: '#475569'}} onClick={() => setFormData({ title: "", description: "", content: "", id: "", imageUrl: "", category: "", tags: "" })}>Cancel</button>}
                             </div>
                         </form>
                     </div>

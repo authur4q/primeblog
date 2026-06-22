@@ -157,11 +157,6 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
 }
 
-.button:active {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
 .feedShowcase {
   width: 100%;
   max-width: 1100px;
@@ -216,6 +211,14 @@
 .homeCard:hover {
   transform: translateY(-4px);
   border-color: #04c21e;
+}
+
+.cardImage {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 4px;
 }
 
 .cardHeader {
@@ -388,42 +391,20 @@
   .container {
     padding: 20px 16px 40px 16px;
   }
-  
   .hero {
     padding: 0;
     margin-top: 20px;
     margin-bottom: 24px;
   }
-
   .button {
     padding: 12px 24px;
     font-size: 1rem;
     max-width: 180px;
   }
-
-  .adWrapper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px;
-  }
-
-  .adActions {
-    align-items: flex-start;
-    width: 100%;
-  }
-
-  .adBtn {
-    width: 100%;
-    text-align: center;
-    box-sizing: border-box;
-  }
-
   .feedShowcase {
     padding: 0;
     margin-top: 40px;
   }
-
   .highlightsBar {
     margin: 40px auto;
     padding: 24px 16px;
@@ -441,11 +422,6 @@
   .container {
     padding: 20px 12px 40px 12px;
   }
-
-  .adSection {
-    padding: 0;
-  }
-
   .button {
     max-width: 160px;
   }

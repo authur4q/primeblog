@@ -10,23 +10,20 @@ const Blogs = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("All")
+
+ 
+  const commonCategories = ["All", "Sports", "Beauty", "Tech", "Lifestyle", "Finance", "Education"];
 
   useEffect(() => {
     const getData = async () => {
       try {
         setLoading(true)
         const res = await fetch("/api/posts")
-        
-        if (!res.ok) {
-          throw new Error("Failed to fetch posts")
-        }
-        
+        if (!res.ok) throw new Error("Failed to fetch posts")
         const json = await res.json()
-        
-        // Ensure we are working with an array
         const postsArray = Array.isArray(json) ? json : (json.posts || []);
         setData(postsArray)
-        
       } catch (err) {
         console.error(err)
         setError("Error loading posts. Please try again later.")
@@ -34,7 +31,6 @@ const Blogs = () => {
         setLoading(false)
       }
     }
-
     getData()
   }, [])
 
@@ -43,8 +39,9 @@ const Blogs = () => {
     const matchesTitle = item.title?.toLowerCase().includes(query) || false
     const matchesDesc = item.description?.toLowerCase().includes(query) || false
     const matchesAuthor = item.name?.toLowerCase().includes(query) || false
+    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory
     
-    return matchesTitle || matchesDesc || matchesAuthor
+    return (matchesTitle || matchesDesc || matchesAuthor) && matchesCategory
   })
 
   return (
@@ -52,7 +49,7 @@ const Blogs = () => {
       <Navbar />
       <div className={styles.wrapper}>
         
-        <div className={styles.searchContainer}>
+        <div className={styles.filterSection}>
           <input
             type="text"
             placeholder="Search posts..."
@@ -60,6 +57,17 @@ const Blogs = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}
           />
+          <div className={styles.categoryButtons}>
+            {commonCategories.map(cat => (
+              <button 
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={selectedCategory === cat ? styles.activeCat : styles.catBtn}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={styles.mainLayout}>
@@ -68,13 +76,12 @@ const Blogs = () => {
             {error && <p className={styles.errorMessage}>{error}</p>}
             
             {!loading && !error && filteredPosts.length === 0 && (
-              <p className={styles.message}>No posts found.</p>
+              <p className={styles.message}>No posts found in this category.</p>
             )}
 
             {!loading && !error && filteredPosts.map((item) => {
               const authorName = item.name || "Anonymous"
               const initial = authorName.charAt(0).toUpperCase()
-              const profileId = typeof item.userId === 'object' ? item.userId?._id : item.userId
 
               return (
                 <div key={item._id || Math.random()} className={styles.post}>
@@ -88,15 +95,17 @@ const Blogs = () => {
                     </div>
                     {item.createdAt && (
                       <p className={styles.time}>
-                        {(() => {
-                          try { return format(parseISO(item.createdAt), 'MM/dd/yyyy HH:mm') } 
-                          catch (e) { return "" }
-                        })()}
+                        {format(parseISO(item.createdAt), 'MM/dd/yyyy')}
                       </p>
                     )}
                   </div>
                   
                   <Link href={`/blogs/${item._id || ''}`} className={styles.postContentLink}>
+                    {item.imageUrl && (
+                      <div className={styles.imageWrapper}>
+                        <img src={item.imageUrl} alt={item.title} className={styles.postImage} />
+                      </div>
+                    )}
                     <h1>{item.title || "Untitled"}</h1>
                     <h3>{item.description || ""}</h3>
                   </Link>

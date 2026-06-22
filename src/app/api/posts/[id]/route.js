@@ -16,7 +16,7 @@ export const GET = async (req, { params }) => {
 export const PUT = async (req, { params }) => {
     const { id } = await params;
     try {
-        const { title, description, content, status } = await req.json();
+        const { title, description, content, status, imageUrl, tags, category } = await req.json();
         await connectMongoDb();
         
         await Post.findByIdAndUpdate(id, {
@@ -24,6 +24,9 @@ export const PUT = async (req, { params }) => {
             description,
             content,
             status,
+            imageUrl,
+            tags,
+            category,
             updatedAt: new Date()
         });
         

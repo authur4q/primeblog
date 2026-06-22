@@ -5,13 +5,20 @@ import User from "../../../../models/user";
 
 export const POST = async (req) => {
     try {
-        const { title, description, content, userId, name, status } = await req.json();
+        const { title, description, content, userId, name, status, imageUrl, tags, category } = await req.json();
         if (!title || !userId) return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
 
         await connectMongoDb();
         const user = await User.findById(userId);
         const post = {
-            title, description, content, userId, name,
+            title, 
+            description, 
+            content, 
+            userId, 
+            name,
+            imageUrl,
+            tags,
+            category,
             status: status || 'published',
             isPremium: user ? user.isPremium : false
         };
@@ -32,16 +39,13 @@ export const GET = async (req) => {
         
         let query = {};
         
-        
         if (userId) {
             query.userId = userId;
         }
         
-       
         if (status === "draft") {
             query.status = "draft";
         } else {
-            
             query.status = "published";
         }
 
