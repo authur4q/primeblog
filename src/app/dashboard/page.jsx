@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import styles from "./dashboard.module.css";
 import Navbar from '../components/navbar/navbar';
 import { useSession } from 'next-auth/react';
@@ -13,6 +13,7 @@ const DashboardPage = () => {
     const router = useRouter();
     const { data: session, status } = useSession();
     const userId = session?.user?.id;
+    const abortControllerRef = useRef(null);
 
     const [view, setView] = useState("published");
     const [formData, setFormData] = useState({ 
@@ -27,19 +28,21 @@ const DashboardPage = () => {
 
     const getData = useCallback(async () => {
         if (!userId) return;
+        
+        if (abortControllerRef.current) abortControllerRef.current.abort();
+        abortControllerRef.current = new AbortController();
+        
         setLoading(true);
         try {
             const endpoint = view === "bookmarks" 
                 ? `/api/posts/bookmarks?userId=${userId}` 
                 : `/api/posts?userId=${userId}&status=${view}`;
             
-            const res = await fetch(endpoint);
+            const res = await fetch(endpoint, { signal: abortControllerRef.current.signal });
             const json = await res.json();
-            const result = Array.isArray(json) ? json : (json.posts || json.data || []);
-            setData(result);
+            setData(Array.isArray(json) ? json : (json.posts || []));
         } catch (err) {
-            console.error('Error fetching posts:', err);
-            setData([]);
+            if (err.name !== 'AbortError') console.error('Error fetching posts:', err);
         } finally {
             setLoading(false);
         }
@@ -47,23 +50,12 @@ const DashboardPage = () => {
 
     useEffect(() => {
         getData();
+        return () => abortControllerRef.current?.abort();
     }, [getData]);
 
-    const handleEdit = (post) => {
-        setFormData({
-            title: post.title,
-            description: post.description,
-            content: post.content,
-            id: post._id,
-            imageUrl: post.imageUrl || "",
-            category: post.category || "",
-            tags: post.tags ? post.tags.join(", ") : ""
-        });
-    };
-
-    const handleAction = async (e, actionType) => {
+    const handleAction = async (e) => {
         e.preventDefault();
-        const postStatus = actionType === "save" ? "draft" : "published";
+        const postStatus = view === "draft" ? "draft" : "published";
         const isEditing = !!formData.id;
         
         const payload = { 
@@ -82,14 +74,15 @@ const DashboardPage = () => {
 
         if (res.ok) {
             setFormData({ title: "", description: "", content: "", id: "", imageUrl: "", category: "", tags: "" });
-            setView(postStatus);
             getData(); 
         }
     };
 
     const handleDelete = async (postId) => {
+        const previousData = [...data];
+        setData(prev => prev.filter(p => p._id !== postId));
         const res = await fetch(`/api/posts/${postId}`, { method: "DELETE" });
-        if (res.ok) getData(); 
+        if (!res.ok) setData(previousData);
     };
 
     if (status === "loading") return <div className={styles.container}>Loading Session...</div>;
@@ -100,9 +93,11 @@ const DashboardPage = () => {
             <div className={styles.wrapper}>
                 <div className={styles.posts}>
                     <div className={styles.dashboardTabs}>
-                        <button onClick={() => setView("published")}>Posts</button>
-                        <button onClick={() => setView("draft")}>Drafts</button>
-                        <button onClick={() => setView("bookmarks")}>Bookmarks</button>
+                        {["published", "draft", "bookmarks"].map(tab => (
+                            <button key={tab} onClick={() => setView(tab)} className={view === tab ? styles.active : ""}>
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            </button>
+                        ))}
                     </div>
                     <h1>{view.toUpperCase()}</h1>
                     <div className={styles.scroll}>
@@ -110,7 +105,7 @@ const DashboardPage = () => {
                             <div key={item._id} className={styles.post}>
                                 <Link href={`/blogs/${item._id}`}><h2>{item.title}</h2></Link>
                                 <div style={{ display: 'flex', gap: '5px' }}>
-                                    {view === "draft" && <button className={styles.btn} onClick={() => handleEdit(item)}>Edit</button>}
+                                    {view === "draft" && <button className={styles.btn} onClick={() => setFormData({...item, tags: item.tags?.join(", ")})}>Edit</button>}
                                     <button className={styles.btn} onClick={() => handleDelete(item._id)}>Delete</button>
                                 </div>
                             </div>
@@ -121,10 +116,10 @@ const DashboardPage = () => {
                 {view !== "bookmarks" && (
                     <div className={styles.form}>
                         <h1>{formData.id ? "Edit Post" : "Create Post"}</h1>
-                        <form onSubmit={(e) => handleAction(e, view === "draft" ? "save" : "publish")}>
+                        <form onSubmit={handleAction}>
                             <UploadButton
                                 endpoint="imageUploader"
-                               onClientUploadComplete={(res) => setFormData({ ...formData, imageUrl: res[0].ufsUrl })}
+                                onClientUploadComplete={(res) => setFormData({ ...formData, imageUrl: res[0].ufsUrl })}
                                 onUploadError={(error) => alert(`Error: ${error.message}`)}
                             />
                             {formData.imageUrl && <img src={formData.imageUrl} alt="Preview" style={{width: '100px', borderRadius: '8px'}} />}
@@ -132,16 +127,9 @@ const DashboardPage = () => {
                             <input className={styles.input} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="Title" required />
                             <input className={styles.input} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Description" required />
                             
-                            <select 
-                                className={styles.select} 
-                                value={formData.category} 
-                                onChange={e => setFormData({...formData, category: e.target.value})} 
-                                required
-                            >
-                                <option className={styles.selectOption} value="" disabled>Select a Category</option>
-                                {CATEGORY_OPTIONS.map((cat) => (
-                                    <option className={styles.selectOption} key={cat} value={cat}>{cat}</option>
-                                ))}
+                            <select className={styles.select} value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
+                                <option value="" disabled className={styles.selectOption} >Select a Category</option>
+                                {CATEGORY_OPTIONS.map((cat) => <option key={cat} value={cat} className={styles.selectOption}>{cat}</option>)}
                             </select>
 
                             <input className={styles.input} value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} placeholder="Tags (comma separated)" />

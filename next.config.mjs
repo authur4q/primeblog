@@ -9,7 +9,19 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: {}
+  turbopack: {},
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'nw0bpfp3qs.ufs.sh',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ufs.sh',
+      },
+    ],
+  },
 };
 
 export default withPWA(nextConfig);

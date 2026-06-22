@@ -1,54 +1,51 @@
-"use client"
-import React, { useEffect, useState } from 'react'
-import Navbar from '../components/navbar/navbar'
-import styles from "./blogs.module.css"
-import Link from 'next/link'
-import { format, parseISO } from 'date-fns'
+"use client";
+import React, { useEffect, useState } from 'react';
+import { Virtuoso } from 'react-virtuoso'; 
+import Navbar from '../components/navbar/navbar';
+import styles from "./blogs.module.css";
+import Link from 'next/link';
+import Image from 'next/image'; 
+import { format, parseISO } from 'date-fns';
 
 const Blogs = () => {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
- 
   const commonCategories = ["All", "Sports", "Beauty", "Tech", "Lifestyle", "Finance", "Education"];
 
   useEffect(() => {
     const getData = async () => {
       try {
-        setLoading(true)
-        const res = await fetch("/api/posts")
-        if (!res.ok) throw new Error("Failed to fetch posts")
-        const json = await res.json()
+        setLoading(true);
+        const res = await fetch("/api/posts");
+        if (!res.ok) throw new Error("Failed to fetch posts");
+        const json = await res.json();
         const postsArray = Array.isArray(json) ? json : (json.posts || []);
-        setData(postsArray)
+        setData(postsArray);
       } catch (err) {
-        console.error(err)
-        setError("Error loading posts. Please try again later.")
+        setError("Error loading posts.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    getData()
-  }, [])
+    };
+    getData();
+  }, []);
 
   const filteredPosts = data.filter((item) => {
-    const query = searchQuery.toLowerCase()
-    const matchesTitle = item.title?.toLowerCase().includes(query) || false
-    const matchesDesc = item.description?.toLowerCase().includes(query) || false
-    const matchesAuthor = item.name?.toLowerCase().includes(query) || false
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory
-    
-    return (matchesTitle || matchesDesc || matchesAuthor) && matchesCategory
-  })
+    const query = searchQuery.toLowerCase();
+    return (
+      (item.title?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query) || item.name?.toLowerCase().includes(query)) &&
+      (selectedCategory === "All" || item.category === selectedCategory)
+    );
+  });
 
   return (
     <div className={styles.container}>
       <Navbar />
       <div className={styles.wrapper}>
-        
         <div className={styles.filterSection}>
           <input
             type="text"
@@ -59,11 +56,7 @@ const Blogs = () => {
           />
           <div className={styles.categoryButtons}>
             {commonCategories.map(cat => (
-              <button 
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={selectedCategory === cat ? styles.activeCat : styles.catBtn}
-              >
+              <button key={cat} onClick={() => setSelectedCategory(cat)} className={selectedCategory === cat ? styles.activeCat : styles.catBtn}>
                 {cat}
               </button>
             ))}
@@ -71,56 +64,50 @@ const Blogs = () => {
         </div>
 
         <div className={styles.mainLayout}>
-          <div className={styles.posts}>
+          <div className={styles.posts} style={{ height: '70vh' }}> 
             {loading && <p className={styles.message}>Loading posts...</p>}
-            {error && <p className={styles.errorMessage}>{error}</p>}
             
-            {!loading && !error && filteredPosts.length === 0 && (
-              <p className={styles.message}>No posts found in this category.</p>
-            )}
-
-            {!loading && !error && filteredPosts.map((item) => {
-              const authorName = item.name || "Anonymous"
-              const initial = authorName.charAt(0).toUpperCase()
-
-              return (
-                <div key={item._id || Math.random()} className={styles.post}>
-                  <div className={styles.postHeader}>
-                    <div className={styles.authorMeta}>
-                      <div className={styles.avatar}>{initial}</div>
-                      <div className={styles.authorBadgeWrapper}>
-                        <span className={styles.author}>pb/{authorName}</span>
-                        {item.isPremium && <span className={styles.verifiedTick}>✓</span>}
+            {!loading && !error && (
+              <Virtuoso
+                totalCount={filteredPosts.length}
+                itemContent={(index) => {
+                  const item = filteredPosts[index];
+                  const authorName = item.name || "Anonymous";
+                  return (
+                    <div key={item._id} className={styles.post}>
+                      <div className={styles.postHeader}>
+                        <div className={styles.authorMeta}>
+                          <div className={styles.avatar}>{authorName.charAt(0).toUpperCase()}</div>
+                          <span className={styles.author}>pb/{authorName}</span>
+                        </div>
+                        {item.createdAt && <p className={styles.time}>{format(parseISO(item.createdAt), 'MM/dd/yyyy')}</p>}
                       </div>
+                      
+                      <Link href={`/blogs/${item._id || ''}`} className={styles.postContentLink}>
+                        {item.imageUrl && (
+                          <div className={styles.imageWrapper} style={{ position: 'relative', height: '200px' }}>
+                            <Image 
+                              src={item.imageUrl} 
+                              alt={item.title} 
+                              fill 
+                              style={{ objectFit: 'cover' }} 
+                              loading="lazy" 
+                            />
+                          </div>
+                        )}
+                        <h1>{item.title}</h1>
+                        <h3>{item.description}</h3>
+                      </Link>
                     </div>
-                    {item.createdAt && (
-                      <p className={styles.time}>
-                        {format(parseISO(item.createdAt), 'MM/dd/yyyy')}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <Link href={`/blogs/${item._id || ''}`} className={styles.postContentLink}>
-                    {item.imageUrl && (
-                      <div className={styles.imageWrapper}>
-                        <img src={item.imageUrl} alt={item.title} className={styles.postImage} />
-                      </div>
-                    )}
-                    <h1>{item.title || "Untitled"}</h1>
-                    <h3>{item.description || ""}</h3>
-                  </Link>
-                </div>
-              )
-            })}
-          </div>
-          
-          <div className={styles.text}>
-            <h2>Get up-to-date with latest catchy posts</h2>
+                  );
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Blogs
+export default Blogs;

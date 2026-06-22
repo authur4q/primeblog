@@ -1,6 +1,7 @@
 import styles from "./page.module.css";
 import Navbar from "./components/navbar/navbar";
 import Link from "next/link";
+import Image from "next/image"; 
 import { auth } from "./api/auth/[...nextauth]/options";
 import mongoose from "mongoose";
 
@@ -15,7 +16,6 @@ import MiniAvatar from "./components/MiniAvatar/MiniAvatar";
 async function getLatestPostsDirectly() {
   try {
     await connectMongoDb();
-    // Added imageUrl to the select list
     return await Post.find({ status: { $ne: "draft" } })
       .sort({ createdAt: -1 })
       .limit(4)
@@ -125,7 +125,17 @@ export default async function Home() {
             {latestPosts.map((post) => (
               <div key={post._id.toString()} className={styles.homeCard}>
                 {post.imageUrl && (
-                  <img src={post.imageUrl} alt={post.title} className={styles.cardImage} />
+                  <div style={{ position: 'relative', width: '100%', height: '200px' }}>
+                    <Image 
+                      src={post.imageUrl} 
+                      alt={post.title} 
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      className={styles.cardImage} 
+                      sizes="(max-width: 768px) 100vw, 400px"
+                      loading="lazy"
+                    />
+                  </div>
                 )}
                 <div className={styles.cardHeader}>
                   <div className={styles.authorGroup}>
