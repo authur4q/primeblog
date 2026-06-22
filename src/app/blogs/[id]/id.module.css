@@ -315,6 +315,14 @@
   justify-content: center;
   box-shadow: 0 0 10px rgba(223, 182, 178, 0.15);
 }
+.avatarLink {
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+
+}
 
 .commentText {
   margin: 0;

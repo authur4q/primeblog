@@ -174,7 +174,8 @@ const BlogPost = () => {
                   <div key={comment._id} className={styles.commentCard}>
                     <div className={styles.commentHeader}>
                       <Link href={`/profile/${comment.user?._id || comment.user}`} className={styles.avatarLink}>
-                        <div className={styles.avatar}>{comment.user?.name?.charAt(0).toUpperCase() || "A"}</div>
+                        <div className={styles.avatar}>{comment.user?.name?.charAt(0).toUpperCase() || "A"} </div>
+                        <div className={styles.avatarName}>{comment.user?.name || "User"} </div>
                       </Link>
                       {session?.user?.id && (comment.user?._id === session.user.id || comment.user === session.user.id) && (
                         <button onClick={() => handleCommentDelete(comment._id)} className={styles.deleteBtn}>✕</button>
