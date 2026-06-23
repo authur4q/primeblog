@@ -43,7 +43,7 @@ function SearchResults() {
               border: '1px solid #222' 
             }}
           >
-            <Link href={`/blog/${post._id}`} style={{ textDecoration: 'none', color: '#fff' }}>
+            <Link href={`/blogs/${post._id}`} style={{ textDecoration: 'none', color: '#fff' }}>
               <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.4rem' }}>{post.title}</h3>
             </Link>
             <p style={{ color: '#aaa', margin: 0, lineHeight: '1.6' }}>{post.description}</p>
@@ -62,9 +62,9 @@ export default function SearchPage() {
     <div style={{ minHeight: '100vh', padding: '2rem', backgroundColor: '#000', color: '#fff', fontFamily: 'sans-serif' }}>
       <Navbar />
       <div style={{ maxWidth: '800px', margin: '2rem auto' }}>
-        <h1 style={{ fontSize: '1.8rem', marginBottom: '2rem', borderLeft: '4px solid #6366f1', paddingLeft: '1rem' }}>
+        <h2 style={{ fontSize: '1.8rem', marginBottom: '2rem', borderLeft: '4px solid #6366f1', paddingLeft: '1rem' }}>
           Search Results
-        </h1>
+        </h2>
         <Suspense fallback={<Loading />}>
           <SearchResults />
         </Suspense>
