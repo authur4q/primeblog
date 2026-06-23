@@ -21,6 +21,23 @@ const BlogPost = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
+  const formatContent = (text) => {
+    if (!text) return null;
+    return text.split('\n').map((line, index) => {
+      const parts = line.split(/(\*\*.*?\*\*|\*.*?\*|#\w+)/g);
+      return (
+        <p key={index} style={{ marginBottom: '1rem' }}>
+          {parts.map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) return <strong key={i}>{part.slice(2, -2)}</strong>;
+            if (part.startsWith('*') && part.endsWith('*')) return <em key={i}>{part.slice(1, -1)}</em>;
+            if (part.startsWith('#')) return <Link key={i} href={`/search?q=${part.slice(1)}`} style={{ color: '#6366f1', textDecoration: 'none' }}>{part}</Link>;
+            return part;
+          })}
+        </p>
+      );
+    });
+  };
+
   const getData = useCallback(async () => {
     if (!id) return;
     try {
@@ -163,7 +180,7 @@ const BlogPost = () => {
               </div>
             )}
 
-            <p className={styles.content}>{data.content}</p>
+            <div className={styles.content}>{formatContent(data.content)}</div>
             <hr className={styles.divider} />
             <div className={styles.commentsSection}>
               <h3>{comments.length} Comments</h3>
