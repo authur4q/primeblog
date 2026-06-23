@@ -4,21 +4,21 @@ import Link from 'next/link';
 import styles from './navbar.module.css';
 import notifStyles from './notification.module.css';
 import { signOut, useSession } from 'next-auth/react';
+import { Home, BookOpen, Crown, MessageSquare, Bell, Menu, Plus, LayoutDashboard, User, ShieldCheck, LogOut } from 'lucide-react';
 
 const publicLinks = [
-  { href: '/', label: 'Home', id: 1 },
-  { href: '/blogs', label: 'Blogs', id: 2 },
-  { href: '/premium', label: 'Premium', id: 3 },
-  { href: '/chat', label: 'Chat', id: 4 }
+  { href: '/', label: 'Home', icon: <Home size={20} />, id: 1 },
+  { href: '/blogs', label: 'Blogs', icon: <BookOpen size={20} />, id: 2 },
+  { href: '/premium', label: 'Pro', icon: <Crown size={20} />, id: 3 },
+  { href: '/chat', label: 'Chat', icon: <MessageSquare size={20} />, id: 4 }
 ];
 
-const Navbar = () => {
+const Navbar = ({ showFab = false }) => {
   const { data: session, status } = useSession();
-  const userId = session?.user?.id;
-  const [isOpen, setIsOpen] = useState(false);
-  
   const [notifications, setNotifications] = useState([]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
 
   const fetchNotifications = async () => {
     try {
@@ -27,113 +27,89 @@ const Navbar = () => {
         const data = await res.json();
         setNotifications(data);
       }
-    } catch (err) {
-      console.error("Error reading notification stream:", err);
-    }
+    } catch (err) { console.error("Error reading notifications:", err); }
   };
 
   useEffect(() => {
     if (status === "authenticated") {
       fetchNotifications();
-      const pollInterval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(pollInterval);
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
     }
   }, [status]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const handleToggleNotifications = async () => {
-    setIsNotifOpen(!isNotifOpen);
-    setIsOpen(false);
-
-    if (!isNotifOpen && unreadCount > 0) {
-      const originalFeed = [...notifications];
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-
-      try {
-        const res = await fetch("/api/notifications", { method: "PATCH" });
-        if (!res.ok) throw new Error("Could not update notification state");
-      } catch (err) {
-        setNotifications(originalFeed);
-        console.error(err.message);
-      }
-    }
-  };
-
   return (
-    <div className={styles.navbar}>
-      <div className={styles.logo}>
-        <h1><Link href="/">Prime</Link></h1>
-      </div>
+    <>
+      <header className={styles.navbar}>
+        <div className={styles.logo}><Link href="/">Prime</Link></div>
 
-      <div className={styles.navRight}>
-        {status === "authenticated" && (
-          <div className={notifStyles.notificationWrapper}>
-            <button 
-              onClick={handleToggleNotifications} 
-              className={notifStyles.notifButton}
-              aria-label="Toggle notifications"
-            >
-              🔔 {unreadCount > 0 && <span className={notifStyles.badge}>{unreadCount}</span>}
-            </button>
+        <nav className={styles.headerLinks}>
+          {publicLinks.map(link => (
+            <Link href={link.href} key={link.id} className={styles.navItem}>
+              {link.icon} <span>{link.label}</span>
+            </Link>
+          ))}
+        </nav>
 
-            {isNotifOpen && (
-              <div className={notifStyles.notifDropdown}>
-                <div className={notifStyles.notifHeader}><h4>Notifications</h4></div>
-                <div className={notifStyles.notifList}>
-                  {notifications.length === 0 ? (
-                    <p className={notifStyles.emptyText}>No recent notifications.</p>
-                  ) : (
-                    notifications.map((item) => (
-                      <Link 
-                        key={item._id} 
-                        href={item.chatId ? `/chat/${item.chatId}` : (item.link || '/chat')}
-                        className={`${notifStyles.notifItem} ${!item.read ? notifStyles.unreadItem : ""}`}
-                        onClick={() => setIsNotifOpen(false)}
-                      >
-                        <div className={notifStyles.notifSenderRow}>
-                          <span className={notifStyles.senderName}>{item.sender?.name || "System"}</span>
-                          {item.sender?.isPremium && <span className={notifStyles.proBadge}>PRO</span>}
-                        </div>
-                        <h5 className={notifStyles.notifTitle}>{item.title}</h5>
-                        <p>{item.message}</p>
-                        <span className={notifStyles.timestamp}>
-                          {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </Link>
-                    ))
-                  )}
-                </div>
+        <div className={styles.navRight}>
+          {status === "authenticated" && (
+            <>
+            
+              <div className={notifStyles.notificationWrapper}>
+                <button onClick={() => setIsNotifOpen(!isNotifOpen)} className={notifStyles.notifButton}>
+                  <Bell size={24} />
+                  {unreadCount > 0 && <span className={notifStyles.badge}>{unreadCount}</span>}
+                </button>
+                {isNotifOpen && (
+                  <div className={notifStyles.notifDropdown}>
+                    <div className={notifStyles.notifHeader}><h4>Notifications</h4></div>
+                    <div className={notifStyles.notifList}>
+                      {notifications.length === 0 ? <p className={notifStyles.emptyText}>No notifications.</p> :
+                        notifications.map(item => (
+                          <Link key={item._id} href={item.link || '/chat'} className={notifStyles.notifItem} onClick={() => setIsNotifOpen(false)}>
+                            <h5>{item.title}</h5>
+                            <p>{item.message}</p>
+                          </Link>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
 
-        <button 
-          className={`${styles.toggle} ${isOpen ? styles.toggleActive : ''}`}
-          onClick={() => { setIsOpen(!isOpen); setIsNotifOpen(false); }}
-        >
-          <span className={styles.bar}></span>
-          <span className={styles.bar}></span>
-          <span className={styles.bar}></span>
-        </button>
-      </div>
+             
+              <div className={styles.userMenuWrapper}>
+                <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className={styles.userTrigger}>
+                  <User size={24} />
+                </button>
+                {isUserMenuOpen && (
+                  <div className={styles.userDropdown}>
+                    {session?.user?.role === "admin" && <Link href="/admin">Admin <ShieldCheck size={16} /></Link>}
+                    <Link href="/dashboard">Dashboard <LayoutDashboard size={16} /></Link>
+                    <Link href={`/profile/${session?.user?.id}`}>Profile <User size={16} /></Link>
+                    <button onClick={() => signOut()}>Logout <LogOut size={16} /></button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+     
+        </div>
+      </header>
 
-      <div className={`${styles.links} ${isOpen ? styles.linksActive : ''}`}>
+      <nav className={styles.bottomNav}>
         {publicLinks.map(link => (
-          <Link href={link.href} key={link.id} onClick={() => setIsOpen(false)}>{link.label}</Link>
+          <Link href={link.href} key={link.id}>{link.icon}</Link>
         ))}
-        {status === "authenticated" && (
-          <>
-            {session?.user?.role === "admin" && <Link href="/admin" onClick={() => setIsOpen(false)}>Admin</Link>}
-            <Link href="/dashboard" onClick={() => setIsOpen(false)}>Dashboard</Link>
-            <Link href={`/profile/${userId}`} onClick={() => setIsOpen(false)}>My Profile</Link>
-            <button className={styles.btn} onClick={() => { setIsOpen(false); signOut({ callbackUrl: '/login' }); }}>Logout</button>
-          </>
-        )}
-        {status === "unauthenticated" && <Link href="/login" onClick={() => setIsOpen(false)}>Login</Link>}
-      </div>
-    </div>
+      </nav>
+
+      {showFab && (
+        <button className={styles.fab}>
+          <Plus size={32} />
+        </button>
+      )}
+    </>
   );
 };
 

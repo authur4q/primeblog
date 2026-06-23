@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image"; 
 import { auth } from "./api/auth/[...nextauth]/options";
 import mongoose from "mongoose";
+import { Plus } from 'lucide-react'
 
 import User from "../../models/user";
 import Post from "../../models/post"; 
@@ -101,15 +102,7 @@ export default async function Home() {
         <UserSearch />
         <UserCarousel />
 
-        {session ? (
-          <Link href="/dashboard">
-            <button className={styles.button}>Go to Dashboard</button>
-          </Link>
-        ) : (
-          <Link href="/register">
-            <button className={styles.button}>Get started</button>
-          </Link>
-        )}  
+
       </div>
 
       {!isPremium && <RotatingAd initialAd={activeAd} />}
@@ -191,6 +184,9 @@ export default async function Home() {
           </div>
         </div>
       </footer>
+            <Link href="/dashboard" className={styles.fab}>
+        <Plus size={32} />
+      </Link>
     </div>
   );
 }

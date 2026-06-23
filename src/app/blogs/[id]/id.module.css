@@ -100,26 +100,25 @@
 }
 
 .bookmarkBtn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(251, 228, 216, 0.2);
-  color: #dfb6b2;
+ background: transparent;
   padding: 8px 16px;
-  border-radius: 6px;
+ border:none;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .likeBtn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(251, 228, 216, 0.2);
-  color: #dfb6b2;
+
+
+ border: none;
+ background: transparent;
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -143,8 +142,8 @@
 }
 
 .audioNarratorCard {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(251, 228, 216, 0.15);
+  background: rgba(245, 172, 172, 0.815);
+  
   border-radius: 8px;
   padding: 14px 18px;
   margin: 10px 0;
@@ -166,13 +165,13 @@
 .audioTitle {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #ffffffe8;
   margin: 0;
 }
 
 .audioStatus {
   font-size: 0.8rem;
-  color: rgba(251, 228, 216, 0.6);
+  color: rgba(255, 255, 255, 0.76);
   margin: 2px 0 0 0;
 }
 

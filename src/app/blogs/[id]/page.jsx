@@ -8,6 +8,7 @@ import Loading from '@/app/components/loading/page';
 import Link from 'next/link';
 import Image from 'next/image';
 import MessageButton from '../../components/messageButton/page';
+import { Heart, Bookmark, Volume2, Play, Pause } from 'lucide-react';
 
 const BlogPost = () => {
   const { data: session, status } = useSession();
@@ -131,12 +132,13 @@ const BlogPost = () => {
               <div className={styles.metaRight}>
                 {session?.user?.id && (
                   <button onClick={handleLike} className={`${styles.likeBtn} ${data.likes?.includes(session.user.id) ? styles.liked : ""}`}>
-                    {data.likes?.includes(session.user.id) ? "❤️" : "🤍"} {data.likes?.length || 0}
+                    <Heart size={20} fill={data.likes?.includes(session.user.id) ? "currentColor" : "none"} />
+                    <span>{data.likes?.length || 0}</span>
                   </button>
                 )}
                 {session?.user?.id && (
                   <button onClick={toggleBookmark} className={styles.bookmarkBtn}>
-                    {isBookmarked ? "★" : "☆"}
+                    <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
                   </button>
                 )}
                 {session?.user?.id && data.userId && session.user.id !== data.userId && (
@@ -148,13 +150,16 @@ const BlogPost = () => {
             {session?.user?.isPremium && (
               <div className={styles.audioNarratorCard}>
                 <div className={styles.audioMeta}>
-                  <span>🔊</span>
+                  <Volume2 size={20} />
                   <div>
                     <h4 className={styles.audioTitle}>Prime Voice Narrator</h4>
                     <p className={styles.audioStatus}>{isPlaying ? (isPaused ? "Paused" : "Speaking...") : "Listen hands-free"}</p>
                   </div>
                 </div>
-                <button onClick={handleSpeechControl} className={styles.audioBtnPrimary}>{isPlaying ? (isPaused ? "Resume" : "Pause") : "Play Audio"}</button>
+                <button onClick={handleSpeechControl} className={styles.audioBtnPrimary}>
+                  {isPlaying ? (isPaused ? <Play size={16} /> : <Pause size={16} />) : <Play size={16} />}
+                  {isPlaying ? (isPaused ? " Resume" : " Pause") : " Play Audio"}
+                </button>
               </div>
             )}
 

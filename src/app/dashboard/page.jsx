@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UploadButton } from "@uploadthing/react";
+import { Bold, Italic, Heading1 } from 'lucide-react';
 
 const CATEGORY_OPTIONS = ["Sports", "Beauty", "Tech", "Lifestyle", "Finance", "Education"];
 
@@ -14,6 +15,7 @@ const DashboardPage = () => {
     const { data: session, status } = useSession();
     const userId = session?.user?.id;
     const abortControllerRef = useRef(null);
+    const textareaRef = useRef(null);
 
     const [view, setView] = useState("published");
     const [formData, setFormData] = useState({ 
@@ -28,16 +30,13 @@ const DashboardPage = () => {
 
     const getData = useCallback(async () => {
         if (!userId) return;
-        
         if (abortControllerRef.current) abortControllerRef.current.abort();
         abortControllerRef.current = new AbortController();
-        
         setLoading(true);
         try {
             const endpoint = view === "bookmarks" 
                 ? `/api/posts/bookmarks?userId=${userId}` 
                 : `/api/posts?userId=${userId}&status=${view}`;
-            
             const res = await fetch(endpoint, { signal: abortControllerRef.current.signal });
             const json = await res.json();
             setData(Array.isArray(json) ? json : (json.posts || []));
@@ -53,11 +52,25 @@ const DashboardPage = () => {
         return () => abortControllerRef.current?.abort();
     }, [getData]);
 
+    const handleInsert = (prefix, suffix) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = formData.content;
+        const selectedText = text.substring(start, end);
+        const newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
+        setFormData({...formData, content: newText});
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+        }, 0);
+    };
+
     const handleAction = async (e) => {
         e.preventDefault();
         const postStatus = view === "draft" ? "draft" : "published";
         const isEditing = !!formData.id;
-        
         const payload = { 
             ...formData, 
             tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
@@ -65,13 +78,11 @@ const DashboardPage = () => {
             name: session?.user?.name, 
             status: postStatus 
         };
-
         const res = await fetch(isEditing ? `/api/posts/${formData.id}` : '/api/posts', {
             method: isEditing ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
         if (res.ok) {
             setFormData({ title: "", description: "", content: "", id: "", imageUrl: "", category: "", tags: "" });
             getData(); 
@@ -133,7 +144,14 @@ const DashboardPage = () => {
                             </select>
 
                             <input className={styles.input} value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} placeholder="Tags (comma separated)" />
-                            <textarea className={styles.textarea} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} placeholder="Content" required></textarea>
+                            
+                            <div className={styles.toolbar}>
+                                <button type="button" className={styles.btn} onClick={() => handleInsert("**", "**")}><Bold size={16} /></button>
+                                <button type="button" className={styles.btn} onClick={() => handleInsert("*", "*")}><Italic size={16} /></button>
+                                <button type="button" className={styles.btn} onClick={() => handleInsert("# ", "")}><Heading1 size={16} /></button>
+                            </div>
+
+                            <textarea ref={textareaRef} className={styles.textarea} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} placeholder="Content" required></textarea>
                             
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <button className={styles.button} type='submit'>{formData.id ? "Update" : (view === "draft" ? "Save Draft" : "Publish")}</button>

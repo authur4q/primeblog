@@ -46,3 +46,9 @@ a {
     color-scheme: dark;
   }
 }
+@media screen and (min-width: 769px) {
+  main {
+    margin-left: 260px; /* Width of your sidebar */
+    padding: 20px;
+  }
+}

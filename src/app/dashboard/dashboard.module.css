@@ -60,7 +60,6 @@
   border-color: #10b981;
 }
 
-
 .active {
   background: #10b981 !important;
   color: #052e16 !important;
@@ -127,11 +126,20 @@
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .form {
@@ -152,28 +160,6 @@
   margin: 0 0 24px 0;
 }
 
-.select {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  outline: none;
-  color: #ffffff;
-  font-size: 0.95rem;
-  background-color: rgba(255, 255, 255, 0.04);
-  transition: all 0.2s ease;
-  width: 100%;
-  cursor: pointer;
-}
-
-.select:focus {
-  border-color: #10b981;
-  background-color: rgba(255, 255, 255, 0.07);
-}
-
-.selectOption {
-  background-color: #1a1a1a;
-  color: #ffffff;
-}
 .form form {
   display: flex;
   flex-direction: column;
@@ -198,6 +184,9 @@
 }
 
 .textarea { height: 140px; resize: vertical; }
+
+.select { cursor: pointer; }
+.selectOption { background-color: #1a1a1a; color: #ffffff; }
 
 .button {
   padding: 12px;
