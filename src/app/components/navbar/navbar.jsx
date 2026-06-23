@@ -70,7 +70,20 @@ const Navbar = ({ showFab = false }) => {
                         notifications.map(item => (
                           <Link key={item._id} href={item.link || '/chat'} className={notifStyles.notifItem} onClick={() => setIsNotifOpen(false)}>
                             <h5>{item.title}</h5>
+                            {item.sender?.name && (
+      <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
+        From  {item.sender.name}  <span className={notifStyles.proBagde}>PRO</span>
+      </p>
+    )}
                             <p>{item.message}</p>
+                            <span className={notifStyles.timestamp}>
+      {new Date(item.createdAt).toLocaleString(undefined, { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: 'numeric', 
+        minute: '2-digit' 
+      })}
+    </span>
                           </Link>
                         ))}
                     </div>
