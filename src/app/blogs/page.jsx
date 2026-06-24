@@ -79,6 +79,7 @@ const Blogs = () => {
                         <div className={styles.authorMeta}>
                           <div className={styles.avatar}>{authorName.charAt(0).toUpperCase()}</div>
                           <span className={styles.author}>pb/{authorName}</span>
+                          <span className={styles.proBadge}>✔</span>
                         </div>
                         {item.createdAt && <p className={styles.time}>{format(parseISO(item.createdAt), 'MM/dd/yyyy')}</p>}
                       </div>

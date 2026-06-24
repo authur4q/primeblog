@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server"
 import connectMongoDb from "../../../../lib/mongodb"
 import Comment from "../../../../models/comments"
-
 import User from "../../../../models/user" 
 
 export const POST = async (req) => {
     try {
-        const { postId, text, userId } = await req.json()
-        console.log("Received comment data:", { postId, text, userId })
-
+        const { postId, text, userId, parentId } = await req.json()
+        
         if (!postId || !text || !userId) {
-            return NextResponse.json({ error: "Missing required fields: postId, text, or userId" }, { status: 400 })
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
         }
 
         await connectMongoDb()
@@ -18,13 +16,12 @@ export const POST = async (req) => {
         const comment = await Comment.create({ 
             text, 
             post: postId, 
-            user: userId 
+            user: userId,
+            parentId: parentId || null // Will be null for top-level, ID for replies
         })
-        
         
         const populatedComment = await Comment.findById(comment._id).populate("user", "name")
         
-        console.log("Created comment:", populatedComment)
         return NextResponse.json(populatedComment, { status: 201 })
     } catch (error) {
         console.error("Error creating comment:", error)
@@ -43,9 +40,10 @@ export const GET = async (req) => {
     try {
         await connectMongoDb()
        
+        // Fetch all comments for the post; the frontend will transform this into a tree
         const comments = await Comment.find({ post: id })
             .populate("user", "name")
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: 1 }) // Sorted by time for proper tree rendering
             
         return NextResponse.json(comments, { status: 200 })
     } catch (error) {
@@ -60,7 +58,7 @@ export const DELETE = async (req) => {
     const currentUserId = url.searchParams.get("userId") 
 
     if (!id) {
-        return NextResponse.json({ message: "Comment ID parameter 'id' is required" }, { status: 400 })
+        return NextResponse.json({ message: "Comment ID required" }, { status: 400 })
     }
 
     try {
@@ -71,10 +69,12 @@ export const DELETE = async (req) => {
             return NextResponse.json({ message: "Comment not found" }, { status: 404 })
         }
 
-        
         if (currentUserId && targetComment.user.toString() !== currentUserId) {
-            return NextResponse.json({ message: "Unauthorized: You can only delete your own comments" }, { status: 403 })
+            return NextResponse.json({ message: "Unauthorized" }, { status: 403 })
         }
+
+        // Optional: If you want to delete children replies when a parent is deleted:
+        await Comment.deleteMany({ parentId: id });
 
         await Comment.findByIdAndDelete(id)
         return NextResponse.json({ message: "Comment deleted successfully" }, { status: 200 })

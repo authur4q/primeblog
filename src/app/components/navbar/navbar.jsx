@@ -38,6 +38,17 @@ const Navbar = ({ showFab = false }) => {
     }
   }, [status]);
 
+  const handleMarkAsRead = async () => {
+    try {
+      const res = await fetch("/api/notifications", { method: "PATCH" });
+      if (res.ok) {
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      }
+    } catch (err) {
+      console.error("Failed to mark as read:", err);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -58,7 +69,10 @@ const Navbar = ({ showFab = false }) => {
             <>
             
               <div className={notifStyles.notificationWrapper}>
-                <button onClick={() => setIsNotifOpen(!isNotifOpen)} className={notifStyles.notifButton}>
+                <button onClick={() => {
+                  setIsNotifOpen(!isNotifOpen);
+                  if (!isNotifOpen && unreadCount > 0) handleMarkAsRead();
+                }} className={notifStyles.notifButton}>
                   <Bell size={24} />
                   {unreadCount > 0 && <span className={notifStyles.badge}>{unreadCount}</span>}
                 </button>
@@ -71,19 +85,19 @@ const Navbar = ({ showFab = false }) => {
                           <Link key={item._id} href={item.link || '/chat'} className={notifStyles.notifItem} onClick={() => setIsNotifOpen(false)}>
                             <h5>{item.title}</h5>
                             {item.sender?.name && (
-      <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
-        From  {item.sender.name}  <span className={notifStyles.proBagde}>PRO</span>
-      </p>
-    )}
+                              <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                From  {item.sender.name}  {item.sender.isPremium && <span className={notifStyles.proBadge}>PRO</span>}
+                              </p>
+                            )}
                             <p>{item.message}</p>
                             <span className={notifStyles.timestamp}>
-      {new Date(item.createdAt).toLocaleString(undefined, { 
-        month: 'short', 
-        day: 'numeric', 
-        hour: 'numeric', 
-        minute: '2-digit' 
-      })}
-    </span>
+                              {new Date(item.createdAt).toLocaleString(undefined, { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                hour: 'numeric', 
+                                minute: '2-digit' 
+                              })}
+                            </span>
                           </Link>
                         ))}
                     </div>
@@ -91,7 +105,7 @@ const Navbar = ({ showFab = false }) => {
                 )}
               </div>
 
-             
+              
               <div className={styles.userMenuWrapper}>
                 <button onClick={() => setIsUserMenuOpen(!isUserMenuOpen)} className={styles.userTrigger}>
                   <User size={24} />
@@ -107,7 +121,7 @@ const Navbar = ({ showFab = false }) => {
               </div>
             </>
           )}
-     
+       
         </div>
       </header>
 

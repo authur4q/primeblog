@@ -123,6 +123,15 @@
   box-sizing: border-box;
   flex-shrink: 0;
 }
+.proBadge {
+  background: linear-gradient(135deg, #f30404, #ec06ec);
+  color: #000000;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 6px;
+  border-radius: 50%;
+  line-height: 1;
+}
 
 .text h2 { color: #ffffff; font-size: 1.5rem; font-weight: 600; line-height: 1.4; margin: 0; }
 

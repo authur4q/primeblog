@@ -60,14 +60,37 @@
   width: 100%;
   height: 400px;
   margin: 20px 0;
-  border-radius: 12px;
+  border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .postImage {
-  object-fit: cover;
-  display: block;
+width: 100%;
+  height: 100%;
+  object-fit: contain; 
+ 
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.fullscreenOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.fullscreenImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .authorTag {
@@ -100,9 +123,9 @@
 }
 
 .bookmarkBtn {
- background: transparent;
+  background: transparent;
   padding: 8px 16px;
- border:none;
+  border: none;
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
@@ -111,10 +134,8 @@
 }
 
 .likeBtn {
-
-
- border: none;
- background: transparent;
+  border: none;
+  background: transparent;
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: 600;
@@ -143,7 +164,6 @@
 
 .audioNarratorCard {
   background: rgba(245, 172, 172, 0.815);
-  
   border-radius: 8px;
   padding: 14px 18px;
   margin: 10px 0;
@@ -272,14 +292,24 @@
   cursor: not-allowed;
 }
 
+/* Scrollable Comments List */
 .commentsList {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin-top: 10px;
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 8px;
+  max-height: 500px; /* Limits the height */
+  overflow-y: auto;  /* Adds vertical scrollbar when needed */
+  padding-right: 10px;
+}
+
+.commentsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.commentsList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
 }
 
 .commentCard {
@@ -289,6 +319,15 @@
   border-radius: 8px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.repliesContainer {
+  margin-top: 12px;
+  padding-left: 20px;
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
@@ -296,8 +335,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 8px;
+  padding-bottom: 4px;
   gap: 10px;
 }
 
@@ -314,13 +352,11 @@
   justify-content: center;
   box-shadow: 0 0 10px rgba(223, 182, 178, 0.15);
 }
-.avatarLink {
 
+.avatarLink {
   display: flex;
   gap: 8px;
   align-items: center;
-  justify-content: center;
-
 }
 
 .commentText {
@@ -330,7 +366,20 @@
   line-height: 1.5;
   white-space: pre-wrap; 
   overflow-wrap: break-word;
-  padding-left: 40px;
+  padding-left: 38px;
+}
+
+.replyLink {
+  background: none;
+  border: none;
+  color: #dfb6b2;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 38px;
+  margin-top: 4px;
 }
 
 .deleteBtn {
@@ -347,6 +396,33 @@
 .deleteBtn:hover {
   color: #dfb6b2;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.loadMoreBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(251, 228, 216, 0.2);
+  color: #fbe4d8;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: background 0.2s;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.loadMoreBtn:hover {
+  background: rgba(251, 228, 216, 0.1);
+}
+
+.replyingTo {
+  color: #dfb6b2;
+  font-size: 0.85rem;
+  margin: 0;
 }
 
 @media screen and (max-width: 768px) {

@@ -5,6 +5,10 @@ import Navbar from '@/app/components/navbar/navbar'
 import Link from 'next/link'
 import styles from './profile.module.css'
 import MessageButton from '../../components/messageButton/page'
+import { ArrowRight } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
+import { Twitter } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 
 const UserProfile = ({ params: paramsPromise }) => {
   const params = React.use(paramsPromise)
@@ -33,6 +37,12 @@ const UserProfile = ({ params: paramsPromise }) => {
   const isOwnProfile = currentUserId && profileUser?._id
     ? String(currentUserId) === String(profileUser._id) || String(currentUserId) === String(profileId)
     : false
+
+  const formatWhatsAppUrl = (phone) => {
+    if (!phone) return null;
+    const cleanNumber = phone.replace(/\D/g, ''); 
+    return `https://wa.me/${cleanNumber}`;
+  };
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -124,18 +134,30 @@ const UserProfile = ({ params: paramsPromise }) => {
               
               <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
                 {profileUser?.primaryPhone && <span className={styles.phoneDisplay}>{profileUser.primaryPhone}</span>}
+                
                 {profileUser?.isPremium && profileUser?.primaryPhone && (
-                  <a href={`https://wa.me/${profileUser.primaryPhone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className={styles.whatsappLink}>WhatsApp</a>
+                  <a href={formatWhatsAppUrl(profileUser.primaryPhone)} target="_blank" rel="noopener noreferrer" className={styles.whatsappLink}>
+                    <MessageCircle size={16} /> WhatsApp
+                  </a>
                 )}
-                {profileUser?.twitter && <span className={styles.socialTab}>Twitter: {profileUser.twitter}</span>}
-                {profileUser?.Instagram && <span className={styles.socialTab}>IG: {profileUser.Instagram}</span>}
+                
+                {profileUser?.twitter && (
+                  <a href={`https://twitter.com/${profileUser.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className={styles.socialTab}>
+                    <Twitter size={16} /> 
+                  </a>
+                )}
+                
+                {profileUser?.Instagram && (
+                  <a href={`https://instagram.com/${profileUser.Instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className={styles.socialTab}>
+                    <Instagram size={16} /> 
+                  </a>
+                )}
               </div>
 
               <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
                 {isOwnProfile && <button onClick={() => setIsEditing(!isEditing)} className={styles.editBtn}>{isEditing ? "Close Edit" : "Edit Profile"}</button>}
                 {isOwnProfile && <button className={styles.logoutBtn} onClick={() => signOut()}>Logout</button>}
-                {!isOwnProfile && <MessageButton recipientId={profileUser?._id} 
-    recipientName={profileUser?.name} />}
+                {!isOwnProfile && <MessageButton recipientId={profileUser?._id} recipientName={profileUser?.name} />}
               </div>
 
               {isEditing && (
@@ -218,8 +240,7 @@ const UserProfile = ({ params: paramsPromise }) => {
                   <h3 className={styles.postTitle}>{post.title}</h3>
                   <p className={styles.postDesc}>{post.description}</p>
                   <Link href={`/blogs/${post._id || post.id}`} className={styles.readLink}>
-                    View Post 
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    View Post <ArrowRight size={16} />
                   </Link>
                 </div>
               ))}
