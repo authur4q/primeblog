@@ -4,13 +4,14 @@ import Link from 'next/link';
 import styles from './navbar.module.css';
 import notifStyles from './notification.module.css';
 import { signOut, useSession } from 'next-auth/react';
-import { Home, BookOpen, Crown, MessageSquare, Bell, Menu, Plus, LayoutDashboard, User, ShieldCheck, LogOut } from 'lucide-react';
+import { Home,Compass, BookOpen, Crown, MessageSquare, Bell, Menu, Plus, LayoutDashboard, User, ShieldCheck, LogOut } from 'lucide-react';
 
 const publicLinks = [
   { href: '/', label: 'Home', icon: <Home size={20} />, id: 1 },
   { href: '/blogs', label: 'Blogs', icon: <BookOpen size={20} />, id: 2 },
   { href: '/premium', label: 'Pro', icon: <Crown size={20} />, id: 3 },
-  { href: '/chat', label: 'Chat', icon: <MessageSquare size={20} />, id: 4 }
+  { href: '/chat', label: 'Chat', icon: <MessageSquare size={20} />, id: 4 },
+  { href: '/explore', label: 'Explore', icon: <Compass size={20} />, id: 5}
 ];
 
 const Navbar = ({ showFab = false }) => {

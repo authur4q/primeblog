@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema({
         sparse: true,
         trim: true
     },
+    location: {
+    type: { type: String, enum: ['Point'], default: 'Point' },
+    coordinates: { type: [Number], index: '2dsphere' }
+  },
+  isSharingLocation: { type: Boolean, default: false },
+  lastKnownLocation: { lat: Number, lng: Number },
     city:{
         type: String,
         required: false,

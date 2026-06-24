@@ -5,10 +5,7 @@ import Navbar from '@/app/components/navbar/navbar'
 import Link from 'next/link'
 import styles from './profile.module.css'
 import MessageButton from '../../components/messageButton/page'
-import { ArrowRight } from 'lucide-react';
-import { MessageCircle } from 'lucide-react';
-import { Twitter } from 'lucide-react';
-import { Instagram } from 'lucide-react';
+import { ArrowRight, MessageCircle, Twitter, Instagram } from 'lucide-react';
 
 const UserProfile = ({ params: paramsPromise }) => {
   const params = React.use(paramsPromise)
@@ -27,6 +24,7 @@ const UserProfile = ({ params: paramsPromise }) => {
   const [activeList, setActiveList] = useState(null)
 
   const [isEditing, setIsEditing] = useState(false)
+  const [isSharingLocation, setIsSharingLocation] = useState(false)
   const [editName, setEditName] = useState("")
   const [editUsername, setEditUsername] = useState("")
   const [editPhone, setEditPhone] = useState("")
@@ -44,6 +42,39 @@ const UserProfile = ({ params: paramsPromise }) => {
     return `https://wa.me/${cleanNumber}`;
   };
 
+  const toggleLocationSharing = async () => {
+    const newState = !isSharingLocation;
+    setIsSharingLocation(newState);
+
+    try {
+      if (newState) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          await fetch(`/api/users/update-location`, {
+            method: 'PATCH',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              isSharingLocation: true, 
+              lat: pos.coords.latitude, 
+              lng: pos.coords.longitude 
+            })
+          });
+        }, (err) => {
+          console.error(err);
+          setIsSharingLocation(false);
+          alert("Please enable location permissions.");
+        });
+      } else {
+        await fetch(`/api/users/update-location`, {
+          method: 'PATCH',
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isSharingLocation: false })
+        });
+      }
+    } catch (err) {
+      setIsSharingLocation(!newState);
+    }
+  };
+
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!profileId) return
@@ -58,6 +89,7 @@ const UserProfile = ({ params: paramsPromise }) => {
         if (!userRes.ok) throw new Error("User profile not found")
         const userData = await userRes.json()
         setProfileUser(userData)
+        setIsSharingLocation(userData.isSharingLocation || false)
         setEditName(userData.name || "")
         setEditUsername(userData.username || "")
         setEditPhone(userData.primaryPhone || "")
@@ -134,19 +166,16 @@ const UserProfile = ({ params: paramsPromise }) => {
               
               <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
                 {profileUser?.primaryPhone && <span className={styles.phoneDisplay}>{profileUser.primaryPhone}</span>}
-                
                 {profileUser?.isPremium && profileUser?.primaryPhone && (
                   <a href={formatWhatsAppUrl(profileUser.primaryPhone)} target="_blank" rel="noopener noreferrer" className={styles.whatsappLink}>
                     <MessageCircle size={16} /> WhatsApp
                   </a>
                 )}
-                
                 {profileUser?.twitter && (
                   <a href={`https://twitter.com/${profileUser.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className={styles.socialTab}>
                     <Twitter size={16} /> 
                   </a>
                 )}
-                
                 {profileUser?.Instagram && (
                   <a href={`https://instagram.com/${profileUser.Instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className={styles.socialTab}>
                     <Instagram size={16} /> 
@@ -154,8 +183,9 @@ const UserProfile = ({ params: paramsPromise }) => {
                 )}
               </div>
 
-              <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
+              <div style={{ display: "flex", gap: "10px", marginTop: "14px", flexWrap: "wrap" }}>
                 {isOwnProfile && <button onClick={() => setIsEditing(!isEditing)} className={styles.editBtn}>{isEditing ? "Close Edit" : "Edit Profile"}</button>}
+                {isOwnProfile && <button onClick={toggleLocationSharing} className={isSharingLocation ? styles.stopLocationBtn : styles.shareLocationBtn}>{isSharingLocation ? "Stop Live Location" : "Share Live Location"}</button>}
                 {isOwnProfile && <button className={styles.logoutBtn} onClick={() => signOut()}>Logout</button>}
                 {!isOwnProfile && <MessageButton recipientId={profileUser?._id} recipientName={profileUser?.name} />}
               </div>
@@ -164,18 +194,14 @@ const UserProfile = ({ params: paramsPromise }) => {
                 <form className={styles.editForm} onSubmit={handleSaveChanges}>
                   <label className={styles.inputLabel}>Name</label>
                   <input className={styles.dashboardInput} value={editName} onChange={(e) => setEditName(e.target.value)} />
-                  
                   <label className={styles.inputLabel}>Phone Number</label>
                   <input className={styles.dashboardInput} value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
-                  
                   {profileUser?.isPremium && (
                     <>
                       <label className={styles.inputLabel}>Username</label>
                       <input className={styles.dashboardInput} value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
-                      
                       <label className={styles.inputLabel}>Twitter</label>
                       <input className={styles.dashboardInput} value={editTwitter} onChange={(e) => setEditTwitter(e.target.value)} />
-                      
                       <label className={styles.inputLabel}>Instagram</label>
                       <input className={styles.dashboardInput} value={editInstagram} onChange={(e) => setEditInstagram(e.target.value)} />
                     </>

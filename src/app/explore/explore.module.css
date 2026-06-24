@@ -1,0 +1,114 @@
+.container { 
+  min-height: 100vh; 
+  background: #000000; 
+}
+
+.exploreWrapper { 
+  max-width: 1200px; 
+  margin: 0 auto; 
+  padding: 2rem; 
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  background: #000000;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #0c0a0ad3; 
+}
+
+
+.exploreLayout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.mapSection { 
+  height: 500px;
+  border-radius: 12px; 
+  overflow: hidden; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+}
+
+
+.proximityFeed {
+  background: rgba(11, 1, 54, 0.733);
+ 
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  min-height: 200px;
+}
+
+.proximityFeed h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: #e6d6d6;
+}
+
+.userList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.userItem {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+  display: block;
+  color: #ffffff; 
+}
+
+.userItem:last-child {
+  border-bottom: none;
+}
+
+.radiusSelect {
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background-color: #111;
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem top 50%;
+  background-size: 0.65rem auto;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.radiusSelect:hover {
+  border-color: #666;
+}
+
+.radiusSelect:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.2);
+}
+
+.loader {
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: #888;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .exploreLayout {
+    grid-template-columns: 1fr;
+  }
+  .proximityFeed{
+     margin-top: -100px;
+  }
+}

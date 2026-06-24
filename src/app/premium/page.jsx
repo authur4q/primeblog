@@ -156,6 +156,7 @@ export default function PremiumPage() {
                 <li className={styles.featureDisabledItem}><span className={styles.iconCross}>✕</span> Custom unique profile tracking handle</li>
                 <li className={styles.featureDisabledItem}><span className={styles.iconCross}>✕</span> Instant integration links for socials</li>
                 <li className={styles.featureDisabledItem}><span className={styles.iconCross}>✕</span> Exclusive Audio Narration</li>
+
               </ul>
 
               <button className={styles.freeButton} disabled>
@@ -176,6 +177,7 @@ export default function PremiumPage() {
 
               <ul className={styles.featureList}>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Read all public blog posts</li>
+                                <li className={styles.featureDisabledItem}><span className={styles.iconCross}>✓</span> Ads free experience</li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Set unique custom profile @username</li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Connect Hobby, Twitter, Instagram & LinkedIn</li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Clickable WhatsApp redirect integration</li>

@@ -44,14 +44,22 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
+    // 1. Create the message
     const newMessage = await Message.create({
       conversationId,
       senderId,
       text: text.trim(),
     })
 
-    let determinedRecipient = recipientId
+    // 2. Update the conversation's updatedAt and lastMessage
+    // This allows the frontend to sort by 'updatedAt'
+    await mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
+      lastMessage: text.trim(),
+      updatedAt: new Date()
+    });
 
+    // 3. Determine recipient for notification
+    let determinedRecipient = recipientId
     if (!determinedRecipient && mongoose.models.Conversation) {
       const activeConvo = await mongoose.models.Conversation.findById(conversationId).lean()
       if (activeConvo && Array.isArray(activeConvo.participants)) {
@@ -61,8 +69,7 @@ export async function POST(req) {
       }
     }
 
-    console.log("Saving notification with sender:", senderId)
-
+    // 4. Create Notification
     if (determinedRecipient) {
       await Notification.create({
         recipient: new mongoose.Types.ObjectId(String(determinedRecipient)),
@@ -76,7 +83,7 @@ export async function POST(req) {
 
     return NextResponse.json(newMessage, { status: 201 })
   } catch (error) {
-    console.error("Error creating message and matching notification instance:", error)
+    console.error("Error in POST /api/chats/messages:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
