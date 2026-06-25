@@ -16,7 +16,7 @@ const getMarkerIcon = (status) => {
   const color = status?.toLowerCase().includes("coffee") ? "green" : "blue";
   return new L.Icon({
     iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    shadowUrl: 'https://leafletjs.com/examples/custom-icons/leaf-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -29,6 +29,11 @@ function StatusUpdater({ user, currentUserId }) {
   const [isEditing, setIsEditing] = useState(false);
   const isOwner = user._id === currentUserId;
 
+ 
+  const distanceKm = user.distInMeters 
+    ? (user.distInMeters / 1000).toFixed(1) 
+    : null;
+
   const saveStatus = async () => {
     const res = await fetch("/api/users/update-status", {
       method: "PATCH",
@@ -36,18 +41,15 @@ function StatusUpdater({ user, currentUserId }) {
       body: JSON.stringify({ status }),
     });
 
-    console.log(status)
-
     if (res.ok) {
       setIsEditing(false);
-      
     }
-    console.log(res)
   };
 
   return (
     <div style={{ textAlign: 'center', minWidth: '150px' }}>
       <strong style={{ fontSize: '1.1em' }}>{user.name}</strong>
+      {distanceKm && <p style={{ fontSize: '0.75em', color: '#080808', margin: '2px 0' }}>{distanceKm} km away</p>}
       
       {isEditing ? (
         <div style={{ margin: '10px 0' }}>
@@ -55,53 +57,24 @@ function StatusUpdater({ user, currentUserId }) {
             value={status} 
             onChange={(e) => setStatus(e.target.value)} 
             maxLength={30}
-            style={{ 
-              width: '90%', 
-              color: "black", 
-              border: "none", 
-              padding: '5px', 
-              backgroundColor: '#eee', 
-              outline: "none", 
-              borderRadius: "10px" 
-            }}
+            style={{ width: '90%', color: "black", border: "none", padding: '5px', backgroundColor: '#eee', outline: "none", borderRadius: "10px" }}
           />
-          <button 
-            onClick={saveStatus} 
-            style={{ 
-              marginTop: '5px', 
-              backgroundColor: "black", 
-              color: "white", 
-              borderRadius: "10px", 
-              padding: "4px 8px", 
-              cursor: "pointer" 
-            }}
-          >
+          <button onClick={saveStatus} style={{ marginTop: '5px', backgroundColor: "black", color: "white", borderRadius: "10px", padding: "4px 8px", cursor: "pointer" }}>
             Save
           </button>
         </div>
       ) : (
         <div>
           <p style={{ fontStyle: 'italic', margin: '5px 0' }}>"{status || "Hello! I'm here."}"</p>
-          
           {isOwner && (
-            <button onClick={() => setIsEditing(true)} style={{ fontSize: '0.8em', marginBottom: '5px' }}>
-              Edit Status
-            </button>
+            <button onClick={() => setIsEditing(true)} style={{ fontSize: '0.8em', marginBottom: '5px' }}>Edit Status</button>
           )}
-          
           {!isOwner && (
             <>
               <br />
               <button 
                 onClick={() => window.location.href = `/profile/${user._id}`}
-                style={{
-                  padding: '5px 10px',
-                  backgroundColor: '#df00f3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
+                style={{ padding: '5px 10px', backgroundColor: '#df00f3', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
               >
                 Say Hi
               </button>
@@ -144,9 +117,7 @@ export default function NearbyMap() {
     );
   }, []);
 
-  if (!position) {
-    return <p>Loading map...</p>;
-  }
+  if (!position) return <p>Loading map...</p>;
 
   return (
     <MapContainer center={position} zoom={13} style={{ height: "400px", width: "100%" }}>

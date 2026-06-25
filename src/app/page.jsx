@@ -1,21 +1,22 @@
 import styles from "./page.module.css";
 import Navbar from "./components/navbar/navbar";
 import Link from "next/link";
-import Image from "next/image"; 
+import Image from "next/image";
+import dynamic from 'next/dynamic';
 import { auth } from "./api/auth/[...nextauth]/options";
 import mongoose from "mongoose";
 import { Plus } from 'lucide-react';
-
 import User from "../../models/user";
-import Post from "../../models/post"; 
+import Post from "../../models/post";
 import connectMongoDb from "../../lib/mongodb";
-import RotatingAd from "./components/RotatingAds/page";
-import UserSearch from "./components/UserSearch/page";
-import UserCarousel from "./components/UserCarousel/UserCarousel";
 import MiniAvatar from "./components/MiniAvatar/MiniAvatar";
+import { ClientComponents } from "./components/ClientWrapper";
 
 
-export const revalidate = 60; 
+
+
+
+
 
 async function getLatestPostsDirectly() {
   try {
@@ -25,8 +26,8 @@ async function getLatestPostsDirectly() {
       .limit(4)
       .select("title description name imageUrl")
       .lean();
+      
   } catch (error) {
-    console.error("Error loading homepage posts:", error);
     return [];
   }
 }
@@ -50,7 +51,6 @@ async function getPremiumExpirationDirectly(email) {
 async function getActiveAdDirectly() {
   try {
     await connectMongoDb();
-   
     if (mongoose.models.Ad) {
       return await mongoose.models.Ad.findOne({ active: true }).lean();
     }
@@ -63,27 +63,25 @@ async function getActiveAdDirectly() {
 export default async function Home() {
   const session = await auth();
 
-
   const [postsRes, premiumRes, adRes] = await Promise.allSettled([
     getLatestPostsDirectly(),
     session?.user?.email ? getPremiumExpirationDirectly(session.user.email) : Promise.resolve(null),
     !session?.user?.isPremium ? getActiveAdDirectly() : Promise.resolve(null)
   ]);
-  
+
   const latestPosts = postsRes.status === 'fulfilled' ? postsRes.value : [];
   const daysRemaining = premiumRes.status === 'fulfilled' ? premiumRes.value : null;
   const activeAd = adRes.status === 'fulfilled' ? adRes.value : null;
-  
   const isPremium = session?.user?.isPremium || (daysRemaining !== null);
 
   return (
     <div className={styles.container}>
       <Navbar />
-      
+
       {isPremium ? (
         <div className={styles.reminderBanner}>
           <p>
-            <strong>Pro Account Active:</strong> You have <span>{daysRemaining ?? 0} days</span> remaining on your current subscription Plan. 
+            <strong>Pro Account Active:</strong> You have <span>{daysRemaining ?? 0} days</span> remaining on your current subscription Plan.
             <Link href="/premium"> Manage Identity Settings →</Link>
           </p>
         </div>
@@ -98,13 +96,12 @@ export default async function Home() {
           <Link href="/premium" className={styles.incentiveBtn}>Claim Your Handle</Link>
         </div>
       )}
-      
+
       <div className={styles.hero}>
         <h1>Welcome to Prime</h1>
         <h2 className={styles.subtext}>Share Ideas. Spark Conversations. Inspire Minds.</h2>
         <p>Join a community where your thoughts matter. Post freely and connect with like-minded thinkers.</p>
-        <UserSearch />
-        <UserCarousel />
+        <ClientComponents />
       </div>
 
       {!isPremium && activeAd && <RotatingAd initialAd={activeAd} />}
@@ -115,18 +112,18 @@ export default async function Home() {
             <h2>Explore Recent Conversations</h2>
             <Link href="/blogs" className={styles.viewAllLink}>View all posts →</Link>
           </div>
-          
+
           <div className={styles.grid}>
             {latestPosts.map((post) => (
               <div key={post._id.toString()} className={styles.homeCard}>
                 {post.imageUrl && (
                   <div style={{ position: 'relative', width: '100%', height: '200px' }}>
-                    <Image 
-                      src={post.imageUrl} 
-                      alt={post.title} 
+                    <Image
+                      src={post.imageUrl}
+                      alt={post.title}
                       fill
                       style={{ objectFit: 'cover' }}
-                      className={styles.cardImage} 
+                      className={styles.cardImage}
                       sizes="(max-width: 768px) 100vw, 400px"
                       loading="lazy"
                     />
@@ -165,7 +162,7 @@ export default async function Home() {
           </div>
         </div>
       </footer>
-      
+
       <Link href="/dashboard" className={styles.fab}>
         <Plus size={32} />
       </Link>

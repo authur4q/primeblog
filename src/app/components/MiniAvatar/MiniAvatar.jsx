@@ -1,11 +1,28 @@
-"use client";
-import { useState, useEffect } from "react";
+import React from 'react';
+import styles from './MiniAvatar.module.css';
 
-export default function MiniAvatar({ name, className }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+const MiniAvatar = ({ name, imageUrl, className = "" }) => {
+  // Fallback to the first letter of the name
+  const getInitials = (name) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  };
 
-  const initial = mounted ? (name || "A").charAt(0).toUpperCase() : "?";
+  return (
+    <div className={`${styles.avatarContainer} ${className}`}>
+      {imageUrl ? (
+        <img 
+          src={imageUrl} 
+          alt={name} 
+          className={styles.avatarImage}
+          loading="lazy"
+        />
+      ) : (
+        <div className={styles.avatarPlaceholder}>
+          {getInitials(name)}
+        </div>
+      )}
+    </div>
+  );
+};
 
-  return <div className={className}>{initial}</div>;
-}
+export default MiniAvatar;
