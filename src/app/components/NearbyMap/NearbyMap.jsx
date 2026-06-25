@@ -71,7 +71,7 @@ export default function NearbyMap() {
   return (
     <MapContainer center={position} zoom={13} style={{ height: "400px", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {nearbyUsers.map(user => {
+      {nearbyUsers?.map(user => {
         if (!user.location?.coordinates) return null;
         
         return (

@@ -28,9 +28,9 @@ export async function GET(req) {
       }
     }).select("name username location").lean();
 
-    return NextResponse.json(nearbyUsers);
+    return NextResponse.json(nearbyUsers || []);
   } catch (error) {
     console.error("Nearby API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch nearby users" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch nearby users" }, { status: 500 })
   }
 }

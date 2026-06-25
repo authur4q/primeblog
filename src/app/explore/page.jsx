@@ -4,12 +4,23 @@ import Navbar from "@/app/components/navbar/navbar";
 import MapWrapper from "../components/NearbyMap/MapWrapper";
 import UpdateLocationButton from "../components/NearbyMap/UpdateLocationButton/UpdateLocationButton";
 import styles from "./explore.module.css";
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
 
 export default function ExplorePage() {
   const [nearbyUsers, setNearbyUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [radius, setRadius] = useState(5000);
+      const router = useRouter();
+      const { data: session, status } = useSession();
+    
+
+      useEffect(() => { 
+          if (status === "unauthenticated") router.push("/login"); 
+      }, [status, router]);
+
+
 
   useEffect(() => {
     const fetchUsers = async () => {
