@@ -70,6 +70,11 @@ const userSchema = new mongoose.Schema({
     trim: true,
     default: ""
   },
+  status: {
+  type: String,
+  trim: true,
+  default: "Hello! I'm here."
+},
   Instagram: {
     type: String,
     trim: true,

@@ -20,8 +20,13 @@ export const metadata = {
   manifest: "/manifest.json",
 };
 
+
 export const viewport = {
+  width: 'device-width',
   themeColor: "#000000",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }) {
