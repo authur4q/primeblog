@@ -1,9 +1,11 @@
 "use client"
 import React, { useState, useEffect, useRef } from 'react'
+import { useSession, signIn } from 'next-auth/react'
 import Link from 'next/link'
 import styles from './search.module.css'
 
 export default function UserSearch() {
+    const { status } = useSession()
     const [query, setQuery] = useState("")
     const [results, setResults] = useState([])
     const [loading, setLoading] = useState(false)
@@ -21,7 +23,7 @@ export default function UserSearch() {
     }, [])
 
     useEffect(() => {
-        if (!query.trim()) {
+        if (status !== "authenticated" || !query.trim()) {
             setResults([])
             return
         }
@@ -42,7 +44,7 @@ export default function UserSearch() {
         }, 300)
 
         return () => clearTimeout(delayDebounce)
-    }, [query])
+    }, [query, status])
 
     return (
         <div className={styles.searchContainer} ref={dropdownRef}>
@@ -53,19 +55,25 @@ export default function UserSearch() {
                 </svg>
                 <input
                     type="text"
-                    placeholder="Search user..."
+                    placeholder={status === "authenticated" ? "Search user..." : "Log in to search"}
                     value={query}
                     onChange={(e) => {
+                        if (status !== "authenticated") {
+                            signIn()
+                            return
+                        }
                         setQuery(e.target.value)
                         setShowDropdown(true)
                     }}
-                    onFocus={() => setShowDropdown(true)}
+                    onFocus={() => {
+                        if (status === "authenticated") setShowDropdown(true)
+                    }}
                     className={styles.searchInput}
                 />
                 {loading && <div className={styles.spinner}></div>}
             </div>
 
-            {showDropdown && query.trim() && (
+            {showDropdown && status === "authenticated" && query.trim() && (
                 <div className={styles.dropdown}>
                     {results.length > 0 ? (
                         results.map((user) => {

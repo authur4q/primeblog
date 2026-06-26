@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import styles from "./usercarousel.module.css";
 import FollowButton from "../followbtn/followbtn";
 
 export default function UserCarousel() {
+  const { status } = useSession();
   const [users, setUsers] = useState([]);
   const [expanded, setExpanded] = useState(false);
 
@@ -15,10 +17,15 @@ export default function UserCarousel() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (status === "authenticated") {
+      fetchUsers();
+    }
+  }, [status]);
 
-  if (users.length === 0) return null;
+  
+  if (status !== "authenticated" || users.length === 0) {
+    return null;
+  }
 
   return (
     <div className={styles.carouselContainer}>
