@@ -28,7 +28,6 @@ export const POST = async (req) => {
         return NextResponse.json({ message: "Post not created" }, { status: 500 });
     }
 };
-
 export const GET = async (req) => {
     const url = new URL(req.url);
     const userId = url.searchParams.get("userId");
@@ -37,19 +36,21 @@ export const GET = async (req) => {
     try {
         await connectMongoDb();
         
-        let query = {};
+      
+        const query = {};
         
         if (userId) {
             query.userId = userId;
         }
         
-        if (status === "draft") {
-            query.status = "draft";
-        } else {
-            query.status = "published";
-        }
 
-        const posts = await Post.find(query).sort({ createdAt: -1 }).lean();
+        query.status = status === "draft" ? "draft" : "published";
+
+       
+        const posts = await Post.find(query)
+            .sort({ createdAt: -1 })
+            .lean();
+
         return NextResponse.json(posts, { status: 200 });
     } catch (error) {
         return NextResponse.json({ message: "Error fetching posts" }, { status: 500 });

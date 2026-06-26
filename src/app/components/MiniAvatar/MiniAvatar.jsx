@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './MiniAvatar.module.css';
 
 const MiniAvatar = ({ name, imageUrl, className = "" }) => {
-  // Fallback to the first letter of the name
+ 
   const getInitials = (name) => {
     return name ? name.charAt(0).toUpperCase() : '?';
   };

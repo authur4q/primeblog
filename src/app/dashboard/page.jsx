@@ -67,22 +67,38 @@ const DashboardPage = () => {
         }, 0);
     };
 
+    const handlePublish = async (postId) => {
+        const res = await fetch(`/api/posts/${postId}`, {
+            method: "PATCH",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: "published" })
+        });
+        if (res.ok) getData();
+    };
+
     const handleAction = async (e) => {
         e.preventDefault();
         const postStatus = view === "draft" ? "draft" : "published";
         const isEditing = !!formData.id;
+        
         const payload = { 
             ...formData, 
-            tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+            tags: formData.tags && typeof formData.tags === 'string' 
+                ? formData.tags.split(',').map(t => t.trim()) 
+                : formData.tags,
             userId, 
             name: session?.user?.name, 
             status: postStatus 
         };
-        const res = await fetch(isEditing ? `/api/posts/${formData.id}` : '/api/posts', {
-            method: isEditing ? 'PUT' : 'POST',
+
+        const endpoint = isEditing ? `/api/posts/${formData.id}` : '/api/posts';
+
+        const res = await fetch(endpoint, {
+            method: isEditing ? 'PATCH' : 'POST', 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
         if (res.ok) {
             setFormData({ title: "", description: "", content: "", id: "", imageUrl: "", category: "", tags: "" });
             getData(); 
@@ -116,7 +132,19 @@ const DashboardPage = () => {
                             <div key={item._id} className={styles.post}>
                                 <Link href={`/blogs/${item._id}`}><h2>{item.title}</h2></Link>
                                 <div style={{ display: 'flex', gap: '5px' }}>
-                                    {view === "draft" && <button className={styles.btn} onClick={() => setFormData({...item, tags: item.tags?.join(", ")})}>Edit</button>}
+                                    {view === "draft" && (
+                                        <button className={styles.btn} onClick={() => handlePublish(item._id)}>Publish</button>
+                                    )}
+                                    {view === "draft" && (
+                                        <button 
+                                            className={styles.btn} 
+                                            onClick={() => setFormData({
+                                                ...item, 
+                                                id: item._id, 
+                                                tags: item.tags?.join(", ")
+                                            })}
+                                        >Edit</button>
+                                    )}
                                     <button className={styles.btn} onClick={() => handleDelete(item._id)}>Delete</button>
                                 </div>
                             </div>
@@ -139,8 +167,8 @@ const DashboardPage = () => {
                             <input className={styles.input} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="Description" required />
                             
                             <select className={styles.select} value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required>
-                                <option value="" disabled className={styles.selectOption} >Select a Category</option>
-                                {CATEGORY_OPTIONS.map((cat) => <option key={cat} value={cat} className={styles.selectOption}>{cat}</option>)}
+                                <option value="" disabled>Select a Category</option>
+                                {CATEGORY_OPTIONS.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                             </select>
 
                             <input className={styles.input} value={formData.tags} onChange={e => setFormData({...formData, tags: e.target.value})} placeholder="Tags (comma separated)" />

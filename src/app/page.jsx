@@ -2,31 +2,25 @@ import styles from "./page.module.css";
 import Navbar from "./components/navbar/navbar";
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+import { Plus } from 'lucide-react';
 import { auth } from "./api/auth/[...nextauth]/options";
 import mongoose from "mongoose";
-import { Plus } from 'lucide-react';
 import User from "../../models/user";
 import Post from "../../models/post";
 import connectMongoDb from "../../lib/mongodb";
 import MiniAvatar from "./components/MiniAvatar/MiniAvatar";
 import { ClientComponents } from "./components/ClientWrapper";
-
-
-
-
-
-
+import RotatingAd from "./components/RotatingAds/RotatingAds";
 
 async function getLatestPostsDirectly() {
   try {
     await connectMongoDb();
-    return await Post.find({ status: { $ne: "draft" } })
+    return await Post.find({ status: { $in: ["published", "archived"] } })
       .sort({ createdAt: -1 })
       .limit(4)
       .select("title description name imageUrl")
       .lean();
-      
   } catch (error) {
     return [];
   }
@@ -60,19 +54,59 @@ async function getActiveAdDirectly() {
   }
 }
 
+async function LatestPostsList() {
+  const latestPosts = await getLatestPostsDirectly();
+  if (latestPosts.length === 0) return null;
+
+  return (
+    <div className={styles.feedShowcase}>
+      <div className={styles.sectionHeader}>
+        <h2>Explore Recent Conversations</h2>
+        <Link href="/blogs" className={styles.viewAllLink}>View all posts →</Link>
+      </div>
+      <div className={styles.grid}>
+        {latestPosts.map((post) => (
+          <div key={post._id.toString()} className={styles.homeCard}>
+            {post.imageUrl && (
+              <div style={{ position: 'relative', width: '100%', height: '200px' }}>
+                <Image
+                  src={post.imageUrl}
+                  alt={post.title}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  className={styles.cardImage}
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            <div className={styles.cardHeader}>
+              <div className={styles.authorGroup}>
+                <MiniAvatar name={post.name} className={styles.miniAvatar} />
+                <span>pb/{post.name || "Anonymous"}</span>
+              </div>
+            </div>
+            <h3>{post.title}</h3>
+            <p>{post.description}</p>
+            <Link href={`/blogs/${post._id.toString()}`} className={styles.readMore}>
+              Read post
+            </Link>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default async function Home() {
   const session = await auth();
-
-  const [postsRes, premiumRes, adRes] = await Promise.allSettled([
-    getLatestPostsDirectly(),
+  
+  const [premiumDays, activeAd] = await Promise.all([
     session?.user?.email ? getPremiumExpirationDirectly(session.user.email) : Promise.resolve(null),
     !session?.user?.isPremium ? getActiveAdDirectly() : Promise.resolve(null)
   ]);
 
-  const latestPosts = postsRes.status === 'fulfilled' ? postsRes.value : [];
-  const daysRemaining = premiumRes.status === 'fulfilled' ? premiumRes.value : null;
-  const activeAd = adRes.status === 'fulfilled' ? adRes.value : null;
-  const isPremium = session?.user?.isPremium || (daysRemaining !== null);
+  const isPremium = session?.user?.isPremium || (premiumDays !== null);
 
   return (
     <div className={styles.container}>
@@ -81,7 +115,7 @@ export default async function Home() {
       {isPremium ? (
         <div className={styles.reminderBanner}>
           <p>
-            <strong>Pro Account Active:</strong> You have <span>{daysRemaining ?? 0} days</span> remaining on your current subscription Plan.
+            <strong>Pro Account Active:</strong> You have <span>{premiumDays ?? 0} days</span> remaining on your current subscription Plan.
             <Link href="/premium"> Manage Identity Settings →</Link>
           </p>
         </div>
@@ -104,47 +138,15 @@ export default async function Home() {
         <ClientComponents />
       </div>
 
-      {!isPremium && activeAd && <RotatingAd initialAd={activeAd} />}
-
-      {latestPosts.length > 0 && (
-        <div className={styles.feedShowcase}>
-          <div className={styles.sectionHeader}>
-            <h2>Explore Recent Conversations</h2>
-            <Link href="/blogs" className={styles.viewAllLink}>View all posts →</Link>
-          </div>
-
-          <div className={styles.grid}>
-            {latestPosts.map((post) => (
-              <div key={post._id.toString()} className={styles.homeCard}>
-                {post.imageUrl && (
-                  <div style={{ position: 'relative', width: '100%', height: '200px' }}>
-                    <Image
-                      src={post.imageUrl}
-                      alt={post.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      className={styles.cardImage}
-                      sizes="(max-width: 768px) 100vw, 400px"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-                <div className={styles.cardHeader}>
-                  <div className={styles.authorGroup}>
-                    <MiniAvatar name={post.name} className={styles.miniAvatar} />
-                    <span>pb/{post.name || "Anonymous"}</span>
-                  </div>
-                </div>
-                <h3>{post.title}</h3>
-                <p>{post.description}</p>
-                <Link href={`/blogs/${post._id.toString()}`} className={styles.readMore}>
-                  Read post
-                </Link>
-              </div>
-            ))}
-          </div>
+      {!isPremium && activeAd && (
+        <div className={styles.adContainer}>
+          <RotatingAd initialAd={activeAd} />
         </div>
       )}
+
+      <Suspense fallback={<div className={styles.loading}>Loading conversations...</div>}>
+        <LatestPostsList />
+      </Suspense>
 
       <div className={styles.highlightsBar}>
         <div className={styles.statItem}><h3>100% Free</h3><p>Open space for ideas</p></div>

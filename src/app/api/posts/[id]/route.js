@@ -13,7 +13,7 @@ export const GET = async (req, { params }) => {
     }
 };
 
-export const PUT = async (req, { params }) => {
+export const PATCH = async (req, { params }) => {
     const { id } = await params;
     try {
         const { title, description, content, status, imageUrl, tags, category } = await req.json();
