@@ -53,7 +53,7 @@ export default function UserSearch() {
                 </svg>
                 <input
                     type="text"
-                    placeholder="Search users by name or username..."
+                    placeholder="Search user..."
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value)
@@ -73,7 +73,7 @@ export default function UserSearch() {
                             return (
                                 <Link 
                                     key={user._id} 
-                                    href={`/profile/${user.username || user._id}`}
+                                    href={`/profile/${user._id}`}
                                     className={styles.resultItem}
                                     onClick={() => {
                                         setShowDropdown(false)

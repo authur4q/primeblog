@@ -44,21 +44,19 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // 1. Create the message
+   
     const newMessage = await Message.create({
       conversationId,
       senderId,
       text: text.trim(),
     })
 
-    // 2. Update the conversation's updatedAt and lastMessage
-    // This allows the frontend to sort by 'updatedAt'
+
     await mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
       lastMessage: text.trim(),
       updatedAt: new Date()
     });
 
-    // 3. Determine recipient for notification
     let determinedRecipient = recipientId
     if (!determinedRecipient && mongoose.models.Conversation) {
       const activeConvo = await mongoose.models.Conversation.findById(conversationId).lean()
@@ -69,7 +67,7 @@ export async function POST(req) {
       }
     }
 
-    // 4. Create Notification
+    
     if (determinedRecipient) {
       await Notification.create({
         recipient: new mongoose.Types.ObjectId(String(determinedRecipient)),

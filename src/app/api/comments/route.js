@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import connectMongoDb from "../../../../lib/mongodb"
 import Comment from "../../../../models/comments"
-import User from "../../../../models/user" 
+
 
 export const POST = async (req) => {
     try {
@@ -17,7 +17,7 @@ export const POST = async (req) => {
             text, 
             post: postId, 
             user: userId,
-            parentId: parentId || null // Will be null for top-level, ID for replies
+            parentId: parentId || null 
         })
         
         const populatedComment = await Comment.findById(comment._id).populate("user", "name")
@@ -40,10 +40,10 @@ export const GET = async (req) => {
     try {
         await connectMongoDb()
        
-        // Fetch all comments for the post; the frontend will transform this into a tree
+   
         const comments = await Comment.find({ post: id })
             .populate("user", "name")
-            .sort({ createdAt: 1 }) // Sorted by time for proper tree rendering
+            .sort({ createdAt: 1 }) 
             
         return NextResponse.json(comments, { status: 200 })
     } catch (error) {
@@ -73,7 +73,6 @@ export const DELETE = async (req) => {
             return NextResponse.json({ message: "Unauthorized" }, { status: 403 })
         }
 
-        // Optional: If you want to delete children replies when a parent is deleted:
         await Comment.deleteMany({ parentId: id });
 
         await Comment.findByIdAndDelete(id)

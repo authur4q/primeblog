@@ -1,18 +1,26 @@
 import { NextResponse } from "next/server";
 import connectMongoDb from "../../../../../lib/mongodb";
 import Post from "../../../../../models/post";
+import User from "../../../../../models/user";
 
-export const GET = async (req, { params }) => {
-    const { id } = await params;
-    try {
-        await connectMongoDb();
-        const post = await Post.findById(id);
-        return NextResponse.json(post, { status: 200 });
-    } catch (error) {
-        return NextResponse.json({ message: "Error fetching post" }, { status: 500 });
+
+export async function GET(req) {
+    const { searchParams } = new URL(req.url);
+    const name = searchParams.get("userId"); 
+
+    await connectMongoDb();
+
+  
+    const user = await User.findOne({ name: name });
+    
+    if (!user) {
+        return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
-};
 
+    const posts = await Post.find({ userId: user._id }); 
+    
+    return NextResponse.json(posts, { status: 200 });
+}
 export const PATCH = async (req, { params }) => {
     const { id } = await params;
     try {
