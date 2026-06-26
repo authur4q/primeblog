@@ -7,13 +7,14 @@ html, body {
   height: 100%; 
   margin: 0; 
   padding: 0; 
-  overflow: hidden; 
+
   background-color: #0b0d13; 
 }
 
 .container {
   height: 100dvh;
   width: 100vw;
+  overflow: hidden;
   background-color: #0b0d13;
   color: #f8fafc;
   font-family: system-ui, -apple-system, sans-serif;

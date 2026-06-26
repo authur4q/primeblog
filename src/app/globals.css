@@ -1,7 +1,7 @@
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  
   margin: 0;
   padding: 0;
 
@@ -24,12 +24,13 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 
 }
 
 .content-wrapper {
   padding-top: 30px; 
-  min-height: 100vh;
+  
   width: 100%;
   display: flex;
   flex-direction: column;
