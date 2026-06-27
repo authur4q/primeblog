@@ -8,7 +8,7 @@ import Loading from '@/app/components/loading/page';
 import Link from 'next/link';
 import Image from 'next/image';
 import MessageButton from '../../components/messageButton/page';
-import { Heart, Bookmark, Volume2, Play, Pause, CornerDownRight, ChevronDown } from 'lucide-react';
+import { Heart, Bookmark, Play, Pause, CornerDownRight, ChevronDown } from 'lucide-react';
 
 const CommentItem = ({ comment, session, handleCommentDelete, setReplyingTo }) => (
   <div className={styles.commentCard}>
@@ -226,21 +226,29 @@ const BlogPost = () => {
               </div>
             </div>
 
-            {session?.user?.isPremium && (
-              <div className={styles.audioNarratorCard}>
-                <div className={styles.audioMeta}>
-                  <Volume2 size={20} />
-                  <div>
-                    <h4 className={styles.audioTitle}>Prime Voice Narrator</h4>
-                    <p className={styles.audioStatus}>{isPlaying ? (isPaused ? "Paused" : "Speaking...") : "Listen hands-free"}</p>
-                  </div>
-                </div>
-                <button onClick={handleSpeechControl} className={styles.audioBtnPrimary}>
-                  {isPlaying ? (isPaused ? <Play size={16} /> : <Pause size={16} />) : <Play size={16} />}
-                  {isPlaying ? (isPaused ? " Resume" : " Pause") : " Play Audio"}
-                </button>
-              </div>
-            )}
+{session?.user?.isPremium && (
+  <div className={styles.audioNarratorCard}>
+    <h4 className={styles.audioNarratorHeader}>Listen Hand-Free with Prime Voice Narrator</h4>
+    
+    <button onClick={handleSpeechControl} className={styles.audioBtnSimple}>
+    
+      {isPlaying && !isPaused ? (
+        <div className={styles.waveContainer}>
+          <div className={styles.waveBar} />
+          <div className={styles.waveBar} />
+          <div className={styles.waveBar} />
+          <div className={styles.waveBar} />
+        </div>
+      ) : (
+        isPlaying && isPaused ? <Pause size={20} /> : <Play size={20} />
+      )}
+      
+      <span>
+        {isPlaying ? (isPaused ? "Resuming..." : "Playing") : "Listen with Voice Narrator"}
+      </span>
+    </button>
+  </div>
+)}
 
             <div className={styles.content}>{formatContent(data.content)}</div>
             <hr className={styles.divider} />

@@ -10,27 +10,44 @@ html, body {
 
   background-color: #0b0d13; 
 }
-
 .container {
+
   height: 100dvh;
+
   width: 100vw;
+
   overflow: hidden;
-  background-color: #0b0d13;
+
+  background-color: #00000070;
+
   color: #f8fafc;
+
   font-family: system-ui, -apple-system, sans-serif;
+
   display: flex;
+
   flex-direction: column;
+
   box-sizing: border-box;
+
   padding-top: var(--nav-top-height);
+
   padding-bottom: var(--nav-bottom-height);
+
   overflow: hidden;
+
+ 
+
 }
+
+
 
 .chatWrapper {
   display: flex;
   flex: 1;
   width: 90%;
   max-width: 1400px;
+  padding-top: 20px;
   margin: 20px auto;
   background: #111422;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -38,6 +55,7 @@ html, body {
   overflow: hidden;
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
   min-height: 0; 
+ 
 }
 
 .chatSidebar { 
@@ -55,12 +73,14 @@ html, body {
 .sidebarSearchInput { width: 100%; padding: 12px; background: #0b0d13; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; color: #fff; outline: none; margin-bottom: 20px; }
 
 .conversationsList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.chatCard { padding: 16px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 12px; cursor: pointer; }
+.chatCard { padding: 16px; background: rgba(255, 255, 255, 0.02); 
+  max-height: 70px; min-height: 70px; padding: 5px 10px; display: flex; flex-direction: column; overflow-y: hidden; border: 1px solid rgba(255, 255, 255, 0.03); border-radius: 12px; cursor: pointer; }
 .chatCardActive { background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.4); }
 .chatCardHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 .username { font-weight: 600; color: #fff; }
 .timestamp { font-size: 0.7rem; color: #64748b; }
-.lastMessage { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; overflow: hidden; }
+.lastMessage { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; overflow: hidden;padding-bottom:20px;
+  height: 10px; word-wrap: break-word;  }
 
 .chatMain { flex: 1; display: flex; flex-direction: column; background: #0b0d13; min-width: 0; min-height: 0; }
 .mainHeader { padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: #111422; display: flex; align-items: center; gap: 10px; }
@@ -85,7 +105,7 @@ html, body {
   word-wrap: break-word;
   word-break: break-word;   
   overflow-wrap: break-word;
-  max-width: 90%;           
+            
   display: inline-block;
 }
 
@@ -117,9 +137,9 @@ html, body {
 
 .messageInput {
   flex: 1;
-  padding: 10px 15px;
+  padding: 4px 15px;
   background: #181c2e; 
-  border: 1px solid #334155;
+  border: none;
   border-radius: 20px; 
   color: white;
   outline: none;
@@ -127,7 +147,7 @@ html, body {
   line-height: 1.4;
   resize: none; 
   min-height: 45px;
-  max-height: 120px; 
+  max-height: 70px; 
   overflow-y: auto; 
   scrollbar-width: thin; 
 }
@@ -136,11 +156,12 @@ html, body {
 .messageInput::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
 
 .messageForm {
-  padding: 15px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border: none;
   display: flex;
   gap: 10px;
   align-items: flex-end; 
+  
 }
 .iconButton {
   background: rgba(255, 255, 255, 0.05);
@@ -205,4 +226,36 @@ html, body {
   .chatMain { display: none; width: 100%; }
   .wrapperHasActive .chatMain { display: flex !important; }
   .messageInput { font-size: 16px; }
+  .container {
+
+  height: calc(100dvh - 20px);
+  width: 100vw;
+  background-color: #000103;
+  color: #f8fafc;
+  font-family: system-ui, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0px;
+  padding-bottom: 40px;
+  box-sizing: border-box;
+  overflow: hidden;
+  
+}
+
+.chatWrapper {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  max-width: 1400px;
+  padding-top: 10px;
+  margin: 20px auto;
+  background: #111422;
+ 
+  
+  overflow: hidden;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  height:100%;
+  
+ 
+}
 }

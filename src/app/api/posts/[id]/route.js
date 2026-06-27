@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import connectMongoDb from "../../../../../lib/mongodb";
 import Post from "../../../../../models/post";
+import { UTApi } from "uploadthing/server"; 
+
+const utapi = new UTApi();
 
 export const GET = async (req, { params }) => {
     const { id } = await params;
@@ -13,7 +16,7 @@ export const GET = async (req, { params }) => {
     }
 };
 
-export const PATCH =  async (req, { params }) => {
+export const PATCH = async (req, { params }) => {
     const { id } = await params;
     try {
         const { title, description, content, status, imageUrl, tags, category } = await req.json();
@@ -40,8 +43,27 @@ export const DELETE = async (req, { params }) => {
     const { id } = await params;
     try {
         await connectMongoDb();
+
+
+        const post = await Post.findById(id);
+        
+        if (!post) {
+            return NextResponse.json({ message: "Post not found" }, { status: 404 });
+        }
+
+      
+        if (post.imageUrl) {
+           
+            const fileKey = post.imageUrl.split('/').pop();
+            if (fileKey) {
+                await utapi.deleteFiles(fileKey);
+            }
+        }
+
+     
         await Post.findByIdAndDelete(id);
-        return NextResponse.json({ message: "Post deleted successfully" }, { status: 200 });
+
+        return NextResponse.json({ message: "Post and image deleted successfully" }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ message: "Error deleting post" }, { status: 500 });
     }

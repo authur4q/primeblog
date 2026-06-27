@@ -66,13 +66,13 @@
 }
 
 .postImage {
-width: 100%;
+  width: 100%;
   height: 100%;
   object-fit: contain; 
- 
   cursor: pointer;
   transition: transform 0.3s ease;
 }
+
 .fullscreenOverlay {
   position: fixed;
   top: 0;
@@ -163,53 +163,64 @@ width: 100%;
 }
 
 .audioNarratorCard {
-  background: rgba(245, 172, 172, 0.815);
-  border-radius: 8px;
-  padding: 14px 18px;
-  margin: 10px 0;
+  background: rgba(209, 154, 154, 0.2);
+  border: 1px solid rgba(209, 154, 154, 0.3);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px 0;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  box-sizing: border-box;
+  gap: 15px;
+  color: #fff;
 }
 
-.audioMeta {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.audioTitle {
-  font-size: 0.95rem;
+.audioNarratorHeader {
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #ffffffe8;
   margin: 0;
+  text-align: center;
 }
-
-.audioStatus {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.76);
-  margin: 2px 0 0 0;
-}
-
-.audioBtnPrimary {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
+.audioBtnSimple {
+  background: linear-gradient(90deg, #d19a9a, #ff3040);
   border: none;
-  background-color: #dfb6b2;
-  color: #1a1a1a;
-  transition: opacity 0.2s ease;
-  white-space: nowrap;
+  border-radius: 50px;
+  padding: 12px 30px;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: transform 0.2s;
 }
 
-.audioBtnPrimary:hover {
-  opacity: 0.9;
+.waveContainer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
+}
+
+
+.waveBar {
+  width: 3px;
+  height: 100%;
+  background: white;
+  border-radius: 2px;
+  animation: waveAnimation 1s infinite ease-in-out;
+}
+
+.waveBar:nth-child(1) { animation-delay: 0.1s; }
+.waveBar:nth-child(2) { animation-delay: 0.3s; }
+.waveBar:nth-child(3) { animation-delay: 0.5s; }
+.waveBar:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes waveAnimation {
+  0%, 100% { height: 40%; }
+  50% { height: 100%; }
 }
 
 .content {
@@ -292,14 +303,13 @@ width: 100%;
   cursor: not-allowed;
 }
 
-
 .commentsList {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin-top: 10px;
   max-height: 500px; 
-  overflow-y: auto;  
+  overflow-y: auto;   
   padding-right: 10px;
 }
 
@@ -426,7 +436,7 @@ width: 100%;
 }
 
 @media screen and (max-width: 768px) {
-  .container { padding: 80px 16px 20px 16px; }
+  .container { padding: 80px 16px 20px 16px;padding-top:6px;padding-bottom: 50px; }
   .wrapper { gap: 16px; }
   .title { font-size: 1.75rem; }
   .audioNarratorCard { flex-direction: column; align-items: stretch; }
