@@ -211,7 +211,7 @@
 
 .homeCard:hover {
   transform: translateY(-4px);
-  border-color: #04c21e;
+  
 }
 
 .cardImage {

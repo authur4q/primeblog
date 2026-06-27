@@ -80,7 +80,7 @@ html, body {
 .username { font-weight: 600; color: #fff; }
 .timestamp { font-size: 0.7rem; color: #64748b; }
 .lastMessage { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; overflow: hidden;padding-bottom:20px;
-  height: 10px; word-wrap: break-word;  }
+  height: 9px; word-wrap: break-word;  }
 
 .chatMain { flex: 1; display: flex; flex-direction: column; background: #0b0d13; min-width: 0; min-height: 0; }
 .mainHeader { padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: #111422; display: flex; align-items: center; gap: 10px; }
