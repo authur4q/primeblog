@@ -42,7 +42,7 @@ function SecuritySettingsModal({ onClose, isPremium, userId }) {
 
   return (
     <div className={styles.fullScreenModal}>
-      <button onClick={onClose} className={styles.modalBackBtn}>&larr; Back to Profile</button>
+      <button onClick={onClose} className={styles.modalBackBtn}>&larr; Back </button>
       <h2 className={styles.modalMainTitle}>Prime Secure Settings</h2>
       
       {!isPremium ? (
