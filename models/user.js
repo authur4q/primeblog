@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import WebAuthnCredential from "./webAuthnCredential";
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -61,6 +62,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "free"
   },
+ 
+biometricsEnabled: {
+    type: Boolean,
+    default: false,
+  },
   premiumUntil: { type: Date, default: null },
   phoneNumber: { type: String, sparse: true },
   primaryPhone: { type: String, unique: true, sparse: true },
@@ -70,11 +76,16 @@ const userSchema = new mongoose.Schema({
     trim: true,
     default: ""
   },
+  webAuthnChallenge: {
+    type: String,
+    default: null
+  },
   status: {
   type: String,
   trim: true,
   default: "Hello! I'm here."
 },
+devices: [Object],
   Instagram: {
     type: String,
     trim: true,
@@ -105,6 +116,13 @@ userSchema.pre(["updateOne", "findOneAndReplace", "findOneAndUpdate"], function 
       if (update.$set.lastTransactionId === "") update.$set.lastTransactionId = undefined;
     }
   }
+  next();
+});
+
+
+userSchema.pre("findOneAndDelete", async function(next) {
+  const userId = this.getQuery()._id;
+  await WebAuthnCredential.deleteMany({ userId });
   next();
 });
 
