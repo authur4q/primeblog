@@ -11,15 +11,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {},
       async authorize(credentials) {
         await connectMongoDb();
-        
-        // Handle Biometric flow: Verify credentials passed from Login.jsx
+      
         if (credentials.isWebAuthn === "true") {
           const user = await User.findById(credentials.userId);
           if (!user) throw new Error("User not found");
           return user; 
         }
 
-        // Handle Standard Password flow
         const { email, password } = credentials;
         if (!email || !password) {
           throw new Error("Please fill all the fields");

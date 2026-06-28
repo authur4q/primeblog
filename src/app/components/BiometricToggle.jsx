@@ -32,7 +32,7 @@ export default function BiometricToggle({ isEnabled, onToggle, userId }) {
           onToggle();
         }
       } catch (error) {
-        console.error("Biometric registration failed:", error);
+        console.error("Biometric registration failed:");
       }
     } else {
       onToggle();
@@ -56,7 +56,7 @@ export default function BiometricToggle({ isEnabled, onToggle, userId }) {
           Biometric Login
         </h4>
         <p style={{ margin: 0, fontSize: '0.875rem', color: isEnabled ? '#059669' : '#6b7280' }}>
-          {isEnabled ? "✓ Biometrics are currently enabled" : "Secure your account with FaceID or TouchID"}
+          {isEnabled ? "Biometrics are currently enabled" : "Secure your account with FaceID or TouchID"}
         </p>
       </div>
       

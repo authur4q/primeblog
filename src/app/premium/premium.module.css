@@ -543,7 +543,7 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-/* --- Security Modal Styles --- */
+
 .fullScreenModal {
   position: fixed;
   top: 0;
@@ -593,7 +593,7 @@
 .securityContent {
   max-width: 500px;
 }
-/* --- Security Modal Styles --- */
+
 .fullScreenModal {
   position: fixed;
   top: 0;

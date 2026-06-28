@@ -8,7 +8,6 @@ export async function POST(req) {
     allowCredentials: [],
   });
   
-  // Note: To use resident keys, you must manage challenge storage 
-  // globally or via temporary session for this specific login attempt.
+
   return Response.json(options);
 }

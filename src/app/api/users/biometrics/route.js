@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import connect from '../../../../../lib/mongodb'; // Your DB connection utility
-import User from '../../../../../models/user';   // Your User model
+import connect from '../../../../../lib/mongodb'; 
+import User from '../../../../../models/user';   
 
 export async function PATCH(request) {
   try {
@@ -8,7 +8,7 @@ export async function PATCH(request) {
     
     await connect();
     
-    // Update the user document in MongoDB
+   
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { biometricsEnabled: enabled },

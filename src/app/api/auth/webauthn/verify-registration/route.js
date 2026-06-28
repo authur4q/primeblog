@@ -10,7 +10,7 @@ import { verifyRegistrationResponse } from "@simplewebauthn/server";
 
 export async function POST(req) {
   try {
-    // 1. Read the body ONCE
+    
     const data = await req.json();
     const { attestation, userId, currentChallenge } = data;
 
@@ -22,14 +22,12 @@ export async function POST(req) {
 
     await connectMongoDb();
 
-    // 2. Fetch the user
     const user = await User.findById(userId);
     if (!user) {
       return new Response("User not found", { status: 404 });
     }
 
-    // 3. Verify the registration response
-    // The library compares the browser's response against your expected challenge
+
     const verification = await verifyRegistrationResponse({
       response: attestation,
       expectedChallenge: currentChallenge,
@@ -38,7 +36,7 @@ export async function POST(req) {
     });
 
     if (verification.verified) {
-      // 4. Save the new credential to your User model
+      
       const { registrationInfo } = verification;
       
       user.devices = user.devices || [];

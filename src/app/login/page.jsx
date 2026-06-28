@@ -54,19 +54,19 @@ const Login = () => {
       const verificationData = await verificationResp.json();
 
       if (verificationResp.ok && verificationData.verified) {
-        // Authenticated! Now tell NextAuth to create the session
+      
         await signIn("credentials", {
           isWebAuthn: "true",
           userId: userId,
           redirect: true,
-          callbackUrl: "/dashboard",
+          callbackUrl: "/",
         });
       } else {
         throw new Error(verificationData.error || "Verification failed");
       }
     } catch (err) {
       console.error("Biometric login failed", err);
-      setError(err.message);
+      setError("Biometric login failed:Upgrade to Prime Premium to access this Feature");
     } finally {
       setLoading(false);
     }

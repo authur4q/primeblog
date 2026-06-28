@@ -13,13 +13,10 @@ export async function POST(req) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
-    // 1. Normalize and find the credential
-    // We convert the stored Binary/Buffer credentialID to a base64url string 
-    // to match the format of assertion.id
+
     const credential = user.devices.find((d) => {
       let storedId = d.credentialID;
-      
-      // If it's a BSON Binary or Buffer, convert to base64url
+l
       if (storedId && typeof storedId !== 'string') {
         storedId = Buffer.from(storedId.buffer || storedId).toString('base64url');
       }
@@ -34,12 +31,11 @@ export async function POST(req) {
       );
     }
 
-    // 2. Ensure credentialPublicKey is a Uint8Array
     const pubKeyBuffer = typeof credential.credentialPublicKey === 'string'
       ? Uint8Array.from(atob(credential.credentialPublicKey), c => c.charCodeAt(0))
       : new Uint8Array(credential.credentialPublicKey.buffer || credential.credentialPublicKey);
 
-    // 3. Verify the assertion
+   
     const verification = await verifyAuthenticationResponse({
       response: assertion,
       expectedChallenge: user.webAuthnChallenge,
