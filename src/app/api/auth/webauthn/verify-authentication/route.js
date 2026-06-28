@@ -16,7 +16,7 @@ export async function POST(req) {
 
     const credential = user.devices.find((d) => {
       let storedId = d.credentialID;
-l
+
       if (storedId && typeof storedId !== 'string') {
         storedId = Buffer.from(storedId.buffer || storedId).toString('base64url');
       }
