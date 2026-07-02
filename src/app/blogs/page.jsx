@@ -6,6 +6,7 @@ import styles from "./blogs.module.css";
 import Link from 'next/link';
 import Image from 'next/image'; 
 import { format, parseISO } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 const Blogs = () => {
   const [data, setData] = useState([]);
@@ -13,6 +14,7 @@ const Blogs = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const router = useRouter();
 
   const commonCategories = ["All", "Sports", "Beauty", "Tech", "Lifestyle", "Finance", "Education"];
 
@@ -21,6 +23,11 @@ const Blogs = () => {
       try {
         setLoading(true);
         const res = await fetch("/api/posts");
+        console.log("Fetched posts:", res);
+        if (res.status === 429) {
+      router.push('/too-many-requests');
+    }
+  
         if (!res.ok) throw new Error("Failed to fetch posts");
         const json = await res.json();
         const postsArray = Array.isArray(json) ? json : (json.posts || []);
