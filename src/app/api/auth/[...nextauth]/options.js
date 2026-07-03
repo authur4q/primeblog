@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "../../../../../models/user";
 import connectMongoDb from "../../../../../lib/mongodb";
+import redis from "../../../../../lib/redis";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -69,27 +70,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.twitter = session.twitter !== undefined ? session.twitter : token.twitter;
         token.Instagram = session.Instagram !== undefined ? session.Instagram : token.Instagram;
         token.primaryPhone = session.primaryPhone !== undefined ? session.primaryPhone : token.primaryPhone; 
-        
+
         try {
           await connectMongoDb();
           const dbUser = await User.findById(token.id).select("isPremium premiumUntil");
           if (dbUser) {
             token.isPremium = dbUser.isPremium;
             token.premiumUntil = dbUser.premiumUntil ? dbUser.premiumUntil.toISOString() : null;
+            await redis.set(`user:premium:${token.id}`, JSON.stringify({ isPremium: token.isPremium, premiumUntil: token.premiumUntil }), { ex: 900 });
           }
         } catch (error) {
-          console.error("JWT update trigger verification database fallback error:", error);
+          console.error("JWT update trigger DB fallback error:", error);
         }
       } else if (token?.id) {
+      
+        const cacheKey = `user:premium:${token.id}`;
         try {
-          await connectMongoDb();
-          const dbUser = await User.findById(token.id).select("isPremium premiumUntil");
-          if (dbUser) {
-            token.isPremium = dbUser.isPremium;
-            token.premiumUntil = dbUser.premiumUntil ? dbUser.premiumUntil.toISOString() : null;
+          const cachedPremium = await redis.get(cacheKey);
+          if (cachedPremium) {
+            const data = JSON.parse(cachedPremium);
+            token.isPremium = data.isPremium;
+            token.premiumUntil = data.premiumUntil;
+          } else {
+            await connectMongoDb();
+            const dbUser = await User.findById(token.id).select("isPremium premiumUntil");
+            if (dbUser) {
+              token.isPremium = dbUser.isPremium;
+              token.premiumUntil = dbUser.premiumUntil ? dbUser.premiumUntil.toISOString() : null;
+              await redis.set(cacheKey, JSON.stringify({ isPremium: token.isPremium, premiumUntil: token.premiumUntil }), { ex: 900 });
+            }
           }
         } catch (error) {
-          console.error("JWT dynamic auto-refresh synchronization crash:", error);
+          console.error("JWT Redis/DB sync error:", error);
         }
       }
       
@@ -111,21 +123,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return session;
         }
 
+   
         if (session.user.isPremium && token.id) {
           try {
-            await connectMongoDb();
-            const dbUser = await User.findById(token.id);
-            if (dbUser) {
-              const today = new Date();
-              if (dbUser.premiumUntil && today > new Date(dbUser.premiumUntil)) {
-                await User.findByIdAndUpdate(token.id, {
-                  $set: { isPremium: false, subscriptionPlan: "free" },
-                  $unset: { premiumUntil: "" }
-                });
-                session.user.isPremium = false;
-                token.isPremium = false;
-                token.premiumUntil = null;
-              }
+            const today = new Date();
+            if (token.premiumUntil && today > new Date(token.premiumUntil)) {
+              await connectMongoDb();
+              await User.findByIdAndUpdate(token.id, {
+                $set: { isPremium: false, subscriptionPlan: "free" },
+                $unset: { premiumUntil: "" }
+              });
+            
+              await redis.del(`user:premium:${token.id}`);
+              
+              session.user.isPremium = false;
+              token.isPremium = false;
+              token.premiumUntil = null;
             }
           } catch (error) {
             console.error("Subscription validation crash:", error);

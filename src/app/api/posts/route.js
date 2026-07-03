@@ -25,7 +25,7 @@ export const POST = async (req) => {
         };
         await Post.create(post);
         return NextResponse.json({ message: "Post created successfully" }, { status: 201 });
-    } catch (error) {
+    } catch{
         return NextResponse.json({ message: "Post not created" }, { status: 500 });
     }
 };
