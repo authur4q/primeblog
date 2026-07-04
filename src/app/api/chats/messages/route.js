@@ -3,6 +3,7 @@ import Message from "../../../../../models/messages"
 import Notification from "../../../../../models/Notification" 
 import mongoose from "mongoose"
 import connectMongoDb from "../../../../../lib/mongodb"
+import redis from "../../../../../lib/redis"
 
 export async function GET(req) {
   try {
@@ -12,7 +13,10 @@ export async function GET(req) {
     const conversationId = searchParams.get("conversationId")
     const limit = parseInt(searchParams.get("limit"), 10) || 20
     const beforeMessageId = searchParams.get("before")
+    const cacheKey = `messages:${conversationId}:${beforeMessageId || 'latest'}:${limit}`
 
+    const cachedMessages = await redis.get(cacheKey)  
+    
     if (!conversationId) {
       return NextResponse.json({ error: "Missing conversationId" }, { status: 400 })
     }
@@ -22,9 +26,26 @@ export async function GET(req) {
       query._id = { $lt: beforeMessageId }
     }
 
+    if (cachedMessages) {
+      try {
+        const data = typeof cachedMessages === 'string' ? JSON.parse(cachedMessages) : cachedMessages;
+        return NextResponse.json(data, { status: 200 });
+      } catch (error) {
+        await redis.del(cacheKey);
+      }
+    }
+
     const messages = await Message.find(query)
       .sort({ _id: -1 }) 
       .limit(limit)
+
+      if(!messages || messages.length === 0){
+        return NextResponse.json({ error: "No messages found" }, { status: 404 })
+      }
+
+    await redis.set(cacheKey, JSON.stringify(messages), { ex: 300 })
+    return NextResponse.json(messages.reverse(), { status: 200 })
+
 
     return NextResponse.json(messages.reverse(), { status: 200 })
   } catch (error) {

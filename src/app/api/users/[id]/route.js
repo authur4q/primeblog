@@ -4,6 +4,7 @@ import Notification from "../../../../../models/Notification"
 import mongoose from "mongoose"
 import connectMongoDb from "../../../../../lib/mongodb"
 import { auth } from "@/app/api/auth/[...nextauth]/options"
+import redis from "../../../../../lib/redis"
 
 const buildUserQuery = (id) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
@@ -19,26 +20,43 @@ const buildUserQuery = (id) => {
 
 export const GET = async (req, { params }) => {
     try {
-        const { id } = await params
+        const { id } = await params;
+        const cacheKey = `user:${id}:profile`;
 
         if (id === "search") {
-            return NextResponse.json({ error: "Route handled by search endpoint" }, { status: 404 })
+            return NextResponse.json({ error: "Route handled by search endpoint" }, { status: 404 });
         }
 
-        await connectMongoDb()
-
-        const queryCondition = buildUserQuery(id)
-        const user = await User.findOne(queryCondition).select("-password")
         
+        const cachedProfile = await redis.get(cacheKey);
+        if (cachedProfile) {
+            
+            try {
+                const data = typeof cachedProfile === 'string' ? JSON.parse(cachedProfile) : cachedProfile;
+                console.log("Returning cachedprofie")
+                return NextResponse.json(data, { status: 200 });
+            } catch (e) {
+                await redis.del(cacheKey); 
+            }
+        }
+
+        
+        await connectMongoDb();
+        const queryCondition = buildUserQuery(id);
+        const user = await User.findOne(queryCondition).select("-password").lean();
+
         if (!user) {
-            console.error(`User account with identifier "${id}" was not found in MongoDB.`)
-            return NextResponse.json({ error: "User profile not found" }, { status: 404 })
+            console.error(`User account with identifier "${id}" was not found.`);
+            return NextResponse.json({ error: "User profile not found" }, { status: 404 });
         }
+
         
-        return NextResponse.json(user, { status: 200 })
+        await redis.set(cacheKey, JSON.stringify(user), { ex: 3600 });
+        
+        return NextResponse.json(user, { status: 200 });
     } catch (error) {
-        console.error("Critical error in GET /api/users/[id]:", error)
-        return NextResponse.json({ error: "Server error retrieving profile details" }, { status: 500 })
+        console.error("Critical error in GET /api/users/[id]:", error);
+        return NextResponse.json({ error: "Server error retrieving profile details" }, { status: 500 });
     }
 }
 

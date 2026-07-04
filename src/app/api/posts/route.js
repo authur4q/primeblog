@@ -6,6 +6,7 @@ import redis from "../../../../lib/redis";
 
 export const POST = async (req) => {
     try {
+        const cacheKey = `posts:${query.status}:${userId || 'all'}`;
         const { title, description, content, userId, name, status, imageUrl, tags, category } = await req.json();
         if (!title || !userId) return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
 
@@ -24,6 +25,7 @@ export const POST = async (req) => {
             isPremium: user ? user.isPremium : false
         };
         await Post.create(post);
+        await redis.del(cacheKey);
         return NextResponse.json({ message: "Post created successfully" }, { status: 201 });
     } catch{
         return NextResponse.json({ message: "Post not created" }, { status: 500 });

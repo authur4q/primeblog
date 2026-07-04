@@ -117,11 +117,17 @@ const ChatPage = () => {
                             .filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())))
                             .map(chat => (
                                 <div key={chat._id} onClick={() => setSelectedChat(chat)} className={`${styles.chatCard} ${selectedChat?._id === chat._id ? styles.chatCardActive : ''}`}>
+                                    <div className={styles.avatar}>
+                                        {chat.participants.find(p => p._id !== userId)?.name?.charAt(0).toUpperCase() || "?"}
+                                    </div>
+                                    <div className={styles.chatCardContent}>
                                     <div className={styles.chatCardHeader}>
                                         <strong className={styles.username}>{chat.participants.find(p => p._id !== userId)?.name}</strong>
                                         <span className={styles.timestamp}>{chat.updatedAt ? new Date(chat.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
                                     </div>
                                     <p className={styles.lastMessage}>{chat.lastMessage}</p>
+                                    </div>
+
                                 </div>
                             ))}
                     </div>
@@ -164,7 +170,7 @@ const ChatPage = () => {
                                     }}
                                     placeholder="Message..." 
                                 />
-                                <button type="submit" className={styles.sendButton}><SendHorizontal size={20} /></button>
+                                <button type="submit" className={styles.sendButton}><SendHorizontal size={30} /></button>
                             </form>
                         </>
                     ) : (

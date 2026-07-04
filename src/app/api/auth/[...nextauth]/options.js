@@ -88,7 +88,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const cachedPremium = await redis.get(cacheKey);
           if (cachedPremium) {
-            const data = JSON.parse(cachedPremium);
+            const data = typeof cachedPremium === 'string' ? JSON.parse(cachedPremium) : cachedPremium;
             token.isPremium = data.isPremium;
             token.premiumUntil = data.premiumUntil;
           } else {
@@ -102,6 +102,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         } catch (error) {
           console.error("JWT Redis/DB sync error:", error);
+          await redis.del(cacheKey)
+          data = null
         }
       }
       

@@ -3,6 +3,7 @@ import { auth } from "@/app/api/auth/[...nextauth]/options";
 import connectMongoDb from "../../../../../lib/mongodb";
 import Conversation from "../../../../../models/conversation";
 
+
 export async function POST(req) {
   try {
     const session = await auth();
