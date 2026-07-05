@@ -1,94 +1,105 @@
-import { NextResponse } from "next/server"
-import Message from "../../../../../models/messages"
-import Notification from "../../../../../models/Notification" 
-import mongoose from "mongoose"
-import connectMongoDb from "../../../../../lib/mongodb"
-import redis from "../../../../../lib/redis"
+import { NextResponse } from "next/server";
+import Message from "../../../../../models/messages";
+import Notification from "../../../../../models/Notification";
+import mongoose from "mongoose";
+import connectMongoDb from "../../../../../lib/mongodb";
+import redis from "../../../../../lib/redis";
+import Pusher from "pusher";
+
+
+const pusherServer = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER,
+  useTLS: true,
+});
 
 export async function GET(req) {
   try {
-    await connectMongoDb()
+    await connectMongoDb();
 
-    const { searchParams } = new URL(req.url)
-    const conversationId = searchParams.get("conversationId")
-    const limit = parseInt(searchParams.get("limit"), 10) || 20
-    const beforeMessageId = searchParams.get("before")
-    const cacheKey = `messages:${conversationId}:${beforeMessageId || 'latest'}:${limit}`
+    const { searchParams } = new URL(req.url);
+    const conversationId = searchParams.get("conversationId");
+    const limit = parseInt(searchParams.get("limit"), 10) || 20;
+    const beforeMessageId = searchParams.get("before");
+    const cacheKey = `messages:${conversationId}:${beforeMessageId || 'latest'}:${limit}`;
 
-    const cachedMessages = await redis.get(cacheKey)  
-    
     if (!conversationId) {
-      return NextResponse.json({ error: "Missing conversationId" }, { status: 400 })
+      return NextResponse.json({ error: "Missing conversationId" }, { status: 400 });
     }
 
-    const query = { conversationId }
-    if (beforeMessageId) {
-      query._id = { $lt: beforeMessageId }
-    }
-
+  
+    const cachedMessages = await redis.get(cacheKey);
     if (cachedMessages) {
       try {
         const data = typeof cachedMessages === 'string' ? JSON.parse(cachedMessages) : cachedMessages;
-        return NextResponse.json(data, { status: 200 });
-      } catch (error) {
+        return NextResponse.json(data.reverse(), { status: 200 });
+      } catch {
         await redis.del(cacheKey);
       }
     }
 
+    const query = { conversationId };
+    if (beforeMessageId) {
+      query._id = { $lt: beforeMessageId };
+    }
+
     const messages = await Message.find(query)
-      .sort({ _id: -1 }) 
-      .limit(limit)
+      .sort({ _id: -1 })
+      .limit(limit);
 
-      if(!messages || messages.length === 0){
-        return NextResponse.json({ error: "No messages found" }, { status: 404 })
-      }
+    if (!messages || messages.length === 0) {
+      return NextResponse.json({ error: "No messages found" }, { status: 404 });
+    }
 
-    await redis.set(cacheKey, JSON.stringify(messages), { ex: 300 })
-    return NextResponse.json(messages.reverse(), { status: 200 })
+   
+    await redis.set(cacheKey, JSON.stringify(messages), { ex: 30 });
+    return NextResponse.json(messages.reverse(), { status: 200 });
 
-
-    return NextResponse.json(messages.reverse(), { status: 200 })
   } catch (error) {
-    console.error("Error fetching messages:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    console.error("Error fetching messages:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
 
 export async function POST(req) {
   try {
-    await connectMongoDb()
+    await connectMongoDb();
 
-    const body = await req.json()
-    const { conversationId, senderId, text, recipientId } = body
+    const body = await req.json();
+    const { conversationId, senderId, text, recipientId } = body;
 
     if (!conversationId || !senderId || !text?.trim()) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-   
     const newMessage = await Message.create({
       conversationId,
       senderId,
       text: text.trim(),
-    })
+    });
 
 
+    await pusherServer.trigger(conversationId, "new-message", newMessage);
+
+  
     await mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
       lastMessage: text.trim(),
       updatedAt: new Date()
     });
 
-    let determinedRecipient = recipientId
+   
+    let determinedRecipient = recipientId;
     if (!determinedRecipient && mongoose.models.Conversation) {
-      const activeConvo = await mongoose.models.Conversation.findById(conversationId).lean()
+      const activeConvo = await mongoose.models.Conversation.findById(conversationId).lean();
       if (activeConvo && Array.isArray(activeConvo.participants)) {
         determinedRecipient = activeConvo.participants.find(
           (pId) => pId.toString() !== senderId.toString()
-        )
+        );
       }
     }
 
-    
     if (determinedRecipient) {
       await Notification.create({
         recipient: new mongoose.Types.ObjectId(String(determinedRecipient)),
@@ -97,12 +108,12 @@ export async function POST(req) {
         title: "New Message Received",
         message: text.trim().length > 40 ? `${text.trim().substring(0, 40)}...` : text.trim(),
         read: false,
-      })
+      });
     }
 
-    return NextResponse.json(newMessage, { status: 201 })
+    return NextResponse.json(newMessage, { status: 201 });
   } catch (error) {
-    console.error("Error in POST /api/chats/messages:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    console.error("Error in POST /api/chats/messages:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

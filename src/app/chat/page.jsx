@@ -110,7 +110,7 @@ const ChatPage = () => {
             <Navbar />
             <div className={`${styles.chatWrapper} ${selectedChat ? styles.wrapperHasActive : ''}`}>
                 <div className={styles.chatSidebar}>
-                    <h3 className={styles.sidebarHeading}>Chats</h3>
+                   
                     <input className={styles.sidebarSearchInput} placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                     <div className={styles.conversationsList}>
                         {Array.isArray(conversations) && conversations
