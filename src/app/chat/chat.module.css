@@ -226,14 +226,16 @@
 .iconButton:hover { color: var(--accent-indigo); }
 
 @media (max-width: 768px) {
-  .container { height: 100dvh; }
+  .container { height: 100dvh;padding: 0; }
   .chatWrapper { 
     width: 100vw; 
     margin: 0; 
     border-radius: 0; 
+   
+    
     border: none; 
   }
-  .chatSidebar { width: 100%; border-right: none;padding: 10px 10px 5px 10px;margin-top: 30px;background-color: rgba(0, 0, 0, 0.692); }
+  .chatSidebar { width: 100%; border-right: none;padding: 10px 10px 5px 10px;margin-top: 40px;background-color: rgba(0, 0, 0, 0.692); }
   .wrapperHasActive .chatSidebar { display: none !important; }
   .chatMain { display: none; }
   .wrapperHasActive .chatMain { display: flex !important; }
@@ -256,7 +258,7 @@
   gap: 15px;
     align-items: center;
     margin-top: 60px;
-    background-color: rgb(0, 0, 0);
+    border:none;
     padding: 6px 5px;
     font-size: 1.25rem;
     font-style: system-ui, -apple-system, sans-serif;
