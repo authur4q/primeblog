@@ -241,16 +241,16 @@
   .wrapperHasActive .chatMain { display: flex !important; }
 
 .messageForm {
-  margin-bottom:46px;
+  margin-bottom:0px;
   display: flex;
   background-color: rgb(0, 0, 3);
   gap: 12px;
-  border: none;
+  
   position:relative;
   align-items: center; 
-  border-top: 1px solid var(--border-subtle);
+  border:none;
   flex-shrink: 0;
-  padding-top: 6px;
+  padding-top: 0px;
 }
 .mainHeader { 
   display: flex;
