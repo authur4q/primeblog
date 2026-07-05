@@ -9,13 +9,7 @@
   --border-subtle: rgba(255, 255, 255, 0.05);
 }
 
-html, body { 
-  height: 100%; 
-  margin: 0; 
-  padding: 0; 
-  background-color: var(--bg-dark); 
-  overflow: hidden;
-}
+
 
 .container {
   
