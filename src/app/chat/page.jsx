@@ -145,8 +145,8 @@ const ChatPage = () => {
                                     <div key={msg._id} className={`${styles.messageGroup} ${msg.senderId === userId ? styles.groupMe : ''}`}>
                                         <div className={`${styles.messageBubble} ${msg.senderId === userId ? styles.messageMe : styles.messageThem}`}>
                                             {msg.text.startsWith('http') ? (
-                                                <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>
-                                                    <MapPin size={24}/>
+                                                <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
+                                                    <MapPin size={34}/>
                                                 </a>
                                             ) : (
                                                 msg.text
@@ -158,6 +158,7 @@ const ChatPage = () => {
                             </div>
                             <form onSubmit={handleSendMessage} className={styles.messageForm}>
                                 <ShareLocationButton 
+                                className={styles.shareLocation}
                                     onLocationShare={(link) => setNewMessageText(prev => prev + " " + link)} 
                                 />
                                 <textarea 
