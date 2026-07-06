@@ -5,6 +5,7 @@
   background-position: center;
   background-attachment: fixed;
   background-color: #0f111a56;
+    overflow-y: scroll;
   color: #ffffff;
   padding-bottom: 4rem;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

@@ -6,6 +6,8 @@
   background-attachment: fixed;
   background-color: #0f111a5e;
   color: #ffffff;
+  overflow-y: scroll;
+
   padding-bottom: 4rem;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -13,7 +15,8 @@
 .wrapper {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 4rem 1.5rem 0 1.5rem;
+  padding: 70px 20px;
+  overflow-y: scroll;
 }
 
 .profileCard {

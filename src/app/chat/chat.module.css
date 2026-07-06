@@ -27,11 +27,24 @@
   min-height: 0;
   overflow: hidden;
 
-  padding-bottom: var(--navbar-height);
-  padding-top:20px;
-  background: var(--wa-bg-panel);
+
   font-family: "Segoe UI", Helvetica, Arial, sans-serif;
   color: var(--wa-text-primary);
+}
+
+.header{
+  display:flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  padding: 0 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.headerTitle {
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
 .loadingContainer {
@@ -52,6 +65,7 @@
   min-height: 0;
   overflow: hidden;
   background: var(--wa-bg-panel);
+
 }
 
 
@@ -182,19 +196,30 @@
     radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 22px 22px;
 }
+.callButtons{
+  display: flex;
+  gap: 10px;
+  align-items: center;
 
+}
 .mainHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 0 16px;
   height: 60px;
   flex-shrink: 0;
   background: var(--wa-bg-panel);
-  border-bottom: 1px solid var(--wa-border);
+  border-bottom: none;
   font-size: 1rem;
   font-weight: 500;
   color: var(--wa-text-primary);
+}
+.backUserName{
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .mobileBackButton {
@@ -398,7 +423,7 @@
 
 .typingIndicator {
     font-size: 0.75rem;
-    color: #6366f1;
+    color: #0508bb;
     font-style: italic;
     margin-top: 2px;
 }
@@ -408,7 +433,7 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    color: #333;
+    color: #fffefe;
     padding: 8px;
     border-radius: 50%;
     transition: background 0.2s;
@@ -417,7 +442,7 @@
 }
 
 .callButton:hover {
-    background-color: #f0f0f0;
+    background-color: #02743b;
 }
 
 .callButton:disabled {

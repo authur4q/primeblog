@@ -23,12 +23,13 @@
 .wrapper {
   width: 100%;
   max-width: 800px;
-  padding: 20px 0;
+  padding: 45px 10px;
   margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 24px;
   box-sizing: border-box;
+  overflow: scroll;
 }
 
 .metaRow {

@@ -12,7 +12,7 @@
   background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(12px);
   z-index: 1000;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom:none;
   box-sizing: border-box;
 }
 .userMenuWrapper { position: relative; }

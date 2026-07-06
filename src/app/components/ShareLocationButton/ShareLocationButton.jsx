@@ -1,6 +1,6 @@
 "use client";
 import { MapPin } from 'lucide-react';
-import styles from "../../chat/chat.module.css";
+import styles from "./shareLocation.module.css";
 
 export default function ShareLocationButton({ onLocationShare }) {
   const handleShare = () => {
@@ -25,9 +25,9 @@ export default function ShareLocationButton({ onLocationShare }) {
     <button 
       type="button" 
       onClick={handleShare}
-      className={styles.iconButton}
+      className={styles.shareLocation}
     >
-      <MapPin size={20} />
+      <MapPin size={28} />
     </button>
   );
 }
