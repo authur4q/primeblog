@@ -381,3 +381,50 @@
     transition: none;
   }
 }
+
+.mainHeader {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    gap: 15px;
+}
+
+.mainHeader strong {
+    display: block;
+    font-size: 1.1rem;
+}
+
+
+.typingIndicator {
+    font-size: 0.75rem;
+    color: #6366f1;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+
+.callButton {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.callButton:hover {
+    background-color: #f0f0f0;
+}
+
+.callButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mainHeader div:first-of-type {
+    flex-grow: 1;
+}

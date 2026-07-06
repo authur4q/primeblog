@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import 'leaflet/dist/leaflet.css';
+import CallListener from "./components/CallListener";
+
 
 import {AuthProvider} from "./provider"; 
 
@@ -36,6 +38,7 @@ export default function RootLayout({ children }) {
         <div className="page-container">
           <AuthProvider>
              <div className="content-wrapper">
+              <CallListener />
                 {children}
              </div>
           </AuthProvider>

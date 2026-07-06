@@ -4,11 +4,8 @@ import styles from "./chat.module.css";
 import Navbar from '../components/navbar/navbar';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import ShareLocationButton from '../components/ShareLocationButton/ShareLocationButton';
-import { ChevronLeft, SendHorizontal,MapPin } from 'lucide-react';
+import { ChevronLeft, SendHorizontal, Phone, Video } from 'lucide-react';
 import Pusher from 'pusher-js';
-
-let pusherClient;
 
 const ChatPage = () => {
     const router = useRouter();
@@ -18,18 +15,42 @@ const ChatPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessageText, setNewMessageText] = useState("");
-    const messagesEndRef = useRef(null);
+    const [isCalling, setIsCalling] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-
-    if (!pusherClient && typeof window !== "undefined") {
-        pusherClient = new Pusher(process.env.PUSHER_KEY || '', { 
-            cluster: process.env.PUSHER_CLUSTER || '' 
-        });
-    }
+    const pusherRef = useRef(null);
 
     useEffect(() => { 
         if (status === "unauthenticated") router.push("/login"); 
-    }, [status, router]);
+        if (status === "authenticated") {
+            pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+                cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+                authEndpoint: '/api/pusher/auth'
+            });
+        }
+        return () => pusherRef.current?.disconnect();
+    }, [status]);
+
+    useEffect(() => {
+        if (!selectedChat || !pusherRef.current) return;
+        const channel = pusherRef.current.subscribe(`private-${selectedChat._id}`);
+        
+        channel.bind("client-typing", (data) => {
+            if (data.senderId !== userId) {
+                setIsTyping(true);
+                setTimeout(() => setIsTyping(false), 2000);
+            }
+        });
+        return () => pusherRef.current.unsubscribe(`private-${selectedChat._id}`);
+    }, [selectedChat, userId]);
+
+    const handleTyping = (e) => {
+        setNewMessageText(e.target.value);
+        if (selectedChat) {
+            const channel = pusherRef.current.subscribe(`private-${selectedChat._id}`);
+            channel.trigger("client-typing", { senderId: userId });
+        }
+    };
 
     const handleSendMessage = async (e) => {
         e?.preventDefault?.();
@@ -47,61 +68,47 @@ const ChatPage = () => {
         });
     };
 
+    const initiateCall = async (mediaType = 'audio') => {
+        if (!selectedChat || isCalling) return;
+        setIsCalling(true);
+        const otherUser = selectedChat.participants.find(p => p._id !== userId);
+        try {
+            await fetch('/api/calls/initiate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    targetUserId: otherUser._id, 
+                    callerName: session.user.name, 
+                    conversationId: selectedChat._id, 
+                    mediaType 
+                })
+            });
+            router.push(`/call/${selectedChat._id}?type=${mediaType}`);
+        } catch (err) { 
+            console.error(err); 
+        } finally { 
+            setIsCalling(false); 
+        }
+    };
+
     useEffect(() => {
         if (status === "authenticated") {
             fetch("/api/chats/conversation")
-                .then(async (res) => {
-                    if (!res.ok) return [];
-                    return res.json();
-                })
+                .then(async (res) => res.ok ? res.json() : [])
                 .then(data => {
-                    const conversationsList = Array.isArray(data) ? data : (data.conversations || []);
-                    const sorted = conversationsList.sort((a, b) => 
-                        new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
-                    );
-                    setConversations(sorted);
-                })
-                .catch(err => console.error("Fetch error:", err));
+                    const list = Array.isArray(data) ? data : (data?.conversations || []);
+                    setConversations(list.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)));
+                });
         }
     }, [status]);
 
     useEffect(() => {
         if (selectedChat) {
             fetch(`/api/chats/messages?conversationId=${selectedChat._id}`)
-                .then(async (res) => {
-                    if (!res.ok) return [];
-                    return res.json();
-                })
-                .then(data => setMessages(Array.isArray(data) ? data : []))
-                .catch(err => console.error("Messages fetch error:", err));
+                .then(async (res) => res.ok ? res.json() : [])
+                .then(data => setMessages(Array.isArray(data) ? data : []));
         }
     }, [selectedChat]);
-
-    useEffect(() => {
-        if (!selectedChat || !pusherClient) return;
-
-        const channel = pusherClient.subscribe(selectedChat._id);
-        channel.bind("new-message", (data) => {
-            setMessages((prev) => [...prev, data]);
-            
-            setConversations((prev) => {
-                const updated = prev.map(c => 
-                    c._id === data.conversationId 
-                    ? { ...c, lastMessage: data.text, updatedAt: new Date().toISOString() } 
-                    : c
-                );
-                return updated.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-            });
-        });
-
-        return () => {
-            pusherClient.unsubscribe(selectedChat._id);
-        };
-    }, [selectedChat]);
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
 
     if (status === "loading") return <div className={styles.loadingContainer}>Loading...</div>;
 
@@ -110,26 +117,20 @@ const ChatPage = () => {
             <Navbar />
             <div className={`${styles.chatWrapper} ${selectedChat ? styles.wrapperHasActive : ''}`}>
                 <div className={styles.chatSidebar}>
-                   
                     <input className={styles.sidebarSearchInput} placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                     <div className={styles.conversationsList}>
-                        {Array.isArray(conversations) && conversations
-                            .filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())))
-                            .map(chat => (
+                        {(conversations ?? []).filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase()))).map(chat => {
+                            const lastMsg = chat.lastMessage || (chat.messages?.[chat.messages.length - 1]);
+                            return (
                                 <div key={chat._id} onClick={() => setSelectedChat(chat)} className={`${styles.chatCard} ${selectedChat?._id === chat._id ? styles.chatCardActive : ''}`}>
-                                    <div className={styles.avatar}>
-                                        {chat.participants.find(p => p._id !== userId)?.name?.charAt(0).toUpperCase() || "?"}
-                                    </div>
+                                    <div className={styles.avatar}>{chat.participants.find(p => p._id !== userId)?.name?.charAt(0).toUpperCase() || "?"}</div>
                                     <div className={styles.chatCardContent}>
-                                    <div className={styles.chatCardHeader}>
                                         <strong className={styles.username}>{chat.participants.find(p => p._id !== userId)?.name}</strong>
-                                        <span className={styles.timestamp}>{chat.updatedAt ? new Date(chat.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
+                                        <p className={styles.lastMessagePreview}>{lastMsg?.text || "Start a conversation..."}</p>
                                     </div>
-                                    <p className={styles.lastMessage}>{chat.lastMessage}</p>
-                                    </div>
-
                                 </div>
-                            ))}
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -138,39 +139,24 @@ const ChatPage = () => {
                         <>
                             <div className={styles.mainHeader}>
                                 <button className={styles.mobileBackButton} onClick={() => setSelectedChat(null)}><ChevronLeft /></button>
-                                <strong>{selectedChat.participants.find(p => p._id !== userId)?.name}</strong>
+                                <strong>{selectedChat.participants?.find(p => p._id !== userId)?.name}</strong>
+                                {isTyping && <span className={styles.typingIndicator}>typing...</span>}
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button className={styles.callButton} onClick={() => initiateCall('audio')} disabled={isCalling}><Phone size={20}/></button>
+                                    <button className={styles.callButton} onClick={() => initiateCall('video')} disabled={isCalling}><Video size={20}/></button>
+                                </div>
                             </div>
                             <div className={styles.messagesContainer}>
-                                {messages.map(msg => (
+                                {(messages ?? []).map(msg => (
                                     <div key={msg._id} className={`${styles.messageGroup} ${msg.senderId === userId ? styles.groupMe : ''}`}>
                                         <div className={`${styles.messageBubble} ${msg.senderId === userId ? styles.messageMe : styles.messageThem}`}>
-                                            {msg.text.startsWith('http') ? (
-                                                <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
-                                                    <MapPin size={34}/>
-                                                </a>
-                                            ) : (
-                                                msg.text
-                                            )}
+                                            {msg.text}
                                         </div>
                                     </div>
                                 ))}
-                                <div ref={messagesEndRef} />
                             </div>
                             <form onSubmit={handleSendMessage} className={styles.messageForm}>
-                                <ShareLocationButton 
-                                className={styles.shareLocation}
-                                    onLocationShare={(link) => setNewMessageText(prev => prev + " " + link)} 
-                                />
-                                <textarea 
-                                    className={styles.messageInput} 
-                                    value={newMessageText} 
-                                    onChange={(e) => {
-                                        setNewMessageText(e.target.value);
-                                        e.target.style.height = 'auto';
-                                        e.target.style.height = e.target.scrollHeight + 'px';
-                                    }}
-                                    placeholder="Message..." 
-                                />
+                                <textarea className={styles.messageInput} value={newMessageText} onChange={handleTyping} placeholder="Message..." />
                                 <button type="submit" className={styles.sendButton}><SendHorizontal size={30} /></button>
                             </form>
                         </>
