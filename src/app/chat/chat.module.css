@@ -78,7 +78,7 @@
   min-height: 0;
   background: var(--wa-bg-panel);
   
-  padding: 10px 5px;
+  padding: 10px 30px;
 }
 
 .sidebarSearchInput {
@@ -204,7 +204,7 @@
 }
 .mainHeader {
   display: flex;
-  position: fixed;
+  position: relative;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
