@@ -78,7 +78,7 @@
   min-height: 0;
   background: var(--wa-bg-panel);
   
-  padding: 10px 30px;
+  padding: 10px 8px;
 }
 
 .sidebarSearchInput {
