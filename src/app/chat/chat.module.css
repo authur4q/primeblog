@@ -203,29 +203,35 @@
 
 }
 .mainHeader {
+
   display: flex;
 
-  position: fixed; 
-
-  top: 0;
-  left: 0;
-
-  width: 100%;
  
-  z-index: 1000; 
 
   align-items: center;
+
   justify-content: space-between;
+
   gap: 12px;
+
   padding: 0 16px;
+
   height: 60px;
+
   flex-shrink: 0;
+
   background: var(--wa-bg-panel);
+
   border-bottom: none;
+
   font-size: 1rem;
+
   font-weight: 500;
+
   color: var(--wa-text-primary);
+
 }
+
 .backUserName{
   display: flex;
   align-items: center;
@@ -265,7 +271,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 90px 6% 12px;
+  padding: 40px 6% 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -399,6 +405,39 @@
   .wrapperHasActive .chatMain {
     transform: translateX(0);
   }
+  .mainHeader {
+  display: flex;
+
+  position: fixed; 
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+ 
+  z-index: 1000; 
+
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  height: 60px;
+  flex-shrink: 0;
+  background: var(--wa-bg-panel);
+  border-bottom: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--wa-text-primary);
+}
+.messagesContainer {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 80px 6% 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
   .mobileBackButton {
     display: flex;
