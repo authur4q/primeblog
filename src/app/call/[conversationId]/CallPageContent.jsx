@@ -10,6 +10,7 @@ export default function CallPageContent() {
     
     const [joined, setJoined] = useState(false);
     const [remoteUsers, setRemoteUsers] = useState({});
+    const [localVideoTrack, setLocalVideoTrack] = useState(null);
     const [error, setError] = useState(null);
     
     const localVideoRef = useRef(null);
@@ -17,17 +18,20 @@ export default function CallPageContent() {
     const clientRef = useRef(null);
     const tracksRef = useRef({ audio: null, video: null });
 
+    // Handle incoming streams
     const handleUserPublished = useCallback(async (user, type) => {
         const client = clientRef.current;
         await client.subscribe(user, type);
-        
-        if (type === 'audio') {
-            user.audioTrack?.play();
-        }
-        if (type === 'video') {
-            setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
-        }
+        if (type === 'audio') user.audioTrack?.play();
+        if (type === 'video') setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
     }, []);
+
+    // Bind local video specifically when the ref is ready
+    useEffect(() => {
+        if (localVideoRef.current && localVideoTrack) {
+            localVideoTrack.play(localVideoRef.current);
+        }
+    }, [localVideoTrack, joined]);
 
     const startCall = async () => {
         try {
@@ -46,7 +50,6 @@ export default function CallPageContent() {
 
             const res = await fetch(`/api/agora/token?channel=${conversationId}`);
             const { token } = await res.json();
-
             await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID, conversationId, token, null);
 
             const [audio, video] = await Promise.all([
@@ -55,35 +58,35 @@ export default function CallPageContent() {
             ]);
 
             tracksRef.current = { audio, video };
-            if (video) video.play(localVideoRef.current);
+            setLocalVideoTrack(video);
             await client.publish(video ? [audio, video] : [audio]);
-
-            client.remoteUsers.forEach(user => handleUserPublished(user, "video"));
-            client.remoteUsers.forEach(user => handleUserPublished(user, "audio"));
             
+            client.remoteUsers.forEach(u => handleUserPublished(u, "video"));
             setJoined(true);
         } catch (err) {
-            setError("Connection failed. Check permissions.");
+            setError("Check camera/mic permissions.");
         }
     };
 
-    useEffect(() => {
-        return () => {
-            Object.values(tracksRef.current).forEach(t => t?.close());
-            clientRef.current?.leave();
-        };
-    }, []);
+    const leaveCall = () => {
+        Object.values(tracksRef.current).forEach(t => t?.close());
+        clientRef.current?.leave();
+        window.location.href = '/chat';
+    };
 
+    // Sync remote video rendering
     useEffect(() => {
         Object.entries(remoteUsers).forEach(([uid, user]) => {
             const container = remoteVideoRefs.current[uid];
-            if (container && user.videoTrack) user.videoTrack.play(container);
+            if (container && user.videoTrack) {
+                container.innerHTML = '';
+                user.videoTrack.play(container);
+            }
         });
     }, [remoteUsers]);
 
     if (!joined) return (
         <div className={styles.lobby}>
-            <h1>Ready to join?</h1>
             <button onClick={startCall} className={styles.btnJoin}>Join Call</button>
             {error && <p className={styles.error}>{error}</p>}
         </div>
@@ -97,6 +100,9 @@ export default function CallPageContent() {
                 ))}
             </div>
             <div className={styles.localView} ref={localVideoRef} />
+            <div className={styles.controls}>
+                <button className={styles.btnEnd} onClick={leaveCall}>End Call</button>
+            </div>
         </div>
     );
 }

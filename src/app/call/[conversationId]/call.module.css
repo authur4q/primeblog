@@ -1,7 +1,9 @@
-.container { position: relative; height: 100vh; background: #111; color: white; }
-.lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; }
-.btnJoin { padding: 20px 40px; background: #25D366; border: none; border-radius: 50px; color: white; font-size: 1.2rem; cursor: pointer; }
-.remoteView { height: 100%; width: 100%; }
-.videoPlayer { height: 100%; width: 100%; object-fit: cover; }
-.localView { position: absolute; top: 20px; right: 20px; width: 150px; height: 200px; border-radius: 10px; border: 2px solid #333; }
-.error { color: #ff3b30; margin-top: 10px; }
+.container { position: relative; height: 100vh; background: #000; color: white; overflow: hidden; }
+.lobby { display: flex; align-items: center; justify-content: center; height: 100vh; }
+.btnJoin { padding: 20px 40px; background: #25D366; border-radius: 50px; border: none; color: white; font-weight: bold; cursor: pointer; }
+.remoteView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+.videoPlayer { width: 100%; height: 100%; object-fit: cover; }
+.localView { position: absolute; top: 20px; right: 20px; width: 120px; height: 160px; border-radius: 10px; border: 2px solid white; z-index: 10; overflow: hidden; background: #333; }
+.controls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; z-index: 20; }
+.btnEnd { background: #ff3b30; padding: 15px 30px; border-radius: 50px; border: none; color: white; cursor: pointer; }
+.error { color: #ff3b30; position: absolute; bottom: 100px; }
