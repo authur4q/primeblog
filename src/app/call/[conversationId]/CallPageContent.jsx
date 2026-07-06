@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import styles from "./call.module.css";
 
@@ -8,109 +8,95 @@ export default function CallPageContent() {
     const searchParams = useSearchParams();
     const mediaType = searchParams.get('type') || 'audio';
     
-    const [status, setStatus] = useState("Initializing...");
+    const [joined, setJoined] = useState(false);
     const [remoteUsers, setRemoteUsers] = useState({});
-    const [AgoraRTC, setAgoraRTC] = useState(null);
+    const [error, setError] = useState(null);
     
     const localVideoRef = useRef(null);
     const remoteVideoRefs = useRef({});
     const clientRef = useRef(null);
     const tracksRef = useRef({ audio: null, video: null });
 
+    const handleUserPublished = useCallback(async (user, type) => {
+        const client = clientRef.current;
+        await client.subscribe(user, type);
+        
+        if (type === 'audio') {
+            user.audioTrack?.play();
+        }
+        if (type === 'video') {
+            setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
+        }
+    }, []);
+
+    const startCall = async () => {
+        try {
+            const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
+            const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+            clientRef.current = client;
+
+            client.on("user-published", handleUserPublished);
+            client.on("user-unpublished", (user) => {
+                setRemoteUsers(prev => {
+                    const next = { ...prev };
+                    delete next[user.uid];
+                    return next;
+                });
+            });
+
+            const res = await fetch(`/api/agora/token?channel=${conversationId}`);
+            const { token } = await res.json();
+
+            await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID, conversationId, token, null);
+
+            const [audio, video] = await Promise.all([
+                AgoraRTC.createMicrophoneAudioTrack(),
+                mediaType === 'video' ? AgoraRTC.createCameraVideoTrack() : null
+            ]);
+
+            tracksRef.current = { audio, video };
+            if (video) video.play(localVideoRef.current);
+            await client.publish(video ? [audio, video] : [audio]);
+
+            client.remoteUsers.forEach(user => handleUserPublished(user, "video"));
+            client.remoteUsers.forEach(user => handleUserPublished(user, "audio"));
+            
+            setJoined(true);
+        } catch (err) {
+            setError("Connection failed. Check permissions.");
+        }
+    };
+
     useEffect(() => {
-        import('agora-rtc-sdk-ng').then((module) => {
-            setAgoraRTC(module.default);
-        });
+        return () => {
+            Object.values(tracksRef.current).forEach(t => t?.close());
+            clientRef.current?.leave();
+        };
     }, []);
 
     useEffect(() => {
-        if (!AgoraRTC || !conversationId) return;
-
-        clientRef.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-        const client = clientRef.current;
-
-        const initCall = async () => {
-            try {
-                setStatus("Fetching credentials...");
-                const response = await fetch(`/api/agora/token?channel=${conversationId}`);
-                if (!response.ok) throw new Error("Failed to fetch token");
-                const { token } = await response.json();
-
-                setStatus("Joining channel...");
-                await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID, conversationId, token, null);
-
-                const audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-                tracksRef.current.audio = audioTrack;
-
-                let videoTrack = null;
-                if (mediaType === 'video') {
-                    videoTrack = await AgoraRTC.createCameraVideoTrack();
-                    tracksRef.current.video = videoTrack;
-                    if (localVideoRef.current) videoTrack.play(localVideoRef.current);
-                }
-
-                await client.publish(videoTrack ? [audioTrack, videoTrack] : [audioTrack]);
-                setStatus("Connected");
-            } catch (error) {
-                console.error("Agora Error:", error);
-                setStatus("Connection Error: " + error.message);
-            }
-        };
-
-        client.on("user-published", async (user, type) => {
-            await client.subscribe(user, type);
-            setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
-        });
-
-        client.on("user-unpublished", (user) => {
-            setRemoteUsers(prev => {
-                const next = { ...prev };
-                delete next[user.uid];
-                return next;
-            });
-        });
-
-        initCall();
-
-        return () => {
-            tracksRef.current.audio?.close();
-            tracksRef.current.video?.close();
-            if (client.connectionState === 'CONNECTED' || client.connectionState === 'CONNECTING') {
-                client.leave();
-            }
-            client.removeAllListeners();
-        };
-    }, [AgoraRTC, conversationId, mediaType]);
-
-    useEffect(() => {
         Object.entries(remoteUsers).forEach(([uid, user]) => {
-            if (user.videoTrack && remoteVideoRefs.current[uid]) {
-                user.videoTrack.play(remoteVideoRefs.current[uid]);
-            }
+            const container = remoteVideoRefs.current[uid];
+            if (container && user.videoTrack) user.videoTrack.play(container);
         });
     }, [remoteUsers]);
 
+    if (!joined) return (
+        <div className={styles.lobby}>
+            <h1>Ready to join?</h1>
+            <button onClick={startCall} className={styles.btnJoin}>Join Call</button>
+            {error && <p className={styles.error}>{error}</p>}
+        </div>
+    );
+
     return (
-        <div className={styles.callContainer}>
-            {status !== "Connected" ? (
-                <h1 className={styles.statusHeader}>{status}</h1>
-            ) : (
-                <div className={styles.activeCallUI}>
-                    <div className={styles.videoGrid}>
-                        {mediaType === 'video' && <div ref={localVideoRef} className={styles.localVideo} />}
-                        {Object.values(remoteUsers).map(user => (
-                            <div 
-                                key={user.uid} 
-                                ref={el => remoteVideoRefs.current[user.uid] = el} 
-                                className={styles.remoteVideo} 
-                            />
-                        ))}
-                    </div>
-                    <button className={styles.endCallButton} onClick={() => window.location.href = '/chat'}>
-                        End Call
-                    </button>
-                </div>
-            )}
+        <div className={styles.container}>
+            <div className={styles.remoteView}>
+                {Object.values(remoteUsers).map(user => (
+                    <div key={user.uid} ref={el => remoteVideoRefs.current[user.uid] = el} className={styles.videoPlayer} />
+                ))}
+            </div>
+            <div className={styles.localView} ref={localVideoRef} />
         </div>
     );
 }

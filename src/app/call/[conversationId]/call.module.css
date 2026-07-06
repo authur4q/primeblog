@@ -1,66 +1,7 @@
-/* call.module.css */
-
-.callContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: #111;
-    color: #fff;
-    padding: 20px;
-    font-family: sans-serif;
-}
-
-.statusHeader {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    color: #bbb;
-}
-
-.videoGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    width: 100%;
-    max-width: 1000px;
-    margin-bottom: 30px;
-}
-
-.localVideo, 
-.remoteVideo {
-    width: 100%;
-    height: 300px;
-    background-color: #000;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 2px solid #333;
-}
-
-.controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
-
-.endCallButton {
-    padding: 12px 24px;
-    background-color: #ff4d4f;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.endCallButton:hover {
-    background-color: #ff7875;
-}
-
-.activeCallUI {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
+.container { position: relative; height: 100vh; background: #111; color: white; }
+.lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #000; }
+.btnJoin { padding: 20px 40px; background: #25D366; border: none; border-radius: 50px; color: white; font-size: 1.2rem; cursor: pointer; }
+.remoteView { height: 100%; width: 100%; }
+.videoPlayer { height: 100%; width: 100%; object-fit: cover; }
+.localView { position: absolute; top: 20px; right: 20px; width: 150px; height: 200px; border-radius: 10px; border: 2px solid #333; }
+.error { color: #ff3b30; margin-top: 10px; }
