@@ -11,6 +11,9 @@ export default function CallPageContent() {
     const [joined, setJoined] = useState(false);
     const [remoteUsers, setRemoteUsers] = useState({});
     const [localVideoTrack, setLocalVideoTrack] = useState(null);
+    const [mutedAudio, setMutedAudio] = useState(false);
+    const [mutedVideo, setMutedVideo] = useState(false);
+    const [networkQuality, setNetworkQuality] = useState(2);
     const [error, setError] = useState(null);
     
     const localVideoRef = useRef(null);
@@ -18,7 +21,6 @@ export default function CallPageContent() {
     const clientRef = useRef(null);
     const tracksRef = useRef({ audio: null, video: null });
 
-    // Handle incoming streams
     const handleUserPublished = useCallback(async (user, type) => {
         const client = clientRef.current;
         await client.subscribe(user, type);
@@ -26,7 +28,18 @@ export default function CallPageContent() {
         if (type === 'video') setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
     }, []);
 
-    // Bind local video specifically when the ref is ready
+    const toggleAudio = async () => {
+        const track = tracksRef.current.audio;
+        await track.setEnabled(mutedAudio);
+        setMutedAudio(!mutedAudio);
+    };
+
+    const toggleVideo = async () => {
+        const track = tracksRef.current.video;
+        await track.setEnabled(mutedVideo);
+        setMutedVideo(!mutedVideo);
+    };
+
     useEffect(() => {
         if (localVideoRef.current && localVideoTrack) {
             localVideoTrack.play(localVideoRef.current);
@@ -47,6 +60,7 @@ export default function CallPageContent() {
                     return next;
                 });
             });
+            client.on("network-quality", (q) => setNetworkQuality(q.uplinkNetworkQuality));
 
             const res = await fetch(`/api/agora/token?channel=${conversationId}`);
             const { token } = await res.json();
@@ -64,7 +78,7 @@ export default function CallPageContent() {
             client.remoteUsers.forEach(u => handleUserPublished(u, "video"));
             setJoined(true);
         } catch (err) {
-            setError("Check camera/mic permissions.");
+            setError("Connection failed. Check permissions.");
         }
     };
 
@@ -74,7 +88,6 @@ export default function CallPageContent() {
         window.location.href = '/chat';
     };
 
-    // Sync remote video rendering
     useEffect(() => {
         Object.entries(remoteUsers).forEach(([uid, user]) => {
             const container = remoteVideoRefs.current[uid];
@@ -94,6 +107,9 @@ export default function CallPageContent() {
 
     return (
         <div className={styles.container}>
+            <div className={styles.networkIndicator}>
+                Signal: {networkQuality > 3 ? "Weak" : "Strong"}
+            </div>
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (
                     <div key={user.uid} ref={el => remoteVideoRefs.current[user.uid] = el} className={styles.videoPlayer} />
@@ -101,7 +117,9 @@ export default function CallPageContent() {
             </div>
             <div className={styles.localView} ref={localVideoRef} />
             <div className={styles.controls}>
+                <button onClick={toggleAudio}>{mutedAudio ? "Unmute" : "Mute"}</button>
                 <button className={styles.btnEnd} onClick={leaveCall}>End Call</button>
+                <button onClick={toggleVideo}>{mutedVideo ? "Show Cam" : "Hide Cam"}</button>
             </div>
         </div>
     );
