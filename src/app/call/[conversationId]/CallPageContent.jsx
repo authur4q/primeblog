@@ -103,15 +103,26 @@ export default function CallPageContent() {
         }
     };
 
-    const leaveCall = () => {
-        setIsCallOngoing(false);
-        setActiveConversationId(null);
-        Object.values(tracksRef.current).forEach(t => t?.close());
-        clientRef.current?.leave();
-        router.replace(`/chat`);
-        
-       
-    };
+const leaveCall = async () => {
+
+    Object.values(tracksRef.current).forEach(track => {
+        if (track && typeof track.stop === 'function') {
+            track.stop();
+        }
+    });
+
+   
+    if (clientRef.current) {
+        await clientRef.current.leave();
+    }
+
+    
+    setIsCallOngoing(false);
+    setActiveConversationId(null);
+
+    
+    router.replace('/chat');
+};
 
     useEffect(() => {
         Object.entries(remoteUsers).forEach(([uid, user]) => {
