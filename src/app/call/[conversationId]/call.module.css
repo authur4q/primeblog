@@ -14,6 +14,6 @@
 .callPageContainer .localView { position: absolute; top: 20px; right: 20px; width: 120px; height: 160px; border-radius: 10px; border: 2px solid rgb(3, 0, 0); z-index: 10; background: #333; }
 .callPageContainer .controls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; z-index: 20; gap: 15px; }
 
-.callPageContainer .networkIndicator { position: absolute; top: 10px; left: 10px; z-index: 30; background: transparent; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; color:#25D366;display: flex; flex-direction: row; align-items: center; font-style: italic;}
+.callPageContainer .networkIndicator { position: absolute; top: 10px; left: 10px; z-index: 30; background: transparent; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; color:#25D366;display: flex; flex-direction: row; align-items: center; gap: 25px; font-style: italic;}
 .callPageContainer .controls button { padding: 15px 17px; border-radius: 50%; border: none; cursor: pointer; background: #444; color: white; }
 .callPageContainer .controls .btnEnd { background: #ff3b30; padding: 15px 17px; border-radius: 50%; border: none; color: white; cursor: pointer; }

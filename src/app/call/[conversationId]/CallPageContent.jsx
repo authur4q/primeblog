@@ -1,11 +1,14 @@
 "use client";
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams,useRouter } from 'next/navigation';
 import styles from "./call.module.css";
-import { Mic, MicOff, Camera, CameraOff, PhoneOff, Wifi, WifiHigh,  WifiLow, WifiZero } from 'lucide-react';
+import { useCall } from '@/context/CallContext';
+import {ArrowLeft, Mic, MicOff, Camera, CameraOff, PhoneOff, Wifi, WifiHigh,  WifiLow, WifiZero } from 'lucide-react';
 
 export default function CallPageContent() {
+    const { setIsCallOngoing, setActiveConversationId } = useCall();
     const { conversationId } = useParams();
+    const router = useRouter();
     const searchParams = useSearchParams();
     const mediaType = searchParams.get('type') || 'audio';
     
@@ -31,13 +34,13 @@ export default function CallPageContent() {
 
     const getWifiIcon = (quality) => {
     switch (quality) {
-        case 0: return <Wifi size={18} />;
-        case 1: return <WifiHigh size={18} />;
+        case 0: return <Wifi size={24} />;
+        case 1: return <WifiHigh size={24} />;
         
-        case 2: return <WifiLow size={18} />;
+        case 2: return <WifiLow size={24} />;
         
-        case 3: return <WifiZero size={18} />;
-        default: return <Wifi size={18} />;
+        case 3: return <WifiZero size={24} />;
+        default: return <Wifi size={24} />;
     }
 };
 
@@ -52,6 +55,9 @@ export default function CallPageContent() {
         await track.setEnabled(mutedVideo);
         setMutedVideo(!mutedVideo);
     };
+    const goBack = () => {
+        router.push(`/chat`);
+    }
 
     useEffect(() => {
         if (localVideoRef.current && localVideoTrack) {
@@ -60,6 +66,8 @@ export default function CallPageContent() {
     }, [localVideoTrack, joined]);
 
     const startCall = async () => {
+        setIsCallOngoing(true);
+    setActiveConversationId(conversationId);
         try {
             const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
             const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -96,9 +104,13 @@ export default function CallPageContent() {
     };
 
     const leaveCall = () => {
+        setIsCallOngoing(false);
+        setActiveConversationId(null);
         Object.values(tracksRef.current).forEach(t => t?.close());
         clientRef.current?.leave();
-        window.location.href = '/chat';
+        router.replace(`/chat`);
+        
+       
     };
 
     useEffect(() => {
@@ -121,8 +133,9 @@ export default function CallPageContent() {
     return (
         <div className={styles.callPageContainer}>
 <div className={styles.networkIndicator}>
+    <ArrowLeft onClick={goBack} />
     {getWifiIcon(networkQuality)}
-    <span>{networkQuality > 3 ? "strong" : "weak"}</span>
+    
 </div>
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (

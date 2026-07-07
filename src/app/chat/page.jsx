@@ -1,15 +1,17 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
 import styles from "./chat.module.css";
-import Navbar from '../components/navbar/navbar';
+
 import ShareLocationButton from '../components/ShareLocationButton/ShareLocationButton';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, SendHorizontal, Phone, Video,ArrowLeft,MapPin } from 'lucide-react';
 import Pusher from 'pusher-js';
+import { useCall } from '@/context/CallContext';
 
 const ChatPage = () => {
     const router = useRouter();
+    const { isCallOngoing, activeConversationId } = useCall();
     const { data: session, status } = useSession();
     const userId = session?.user?.id;
     const [conversations, setConversations] = useState([]);
@@ -124,11 +126,20 @@ const handleDeleteMessage = async (messageId, senderId) => {
     }, [selectedChat]);
 
     const handleGoBack = () => {
+        if (window.location.pathname === '/chat') {
+            router.push('/');
+        return; 
+        
+      
+    } else {
+      
         router.back();
+    }
     }
         useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+    const showbanner = isCallOngoing && activeConversationId === selectedChat?._id;
 
     if (status === "loading") return <div className={styles.loadingContainer}>Loading...</div>;
 
@@ -176,6 +187,14 @@ const handleDeleteMessage = async (messageId, senderId) => {
                                 </div>
                             </div>
                             <div className={styles.messagesContainer}>
+                                {showbanner && (
+                <div className={styles.callBanner}>
+                    <span>Ongoing Call</span>
+                    <button onClick={() => router.push(`/call/${activeConversationId}`)}>
+                        Return
+                    </button>
+                </div>
+            )}
                                {(messages ?? []).map(msg => (
     <div key={msg._id} className={`${styles.messageGroup} ${msg.senderId === userId ? styles.groupMe : ''}`}>
         <div 

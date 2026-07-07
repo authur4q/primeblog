@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import 'leaflet/dist/leaflet.css';
 import CallListener from "./components/CallListener";
+import { CallProvider } from "@/context/CallContext";
 
 
 import {AuthProvider} from "./provider"; 
@@ -36,12 +37,15 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <div className="page-container">
-          <AuthProvider>
-             <div className="content-wrapper">
-              <CallListener />
+        
+          <CallProvider>
+            <AuthProvider>
+              <div className="content-wrapper">
+                <CallListener />
                 {children}
-             </div>
-          </AuthProvider>
+              </div>
+            </AuthProvider>
+          </CallProvider>
         </div>
       </body>
     </html>
