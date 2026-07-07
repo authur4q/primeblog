@@ -6,6 +6,7 @@ import { CallProvider } from "@/context/CallContext";
 
 
 import {AuthProvider} from "./provider"; 
+import IncomingCallModal from "./components/IncomingCallModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <div className="content-wrapper">
                 <CallListener />
+                <IncomingCallModal/>
                 {children}
               </div>
             </AuthProvider>

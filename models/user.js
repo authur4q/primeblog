@@ -85,6 +85,7 @@ biometricsEnabled: {
   trim: true,
   default: "Hello! I'm here."
 },
+fcmToken: { type: String, default: null },
 devices: [Object],
   Instagram: {
     type: String,

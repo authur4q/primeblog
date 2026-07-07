@@ -23,6 +23,8 @@
     "bcryptjs": "^3.0.2",
     "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
+    "firebase": "^12.15.0",
+    "firebase-admin": "^14.1.0",
     "ioredis": "^5.11.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.475.0",
