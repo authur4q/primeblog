@@ -1,4 +1,3 @@
-
 "use client";
 import { useCall } from '@/context/CallContext';
 import { useRouter } from 'next/navigation';
@@ -9,22 +8,29 @@ export default function IncomingCallModal() {
   const { 
     activeConversationId, 
     callerName, 
+    callMode, 
+    setCallMode,
     setIsCallOngoing, 
     setActiveConversationId 
   } = useCall();
   
   const router = useRouter();
 
-  if (!activeConversationId) return null;
+  
+  if (callMode !== 'incoming' || !activeConversationId) return null;
 
   const handleAccept = () => {
     setIsCallOngoing(true);
     router.push(`/call/${activeConversationId}`);
+    
     setActiveConversationId(null);
+    setCallMode(null);
   };
 
   const handleReject = () => {
+   e
     setActiveConversationId(null);
+    setCallMode(null);
   };
 
   return (

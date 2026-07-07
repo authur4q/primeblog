@@ -8,6 +8,9 @@ export function CallProvider({ children }) {
     const [activeConversationId, setActiveConversationId] = useState(null);
     const [callerName, setCallerName] = useState("");
     const [mediaType, setMediaType] = useState("audio");
+    
+    
+    const [callMode, setCallMode] = useState(null); 
 
     return (
         <CallContext.Provider value={{ 
@@ -18,11 +21,13 @@ export function CallProvider({ children }) {
             callerName,
             setCallerName,
             mediaType,
-            setMediaType
+            setMediaType,
+            callMode,
+            setCallMode
         }}>
             {children}
         </CallContext.Provider>
     );
 }
 
-export const useCall = () => useContext(CallContext);
+export const useCall = () => useContext(CallContext)

@@ -6,7 +6,13 @@ import { useCall } from '@/context/CallContext';
 
 export default function CallListener() {
     const { data: session } = useSession();
-    const { setActiveConversationId, setCallerName, setMediaType } = useCall();
+    const { 
+        setActiveConversationId, 
+        setCallerName, 
+        setMediaType, 
+        setCallMode 
+    } = useCall();
+    
     const pusherRef = useRef(null);
 
     useEffect(() => {
@@ -20,10 +26,10 @@ export default function CallListener() {
         const channel = pusherRef.current.subscribe(`private-user-${session.user.id}`);
 
         channel.bind("incoming-call", (data) => {
-            
             setActiveConversationId(data.conversationId);
             setCallerName(data.callerName);
             setMediaType(data.mediaType);
+            setCallMode('incoming'); 
         });
 
         return () => {
@@ -32,7 +38,7 @@ export default function CallListener() {
                 pusherRef.current.disconnect();
             }
         };
-    }, [session?.user?.id, setActiveConversationId, setCallerName, setMediaType]);
+    }, [session?.user?.id, setActiveConversationId, setCallerName, setMediaType, setCallMode]);
 
     return null;
 }
