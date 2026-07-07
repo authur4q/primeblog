@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useSearchParams,useRouter } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import styles from "./call.module.css";
 import { useCall } from '@/context/CallContext';
-import {ArrowLeft, Mic, MicOff, Camera, CameraOff, PhoneOff, Wifi, WifiHigh,  WifiLow, WifiZero } from 'lucide-react';
+import { ArrowLeft, Mic, MicOff, Camera, CameraOff, PhoneOff, Wifi, WifiHigh, WifiLow, WifiZero } from 'lucide-react';
 
 export default function CallPageContent() {
-    const { setIsCallOngoing, setActiveConversationId } = useCall();
+    const { setIsCallOngoing, setActiveConversationId, setCallMode } = useCall();
     const { conversationId } = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -33,41 +33,45 @@ export default function CallPageContent() {
     }, []);
 
     const getWifiIcon = (quality) => {
-    switch (quality) {
-        case 0: return <Wifi size={24} />;
-        case 1: return <WifiHigh size={24} />;
-        
-        case 2: return <WifiLow size={24} />;
-        
-        case 3: return <WifiZero size={24} />;
-        default: return <Wifi size={24} />;
-    }
-};
+        switch (quality) {
+            case 0: return <Wifi size={24} />;
+            case 1: return <WifiHigh size={24} />;
+            case 2: return <WifiLow size={24} />;
+            case 3: return <WifiZero size={24} />;
+            default: return <Wifi size={24} />;
+        }
+    };
 
     const toggleAudio = async () => {
-        const track = tracksRef.current.audio;
-        await track.setEnabled(mutedAudio);
+        if (!tracksRef.current.audio) return;
+        await tracksRef.current.audio.setEnabled(mutedAudio);
         setMutedAudio(!mutedAudio);
     };
 
     const toggleVideo = async () => {
-        const track = tracksRef.current.video;
-        await track.setEnabled(mutedVideo);
+        if (!tracksRef.current.video) return;
+        await tracksRef.current.video.setEnabled(mutedVideo);
         setMutedVideo(!mutedVideo);
     };
-    const goBack = () => {
-        router.push(`/chat`);
-    }
 
+    const goBack = () => router.push(`/chat`);
+
+    
     useEffect(() => {
-        if (localVideoRef.current && localVideoTrack) {
-            localVideoTrack.play(localVideoRef.current);
+        if (localVideoRef.current) {
+            if (localVideoTrack) {
+                localVideoTrack.play(localVideoRef.current);
+            } else {
+                localVideoRef.current.innerHTML = '';
+            }
         }
-    }, [localVideoTrack, joined]);
+    }, [localVideoTrack]);
 
     const startCall = async () => {
         setIsCallOngoing(true);
-    setActiveConversationId(conversationId);
+        setActiveConversationId(conversationId);
+        setCallMode(null); 
+        
         try {
             const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
             const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -103,26 +107,27 @@ export default function CallPageContent() {
         }
     };
 
-const leaveCall = async () => {
+    const leaveCall = async () => {
+        
+        Object.values(tracksRef.current).forEach(track => {
+            if (track) {
+                track.stop();
+                track.close();
+            }
+        });
+        tracksRef.current = { audio: null, video: null };
+        setLocalVideoTrack(null);
 
-    Object.values(tracksRef.current).forEach(track => {
-        if (track && typeof track.stop === 'function') {
-            track.stop();
+        if (clientRef.current) {
+            await clientRef.current.leave();
         }
-    });
 
-   
-    if (clientRef.current) {
-        await clientRef.current.leave();
-    }
-
-    
-    setIsCallOngoing(false);
-    setActiveConversationId(null);
-
-    
-    router.replace('/chat');
-};
+        setIsCallOngoing(false);
+        setActiveConversationId(null);
+        setCallMode(null);
+        
+        router.replace('/chat');
+    };
 
     useEffect(() => {
         Object.entries(remoteUsers).forEach(([uid, user]) => {
@@ -143,11 +148,10 @@ const leaveCall = async () => {
 
     return (
         <div className={styles.callPageContainer}>
-<div className={styles.networkIndicator}>
-    <ArrowLeft onClick={goBack} />
-    {getWifiIcon(networkQuality)}
-    
-</div>
+            <div className={styles.networkIndicator}>
+                <ArrowLeft onClick={goBack} />
+                {getWifiIcon(networkQuality)}
+            </div>
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (
                     <div key={user.uid} ref={el => remoteVideoRefs.current[user.uid] = el} className={styles.videoPlayer} />
