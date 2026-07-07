@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import styles from "./call.module.css";
+import { Mic, MicOff, Camera, CameraOff, PhoneOff, Wifi, WifiHigh,  WifiLow, WifiZero } from 'lucide-react';
 
 export default function CallPageContent() {
     const { conversationId } = useParams();
@@ -27,6 +28,18 @@ export default function CallPageContent() {
         if (type === 'audio') user.audioTrack?.play();
         if (type === 'video') setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
     }, []);
+
+    const getWifiIcon = (quality) => {
+    switch (quality) {
+        case 0: return <Wifi size={18} />;
+        case 1: return <WifiHigh size={18} />;
+        
+        case 2: return <WifiLow size={18} />;
+        
+        case 3: return <WifiZero size={18} />;
+        default: return <Wifi size={18} />;
+    }
+};
 
     const toggleAudio = async () => {
         const track = tracksRef.current.audio;
@@ -106,10 +119,11 @@ export default function CallPageContent() {
     );
 
     return (
-        <div className={styles.container}>
-            <div className={styles.networkIndicator}>
-                Signal: {networkQuality > 3 ? "Weak" : "Strong"}
-            </div>
+        <div className={styles.callPageContainer}>
+<div className={styles.networkIndicator}>
+    {getWifiIcon(networkQuality)}
+    <span>{networkQuality > 3 ? "strong" : "weak"}</span>
+</div>
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (
                     <div key={user.uid} ref={el => remoteVideoRefs.current[user.uid] = el} className={styles.videoPlayer} />
@@ -117,9 +131,9 @@ export default function CallPageContent() {
             </div>
             <div className={styles.localView} ref={localVideoRef} />
             <div className={styles.controls}>
-                <button onClick={toggleAudio}>{mutedAudio ? "Unmute" : "Mute"}</button>
-                <button className={styles.btnEnd} onClick={leaveCall}>End Call</button>
-                <button onClick={toggleVideo}>{mutedVideo ? "Show Cam" : "Hide Cam"}</button>
+                <button onClick={toggleAudio}>{mutedAudio ? <MicOff /> : <Mic />}</button>
+                <button className={styles.btnEnd} onClick={leaveCall}><PhoneOff /></button>
+                <button onClick={toggleVideo}>{mutedVideo ? <CameraOff /> : <Camera />}</button>
             </div>
         </div>
     );
