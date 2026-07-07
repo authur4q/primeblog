@@ -8,17 +8,23 @@ import User from '../../../../../models/user';
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
-  key: process.env.NEXT_PUBLIC_PUSHER_KEY,
+  key: process.env.PUSHER_KEY,
   secret: process.env.PUSHER_SECRET,
-  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+  cluster: process.env.PUSHER_CLUSTER,
   useTLS: true,
 });
 
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY))
-  });
+// Replace your existing if (!admin.apps.length) block with this:
+if (!admin.apps || admin.apps.length === 0) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+  } catch (e) {
+    console.error("Firebase Admin initialization failed. Ensure FIREBASE_SERVICE_ACCOUNT_KEY is set.");
+  }
 }
 
 export async function POST(req) {
