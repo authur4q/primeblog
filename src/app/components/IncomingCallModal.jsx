@@ -28,7 +28,7 @@ export default function IncomingCallModal() {
   };
 
   const handleReject = () => {
-   e
+   
     setActiveConversationId(null);
     setCallMode(null);
   };

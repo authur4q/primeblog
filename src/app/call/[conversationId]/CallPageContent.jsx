@@ -44,19 +44,21 @@ export default function CallPageContent() {
 
     const toggleAudio = async () => {
         if (!tracksRef.current.audio) return;
-        await tracksRef.current.audio.setEnabled(mutedAudio);
-        setMutedAudio(!mutedAudio);
+        const newState = !mutedAudio;
+        await tracksRef.current.audio.setEnabled(!newState);
+        setMutedAudio(newState);
     };
 
     const toggleVideo = async () => {
         if (!tracksRef.current.video) return;
-        await tracksRef.current.video.setEnabled(mutedVideo);
-        setMutedVideo(!mutedVideo);
+        const newState = !mutedVideo;
+        await tracksRef.current.video.setEnabled(!newState);
+        setMutedVideo(newState);
     };
 
     const goBack = () => router.push(`/chat`);
 
-    
+    // Handle local video playback
     useEffect(() => {
         if (localVideoRef.current) {
             if (localVideoTrack) {
@@ -67,10 +69,21 @@ export default function CallPageContent() {
         }
     }, [localVideoTrack]);
 
+    // Handle remote video playback
+    useEffect(() => {
+        Object.entries(remoteUsers).forEach(([uid, user]) => {
+            const container = remoteVideoRefs.current[uid];
+            if (container && user.videoTrack && container !== localVideoRef.current) {
+                container.innerHTML = '';
+                user.videoTrack.play(container);
+            }
+        });
+    }, [remoteUsers]);
+
     const startCall = async () => {
         setIsCallOngoing(true);
         setActiveConversationId(conversationId);
-        setCallMode(null); 
+        setCallMode(null);
         
         try {
             const AgoraRTC = (await import('agora-rtc-sdk-ng')).default;
@@ -108,7 +121,6 @@ export default function CallPageContent() {
     };
 
     const leaveCall = async () => {
-        
         Object.values(tracksRef.current).forEach(track => {
             if (track) {
                 track.stop();
@@ -129,16 +141,6 @@ export default function CallPageContent() {
         router.replace('/chat');
     };
 
-    useEffect(() => {
-        Object.entries(remoteUsers).forEach(([uid, user]) => {
-            const container = remoteVideoRefs.current[uid];
-            if (container && user.videoTrack) {
-                container.innerHTML = '';
-                user.videoTrack.play(container);
-            }
-        });
-    }, [remoteUsers]);
-
     if (!joined) return (
         <div className={styles.lobby}>
             <button onClick={startCall} className={styles.btnJoin}>Join Call</button>
@@ -154,7 +156,11 @@ export default function CallPageContent() {
             </div>
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (
-                    <div key={user.uid} ref={el => remoteVideoRefs.current[user.uid] = el} className={styles.videoPlayer} />
+                    <div 
+                        key={user.uid} 
+                        ref={el => { if (el) remoteVideoRefs.current[user.uid] = el; }} 
+                        className={styles.videoPlayer} 
+                    />
                 ))}
             </div>
             <div className={styles.localView} ref={localVideoRef} />
