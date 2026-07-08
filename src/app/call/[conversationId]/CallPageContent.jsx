@@ -79,22 +79,21 @@ export default function CallPageContent() {
         });
     }, []);
 
-    // 1. REFACTORED REMOTE RENDERING LOGIC
+    // Handle Remote Users Video Playback
     useEffect(() => {
         if (!joined) return;
         Object.values(remoteUsers).forEach(user => {
             if (user.videoTrack) {
-                // Target by raw string ID to bypass fragile ref assignments
                 const container = document.getElementById(`remote-container-${user.uid}`);
                 if (container) {
-                    container.innerHTML = ""; // Clear out any broken frame ghosts
+                    container.innerHTML = ""; 
                     user.videoTrack.play(container);
                 }
             }
         });
     }, [remoteUsers, joined]);
 
-    // 2. REFACTORED LOCAL RENDERING LOGIC
+    // Handle Local User Video Playback (Your Small Box)
     useEffect(() => {
         if (joined && tracksRef.current.video) {
             const container = document.getElementById("local-video-container");
@@ -103,7 +102,7 @@ export default function CallPageContent() {
                 tracksRef.current.video.play(container);
             }
         }
-    }, [joined]);
+    }, [joined, mutedVideo]);
 
     const startCall = async () => {
         setIsJoining(true);
@@ -130,7 +129,6 @@ export default function CallPageContent() {
 
             tracksRef.current = { audio, video };
             
-            // Layout mounts instantly; useEffect triggers immediately handle rendering hookups
             setJoined(true);
             setIsCallOngoing(true);
             setActiveConversationId(conversationId);
@@ -138,7 +136,7 @@ export default function CallPageContent() {
             await client.publish(video ? [audio, video] : [audio]);
         } catch (err) {
             console.error("Critical Call Failure:", err);
-            setError("Could not access camera/mic. Make sure no other app is using them.");
+            setError("Could not access camera/mic.");
             cleanupResources();
         } finally {
             setIsJoining(false);
@@ -173,6 +171,8 @@ export default function CallPageContent() {
             <div className={styles.networkIndicator}>
                 {getWifiIcon(networkQuality)}
             </div>
+
+            {/* Large full screen container for Remote Users */}
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (
                     <div 
@@ -182,14 +182,16 @@ export default function CallPageContent() {
                     />
                 ))}
             </div>
-            {/* Native clean string string-id element for local video tracking */}
+
+            {/* Small floating corner box for Local User (You) */}
             <div className={styles.localView} id="local-video-container" />
+
             <div className={styles.controls}>
                 <button onClick={() => { tracksRef.current.audio?.setEnabled(mutedAudio); setMutedAudio(!mutedAudio); }}>
                     {mutedAudio ? <MicOff /> : <Mic />}
                 </button>
                 <button className={styles.btnEnd} onClick={leaveCall}><PhoneOff /></button>
-                <button onClick={() => { tracksRef.current.video?.setEnabled(mutedVideo); setMutedVideo(!mutedVideo); }}>
+                <button onClick={() => { tracksRef.current.video?.setEnabled(!mutedVideo); setMutedVideo(!mutedVideo); }}>
                     {mutedVideo ? <CameraOff /> : <Camera />}
                 </button>
             </div>
