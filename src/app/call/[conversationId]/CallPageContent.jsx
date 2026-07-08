@@ -10,7 +10,9 @@ export default function CallPageContent() {
     const { conversationId } = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const mediaType = searchParams.get('type') || 'audio';
+    
+    // FORCE video mode if specified, or default intelligently to ensure tracks are requested
+    const mediaType = searchParams.get('type') || 'video';
     
     const [joined, setJoined] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
@@ -122,6 +124,7 @@ export default function CallPageContent() {
             
             await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID, conversationId, token, null);
 
+            // Create both tracks unconditionally if mediaType says video
             const [audio, video] = await Promise.all([
                 AgoraRTC.createMicrophoneAudioTrack(),
                 mediaType === 'video' ? AgoraRTC.createCameraVideoTrack() : null
@@ -136,7 +139,7 @@ export default function CallPageContent() {
             await client.publish(video ? [audio, video] : [audio]);
         } catch (err) {
             console.error("Critical Call Failure:", err);
-            setError("Could not access camera/mic.");
+            setError("Could not access camera/mic. Make sure permissions are granted.");
             cleanupResources();
         } finally {
             setIsJoining(false);
@@ -191,7 +194,7 @@ export default function CallPageContent() {
                     {mutedAudio ? <MicOff /> : <Mic />}
                 </button>
                 <button className={styles.btnEnd} onClick={leaveCall}><PhoneOff /></button>
-                <button onClick={() => { tracksRef.current.video?.setEnabled(!mutedVideo); setMutedVideo(!mutedVideo); }}>
+                <button onClick={() => { tracksRef.current.video?.setEnabled(mutedVideo); setMutedVideo(!mutedVideo); }}>
                     {mutedVideo ? <CameraOff /> : <Camera />}
                 </button>
             </div>
