@@ -12,7 +12,6 @@ export default function CallPageContent() {
     const searchParams = useSearchParams();
     const mediaType = searchParams.get('type') || 'audio';
     
-    // UI States
     const [joined, setJoined] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
     const [remoteUsers, setRemoteUsers] = useState({});
@@ -21,9 +20,6 @@ export default function CallPageContent() {
     const [networkQuality, setNetworkQuality] = useState(2);
     const [error, setError] = useState(null);
     
-    // Refs
-    const localVideoRef = useRef(null);
-    const remoteVideoRefs = useRef({});
     const clientRef = useRef(null);
     const tracksRef = useRef({ audio: null, video: null });
 
@@ -47,10 +43,13 @@ export default function CallPageContent() {
         tracksRef.current = { audio: null, video: null };
 
         if (clientRef.current) {
+            clientRef.current.off("user-published", handleUserPublished);
+            clientRef.current.off("user-unpublished", handleUserUnpublished);
             await clientRef.current.leave();
             clientRef.current = null;
         }
         setRemoteUsers({});
+        setJoined(false);
     }, []);
 
     useEffect(() => {
@@ -61,12 +60,52 @@ export default function CallPageContent() {
         if (!clientRef.current) return;
         try {
             await clientRef.current.subscribe(user, type);
-            if (type === 'audio') user.audioTrack?.play();
-            if (type === 'video') setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
-        } catch (err) { console.error("Subscription failed", err); }
+            if (type === 'audio') {
+                user.audioTrack?.play();
+            }
+            if (type === 'video') {
+                setRemoteUsers(prev => ({ ...prev, [user.uid]: user }));
+            }
+        } catch (err) {
+            console.error("Subscription failed:", err);
+        }
     }, []);
 
-const startCall = async () => {
+    const handleUserUnpublished = useCallback((user) => {
+        setRemoteUsers(prev => {
+            const next = { ...prev };
+            delete next[user.uid];
+            return next;
+        });
+    }, []);
+
+    // 1. REFACTORED REMOTE RENDERING LOGIC
+    useEffect(() => {
+        if (!joined) return;
+        Object.values(remoteUsers).forEach(user => {
+            if (user.videoTrack) {
+                // Target by raw string ID to bypass fragile ref assignments
+                const container = document.getElementById(`remote-container-${user.uid}`);
+                if (container) {
+                    container.innerHTML = ""; // Clear out any broken frame ghosts
+                    user.videoTrack.play(container);
+                }
+            }
+        });
+    }, [remoteUsers, joined]);
+
+    // 2. REFACTORED LOCAL RENDERING LOGIC
+    useEffect(() => {
+        if (joined && tracksRef.current.video) {
+            const container = document.getElementById("local-video-container");
+            if (container) {
+                container.innerHTML = ""; 
+                tracksRef.current.video.play(container);
+            }
+        }
+    }, [joined]);
+
+    const startCall = async () => {
         setIsJoining(true);
         setError(null);
         try {
@@ -75,13 +114,8 @@ const startCall = async () => {
             clientRef.current = client;
 
             client.on("user-published", handleUserPublished);
-            client.on("user-unpublished", (user) => {
-                setRemoteUsers(prev => {
-                    const next = { ...prev };
-                    delete next[user.uid];
-                    return next;
-                });
-            });
+            client.on("user-unpublished", handleUserUnpublished);
+            client.on("network-quality", (q) => setNetworkQuality(q.uplinkNetworkQuality));
 
             const res = await fetch(`/api/agora/token?channel=${conversationId}`);
             if (!res.ok) throw new Error("Failed to fetch token");
@@ -96,22 +130,15 @@ const startCall = async () => {
 
             tracksRef.current = { audio, video };
             
-            // 1. Change layout state to mount the video containers in the DOM
+            // Layout mounts instantly; useEffect triggers immediately handle rendering hookups
             setJoined(true);
             setIsCallOngoing(true);
             setActiveConversationId(conversationId);
-
-            // 2. Allow React a frame to mount the ref before playing
-            setTimeout(() => {
-                if (video && localVideoRef.current) {
-                    video.play(localVideoRef.current);
-                }
-            }, 100);
             
-            // 3. Publish tracks to the channel
             await client.publish(video ? [audio, video] : [audio]);
         } catch (err) {
-            setError("Connection failed. Check permissions.");
+            console.error("Critical Call Failure:", err);
+            setError("Could not access camera/mic. Make sure no other app is using them.");
             cleanupResources();
         } finally {
             setIsJoining(false);
@@ -148,10 +175,15 @@ const startCall = async () => {
             </div>
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (
-                    <div key={user.uid} ref={el => { if (el) remoteVideoRefs.current[user.uid] = el; }} className={styles.videoPlayer} />
+                    <div 
+                        key={user.uid} 
+                        id={`remote-container-${user.uid}`} 
+                        className={styles.videoPlayer} 
+                    />
                 ))}
             </div>
-            <div className={styles.localView} ref={localVideoRef} />
+            {/* Native clean string string-id element for local video tracking */}
+            <div className={styles.localView} id="local-video-container" />
             <div className={styles.controls}>
                 <button onClick={() => { tracksRef.current.audio?.setEnabled(mutedAudio); setMutedAudio(!mutedAudio); }}>
                     {mutedAudio ? <MicOff /> : <Mic />}
