@@ -1,236 +1,205 @@
 .callPageContainer {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     height: 100vh;
-    background: radial-gradient(circle at top right, #111827, #030712);
+    background: #0f0e13;
     color: white;
     font-family: 'Inter', system-ui, sans-serif;
     position: relative;
     overflow: hidden;
 }
 
-/* Remote Video: Spans across the entire screen space */
+/* Remote Video Backdrop: Pure full screen */
 .remoteView {
     position: absolute;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
     z-index: 1;
 }
 
 .videoPlayer {
     width: 100%;
     height: 100%;
-    background: #0b0f19;
-    overflow: hidden;
+    background: #141318;
 }
 
-/* Force Agora inner structures to inherit full cover rules */
+/* Force video elements to stretch fully */
 .remoteView div, .localView div {
     width: 100% !important;
     height: 100% !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .remoteView video, .localView video {
     object-fit: cover !important;
-    width: 100% !important;
-    height: 100% !important;
 }
 
-/* Local Video: Picture-in-Picture Floating Layer */
+/* Subtle dark gradient overlay to make text and controls pop */
+.callPageContainer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 75%, rgba(0,0,0,0.6) 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Top Calling Info Wrapper */
+.networkIndicator {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.networkIndicator h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.networkIndicator p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    font-weight: 400;
+}
+
+/* Floating Local PIP (Rounded and compact like real mobile apps) */
 .localView {
     position: absolute;
-    bottom: 120px;
-    right: 30px;
-    width: 240px;
+    top: 60px;
+    right: 20px;
+    width: 110px;
     height: 160px;
-    border-radius: 24px;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    border-radius: 16px;
+    background: #232229;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
     overflow: hidden;
-    z-index: 10;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 12;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.localView:hover {
-    transform: scale(1.02);
-    border-color: rgba(255, 255, 255, 0.25);
-}
-
-/* Controls Bar: Premium Floating Glassmorphism Element */
+/* Bottom Control Capsule Bar */
 .controls {
     position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 40px;
+    left: 5%;
+    right: 5%;
+    width: 90%;
+    max-width: 450px;
+    margin: 0 auto;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    gap: 24px;
-    padding: 16px 32px;
-    background: rgba(15, 23, 42, 0.45);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    padding: 14px 24px;
+    background: rgba(20, 19, 26, 0.85);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    z-index: 10;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 100px;
-    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
-    z-index: 20;
 }
 
 .controls button {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
     color: white;
-    padding: 16px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .controls button:hover {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .controls button:active {
-    transform: translateY(0) scale(0.95);
+    transform: scale(0.95);
 }
 
+/* Center-docked Speaker/Main Action Button */
+.controls button.speakerActive {
+    background: #ffffff;
+    color: #141318;
+}
+
+/* End Call Circle Option */
 .btnEnd {
-    background: #ef4444 !important;
-    border: none !important;
-    box-shadow: 0 8px 20px -4px rgba(239, 68, 68, 0.4);
+    background: #f43f5e !important;
+    transform: rotate(135deg); /* Angles the phone icon perfectly downward */
 }
 
 .btnEnd:hover {
-    background: #dc2626 !important;
-    box-shadow: 0 12px 24px -2px rgba(220, 38, 38, 0.5);
+    background: #e11d48 !important;
 }
 
-/* Network Indicator Bubble */
-.networkIndicator {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    background: rgba(15, 23, 42, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 12px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.5);
-}
-
-/* Lobby View Layout */
+/* Lobby Styling Remains Untouched */
 .lobby {
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at center, #111827, #030712);
+    background: #0f0e13;
 }
 
 .btnJoin {
-    padding: 16px 48px;
+    padding: 16px 40px;
     font-size: 1.1rem;
     font-weight: 600;
-    background: #2563eb;
+    background: #6366f1;
     color: white;
     border: none;
-    border-radius: 100px;
+    border-radius: 30px;
     cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    transition: transform 0.2s ease;
 }
 
 .btnJoin:hover {
-    background: #1d4ed8;
     transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba(29, 78, 216, 0.5);
 }
 
-/* Connection Processing Box Overlay */
 .loadingOverlay {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    padding: 48px;
-    background: rgba(15, 23, 42, 0.45);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-radius: 28px;
-    color: #ffffff;
-    text-align: center;
-    max-width: 340px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-.loadingOverlay p {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-}
-
-.btnCancel {
-    background: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #f87171;
-    padding: 10px 28px;
-    border-radius: 100px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-top: 8px;
-}
-
-.btnCancel:hover {
-    background: rgba(239, 68, 68, 0.22);
-    border-color: rgba(239, 68, 68, 0.45);
-    transform: scale(1.03);
+    gap: 16px;
+    padding: 32px;
+    background: rgba(20, 19, 26, 0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .spinner {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     animation: spin 1s linear infinite;
-    color: #2563eb;
+    color: #6366f1;
 }
 
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
-}
-
-.error {
-    color: #f87171;
-    margin-top: 20px;
-    font-size: 0.95rem;
-    background: rgba(239, 68, 68, 0.1);
-    padding: 8px 20px;
-    border-radius: 100px;
-    border: 1px solid rgba(239, 68, 68, 0.2);
 }
