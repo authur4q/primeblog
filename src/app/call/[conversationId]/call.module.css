@@ -1,19 +1,162 @@
-
 .callPageContainer {
-  position: relative;
-  height: 100vh;
-  background: #000;
-  color: white;
-  overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: radial-gradient(circle at top right, #1e293b, #0f172a);
+    color: white;
+    font-family: 'Inter', system-ui, sans-serif;
+    position: relative;
+    overflow: hidden;
 }
 
- .lobby { display: flex; align-items: center; justify-content: center; height: 100vh; }
- .btnJoin { padding: 20px 40px; background: #25D366; border-radius: 50px; border: none; color: white; cursor: pointer; }
-.callPageContainer .remoteView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-.callPageContainer .videoPlayer { width: 100%; height: 100%; object-fit: cover; }
-.callPageContainer .localView { position: absolute; top: 20px; right: 20px; width: 120px; height: 160px; border-radius: 10px; border: 2px solid rgb(3, 0, 0); z-index: 10; background: #333; }
-.callPageContainer .controls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; z-index: 20; gap: 15px; }
+/* Remote Video: Fullscreen/Grid */
+.remoteView {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
 
-.callPageContainer .networkIndicator { position: absolute; top: 10px; left: 10px; z-index: 30; background: transparent; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; color:#25D366;display: flex; flex-direction: row; align-items: center; gap: 25px; font-style: italic;}
-.callPageContainer .controls button { padding: 15px 17px; border-radius: 50%; border: none; cursor: pointer; background: #444; color: white; }
-.callPageContainer .controls .btnEnd { background: #ff3b30; padding: 15px 17px; border-radius: 50%; border: none; color: white; cursor: pointer; }
+.videoPlayer {
+    background: #334155;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Local Video: Picture-in-Picture */
+.localView {
+    position: absolute;
+    bottom: 100px;
+    right: 20px;
+    width: 200px;
+    height: 150px;
+    border-radius: 16px;
+    background: #475569;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    z-index: 10;
+}
+
+/* Controls Bar: Glassmorphism */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.controls button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.btnEnd {
+    background: #ef4444 !important;
+}
+
+.btnEnd:hover {
+    background: #dc2626 !important;
+}
+
+/* Lobby Styling */
+.lobby {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0f172a;
+}
+
+.btnJoin {
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+/* Container for the loading/joining state */
+.loadingOverlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 40px;
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    color: #ffffff;
+    text-align: center;
+    width: fit-content;
+    margin: 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.loadingOverlay p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Cancel Button Styling */
+.btnCancel {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #f87171;
+    padding: 8px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.btnCancel:hover {
+    background: rgba(239, 68, 68, 0.3);
+    transform: scale(1.05);
+}
+
+/* Spinner Animation */
+.spinner {
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    color: #3b82f6;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
