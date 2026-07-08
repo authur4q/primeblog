@@ -78,7 +78,7 @@
     align-items: center;
     gap: 24px;
     padding: 16px 32px;
-    background: rgba(31, 44, 75, 0.45);
+    background: rgba(15, 23, 42, 0.45);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -146,7 +146,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at center, #000205, #020a1f);
+    background: radial-gradient(circle at center, #111827, #030712);
 }
 
 .btnJoin {
@@ -176,16 +176,16 @@
     justify-content: center;
     gap: 20px;
     padding: 48px;
-    background: rgba(0, 0, 0, 0.979);
+    background: rgba(15, 23, 42, 0.45);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-radius: 28px;
     color: #ffffff;
     text-align: center;
     max-width: 340px;
-    border:none;
-    box-shadow: 0 25px 50px -12px rgba(0, 0,  0.5);
-
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
 
 .loadingOverlay p {
     margin: 0;
