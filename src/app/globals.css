@@ -13,6 +13,31 @@ html, body {
   text-rendering: optimizeLegibility;
   overflow-x: hidden; /* Prevents unwanted horizontal swiping shifts */
 }
+/* ==========================================================================
+   Global Scrollbar Removal (Maintains native scrolling mechanics)
+   ========================================================================== */
+
+/* 1. Chromium-based browsers (Chrome, Edge, Brave, Opera, Safari) */
+::-webkit-scrollbar {
+  display: none;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* 2. Firefox and Standard W3C Specifications */
+html, body {
+  scrollbar-width: none; /* Hides scrollbar completely */
+  -ms-overflow-style: none; /* IE and Old Edge fallback */
+}
+
+/* 3. Global element utility fallback */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
 
 /* 
    Safe universal reset: Avoid resetting padding/margin globally with '*' 
