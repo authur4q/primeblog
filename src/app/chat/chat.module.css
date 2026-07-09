@@ -1,5 +1,6 @@
-
-
+/* ==========================================================================
+   1. Root Layout Structural Containment
+   ========================================================================== */
 .container {
   --navbar-height: 60px;
   --wa-header: #202c33;      
@@ -12,7 +13,6 @@
   --wa-text-primary: #e9edef;
   --wa-text-secondary: #8696a0;
   --wa-text-tertiary: #667781;
-
   --wa-wallpaper: #0b141a;    
   --wa-bubble-sent: #005c4b;
   --wa-bubble-received: #202c33;
@@ -23,28 +23,28 @@
 
   display: flex;
   flex-direction: column;
-  flex: 1;
-  height:100vh;
+  width: 100%;
+  height: 100dvh; /* Use dynamic viewport height to secure mobile toolbars */
   overflow: hidden;
-
-
-  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--wa-text-primary);
+  background: var(--wa-wallpaper);
 }
 
-.header{
-  display:flex;
+.header {
+  display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
-  padding: 0 20px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  padding: 0 24px;
+  margin: 12px 0;
+  flex-shrink: 0;
 }
 
 .headerTitle {
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .loadingContainer {
@@ -56,42 +56,43 @@
   font-size: 0.95rem;
 }
 
-
-
+/* ==========================================================================
+   2. Split-Pane Chat Framework Workspace
+   ========================================================================== */
 .chatWrapper {
-
   flex: 1;
   display: flex;
   min-height: 0;
+  width: 100%;
   overflow: hidden;
   background: var(--wa-bg-panel);
-
+  position: relative;
 }
 
-
-
+/* ==========================================================================
+   3. Master Navigation Pane (Sidebar Subsystem)
+   ========================================================================== */
 .chatSidebar {
   width: 400px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow-y: hidden;
+  height: 100%;
+  overflow: hidden;
   background: var(--wa-bg-panel);
-  
-  padding: 10px 8px;
+  border-right: 1px solid var(--wa-border);
 }
 
 .sidebarSearchInput {
-  margin: 8px 12px 4px;
-  padding: 15px 16px;
-  border: none;
+  margin: 8px 16px 12px 16px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
   border-radius: var(--radius-pill);
   background: var(--wa-bg-active);
   font-size: 0.9rem;
   color: var(--wa-text-primary);
   outline: none;
-  transition: background 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .sidebarSearchInput::placeholder {
@@ -100,56 +101,65 @@
 
 .sidebarSearchInput:focus {
   background: var(--wa-bg-hover);
-  box-shadow: inset 0 0 0 1px var(--wa-border);
+  border-color: rgba(0, 168, 132, 0.3);
 }
 
 .conversationsList {
   flex: 1;
   min-height: 0;
-  overflow-y: scroll;
-  padding-top: 4px;
+  overflow-y: auto;
+  padding-bottom: 12px;
 }
 
+.conversationsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.conversationsList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   4. Chat Navigation Cards
+   ========================================================================== */
 .chatCard {
   display: flex;
   align-items: center;
   gap: 15px;
   padding: 12px 16px;
   cursor: pointer;
-  border-bottom: 1px solid var(--wa-border);
-  transition: background 0.1s ease;
+  border-bottom: 1px solid rgba(34, 45, 52, 0.5);
+  transition: background 0.15s ease;
 }
 
 .chatCard:hover {
   background: var(--wa-bg-hover);
 }
 
-.chatCardActive {
-  background: var(--wa-bg-active);
-}
-
+.chatCardActive, 
 .chatCardActive:hover {
   background: var(--wa-bg-active);
 }
 
 .avatar {
   flex-shrink: 0;
-  width: 49px;
-  height: 49px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--wa-accent), #01493d);
-  color: rgb(5, 218, 5);
+  color: #00ffcc;
   font-weight: 600;
   font-size: 1.05rem;
+  user-select: none;
 }
 
 .chatCardContent {
   flex: 1;
   min-width: 0;
-  border-bottom: none;
 }
 
 .chatCardHeader {
@@ -176,7 +186,7 @@
 }
 
 .lastMessage {
-  margin: 2px 0 0;
+  margin: 3px 0 0;
   font-size: 0.85rem;
   color: var(--wa-text-secondary);
   white-space: nowrap;
@@ -184,97 +194,128 @@
   text-overflow: ellipsis;
 }
 
-
-
-.callButtons{
-  display: flex;
-  gap: 10px;
-  align-items: center;
-
-}
-/* 1. Ensure the main layout box fills all available space without growing */
+/* ==========================================================================
+   5. Detail Stream Workspace (Main Window Subsystem)
+   ========================================================================== */
 .chatMain {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    height: 100%; /* Force full container height constraints */
-    position: relative;
-    overflow: hidden;
-    background: var(--wa-wallpaper);
-    background-image: radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-    background-size: 22px 22px;
-}
-
-/* 2. Lock the header down to prevent pushing */
-.mainHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0 16px;
-    height: 60px;
-    flex-shrink: 0; /* Prevents the header from flattening or shrinking */
-    background: var(--wa-bg-panel);
-    border-bottom: 1px solid var(--wa-border);
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--wa-text-primary);
-    z-index: 10;
-}
-
-/* 3. Confine the scroll mechanics strictly inside this container */
-.messagesContainer {
-    flex: 1; /* Instructs the messages list to absorb all remaining vertical room */
-    overflow-y: auto; /* Keeps the scrollbar inside this layer only */
-    min-height: 0; /* Prevents layout expanding beyond screen boundaries */
-    padding: 20px 6% 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.backUserName{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.mobileBackButton {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: var(--wa-text-secondary);
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.mobileBackButton:hover {
-  background: var(--wa-bg-hover);
-}
-
-.noChatSelected {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--wa-bg-panel);
-  color: var(--wa-text-tertiary);
-  font-size: 0.95rem;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: var(--wa-wallpaper);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
+.mainHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  height: 60px;
+  flex-shrink: 0; 
+  background: var(--wa-bg-panel);
+  border-bottom: 1px solid var(--wa-border);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--wa-text-primary);
+  z-index: 10;
+}
 
+.mainHeader div:first-of-type {
+  flex-grow: 1;
+  min-width: 0;
+}
 
+.mainHeader strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.backUserName {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.callButtons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   6. Live Interaction Overlay Banner Components
+   ========================================================================== */
+.callBanner {
+  position: absolute; /* Swap to absolute containment inside chat main layer */
+  top: 68px; 
+  left: 16px;
+  right: 16px;         
+  z-index: 100;
+  background-color: #025c4c; 
+  color: #ffffff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.callBanner button {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.callBanner button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ==========================================================================
+   7. Real-Time Conversation Stream Box
+   ========================================================================== */
+.messagesContainer {
+  flex: 1; 
+  overflow-y: auto; 
+  min-height: 0; 
+  padding: 20px 5% 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.messagesContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messagesContainer::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
 
 .messageGroup {
   display: flex;
   justify-content: flex-start;
-  padding: 1px 0;
+  width: 100%;
 }
 
 .groupMe {
@@ -284,10 +325,10 @@
 .messageBubble {
   position: relative;
   max-width: 65%;
-  padding: 6px 9px 8px;
+  padding: 8px 12px;
   border-radius: var(--radius-lg);
   font-size: 0.92rem;
-  line-height: 1.35;
+  line-height: 1.4;
   word-wrap: break-word;
   box-shadow: var(--shadow-sm);
 }
@@ -304,68 +345,44 @@
   border-top-right-radius: 0;
 }
 
+.typingIndicator {
+  font-size: 0.78rem;
+  color: var(--wa-accent);
+  font-style: italic;
+  margin-top: 3px;
+}
 
+/* ==========================================================================
+   8. Chat Operational Control Input Deck
+   ========================================================================== */
 .messageForm {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 12px;
+  padding: 12px 16px;
   flex-shrink: 0;
-  background:transparent;
-  border-top:none;
-}
-.callBanner {
-  position: sticky; 
-    top: 0;           
-    z-index: 1000;
-    background-color:rgba(0, 0, 255, 0.801); 
-    color: white;
-    padding: 14px 20px;
-    display: flex;
-    justify-content: space-between;
-    border: none;
-    align-items: center;
-    font-weight: bold;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.callBanner button {
-    background: rgba(72, 1, 185, 0.61);
-    color: #ecf0ed;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
+  background: var(--wa-bg-dark, #111b21);
 }
 
 .messageInput {
   flex: 1;
   resize: none;
+  height: 42px;
   max-height: 120px;
-  padding: 9px 16px;
+  padding: 10px 18px;
   border: none;
   border-radius: var(--radius-pill);
   background: var(--wa-bg-active);
   font-family: inherit;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   line-height: 1.4;
   color: var(--wa-text-primary);
   outline: none;
-  transition: box-shadow 0.15s ease;
+  box-sizing: border-box;
 }
 
 .messageInput::placeholder {
   color: var(--wa-text-tertiary);
-}
-
-.messageInput:focus {
-  box-shadow: inset 0 0 0 1px var(--wa-border);
-}
-.shareLocation{
-  background:transparent;
-  color:red;
 }
 
 .sendButton {
@@ -373,54 +390,103 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, #06cf9c, var(--wa-accent));
-  color: #0b141a;
-  box-shadow: 0 2px 8px rgba(0, 168, 132, 0.35);
+  background: var(--wa-accent);
+  color: #111b21;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  transition: transform 0.1s ease, opacity 0.2s ease;
 }
 
 .sendButton:hover {
-  box-shadow: 0 4px 14px rgba(0, 168, 132, 0.45);
-  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .sendButton:active {
-  transform: scale(0.94) translateY(0);
-  box-shadow: 0 1px 4px rgba(0, 168, 132, 0.35);
+  transform: scale(0.95);
 }
 
+.callButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--wa-text-secondary);
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.callButton:hover {
+  background-color: var(--wa-bg-hover);
+  color: var(--wa-text-primary);
+}
 
+.callButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.shareLocation {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: var(--wa-text-secondary);
+}
+
+.noChatSelected {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #222e35;
+  color: var(--wa-text-tertiary);
+  font-size: 0.95rem;
+}
+
+.mobileBackButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   9. High-Performance Mobile Layout Shifts
+   ========================================================================== */
 @media (max-width: 768px) {
-  .chatWrapper {
-    position: relative;
-    
-    overflow: hidden;
-  }
-
   .chatSidebar {
     width: 100%;
     border-right: none;
-    overflow-y: hidden;
   }
 
-.chatMain {
-  position: absolute;
-  top: 60px; /* Aligns perfectly right below your 60px header */
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding-top: 0px; /* Keeps your internal top padding clean */
-  transform: translateX(100%);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--wa-bg-main); /* Ensure it has a background so content doesn't bleed through */
-}
+  /* Absolute viewport overlay deck without calculations traps */
+  .chatMain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 500;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
+  /* Smooth layout state shifting */
   .wrapperHasActive .chatSidebar {
     display: none;
   }
@@ -428,43 +494,17 @@
   .wrapperHasActive .chatMain {
     transform: translateX(0);
   }
-.mainHeader {
-  display: flex;
-  flex-shrink: 0;
-  
-  /* Modern Sticky Lock */
-  position: sticky; 
-  top: 0;
-  width: 100%;
-  z-index: 1000; 
-
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 16px;
-  height: 60px;
-  background: var(--wa-bg-panel);
-  border-bottom: none;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--wa-text-primary);
-}
-.messagesContainer {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 10px 6% 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
   .mobileBackButton {
     display: flex;
   }
 
   .messageBubble {
-    max-width: 82%;
+    max-width: 80%;
+  }
+  
+  .messagesContainer {
+    padding: 16px 4% 16px;
   }
 }
 
@@ -474,44 +514,4 @@
   .chatCard {
     transition: none;
   }
-}
-
-
-.mainHeader strong {
-    display: block;
-    font-size: 1.1rem;
-}
-
-
-.typingIndicator {
-    font-size: 0.75rem;
-    color: #0508bb;
-    font-style: italic;
-    margin-top: 2px;
-}
-
-
-.callButton {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: #fffefe;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-}
-
-.callButton:hover {
-    background-color: #02743b;
-}
-
-.callButton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.mainHeader div:first-of-type {
-    flex-grow: 1;
 }
