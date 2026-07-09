@@ -222,7 +222,7 @@
   padding: 0 16px;
   height: 60px;
   flex-shrink: 0; 
-  background: var(--wa-bg-panel);
+  background:transparent;
   border-bottom: 1px solid var(--wa-border);
   font-size: 1rem;
   font-weight: 500;
