@@ -1,4 +1,4 @@
-/* Overlay layer to dim the background */
+
 .overlay {
   position: fixed;
   top: 0;
@@ -11,11 +11,11 @@
   align-items: center;
   z-index: 9999;
   padding: 20px;
-  /* Animation for the overlay fade-in */
+ 
   animation: fadeIn 0.3s ease-out;
 }
 
-/* The actual modal box */
+
 .modal {
   background: #ffffff;
   padding: 2rem;
@@ -25,11 +25,11 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 320px;
-  /* Animation for the modal scale-up */
+  
   animation: scaleUp 0.3s ease-out;
 }
 
-/* Caller Name styling */
+
 .callerName {
   font-size: 1.5rem;
   font-weight: 700;
@@ -37,7 +37,6 @@
   margin: 1rem 0;
 }
 
-/* Container for the buttons */
 .buttonGroup {
   display: flex;
   gap: 1rem;
@@ -45,7 +44,7 @@
   margin-top: 2rem;
 }
 
-/* Button base styles */
+
 .acceptBtn, .rejectBtn {
   border: none;
   padding: 0.8rem 1.5rem;
@@ -65,12 +64,11 @@
   color: white;
 }
 
-/* Interaction feedback */
+
 .acceptBtn:active, .rejectBtn:active {
   transform: scale(0.95);
 }
 
-/* Keyframe animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

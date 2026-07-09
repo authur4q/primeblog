@@ -214,8 +214,9 @@ export default function PremiumPage() {
               <ul className={styles.featureList}>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Read all public blog posts</li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Set unique custom profile @username</li>
-                <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Connect Twitter, Instagram & LinkedIn</li>
+                <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Connect X, Instagram </li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Clickable WhatsApp redirect integration</li>
+                <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Exclusive Prime Voice narrator</li>
               </ul>
               <button className={styles.premiumButton} onClick={handleSubscribeClick}>Upgrade to Pro Tier</button>
             </div>

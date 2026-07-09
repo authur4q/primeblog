@@ -5,7 +5,7 @@ import styles from "./chat.module.css";
 import ShareLocationButton from '../components/ShareLocationButton/ShareLocationButton';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, SendHorizontal, Phone, Video,ArrowLeft,MapPin } from 'lucide-react';
+import { SendHorizontal, Phone, Video,ArrowLeft,MapPin } from 'lucide-react';
 import Pusher from 'pusher-js';
 import { useCall } from '@/context/CallContext';
 
@@ -51,7 +51,7 @@ const ChatPage = () => {
 
 const handleDeleteMessage = async (messageId, senderId) => {
     console.log("Attempting to delete message:", messageId);
-    // Only proceed if the user is the one who sent the message
+   
     if (senderId !== userId) return; 
 
     if (!selectedChat) return;

@@ -1,9 +1,7 @@
-/* ==========================================================================
-   1. Core Reset & Variable Baselines
-   ========================================================================== */
+
 html, body {
   height: 100dvh;
-    scrollbar-width: none; /* Hides scrollbar completely */
+    scrollbar-width: none; 
   -ms-overflow-style: none; 
   margin: 0;
   padding: 0;
@@ -13,13 +11,9 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden; /* Prevents unwanted horizontal swiping shifts */
+  overflow-x: hidden; 
 }
-/* ==========================================================================
-   Global Scrollbar Removal (Maintains native scrolling mechanics)
-   ========================================================================== */
 
-/* 1. Chromium-based browsers (Chrome, Edge, Brave, Opera, Safari) */
 ::-webkit-scrollbar {
   display: none;
   width: 0 !important;
@@ -36,17 +30,12 @@ html, body {
   display: none;
 }
 
-/* 
-   Safe universal reset: Avoid resetting padding/margin globally with '*' 
-   as it strips native element metrics from form inputs and buttons.
-*/
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-/* ==========================================================================
-   2. Base Typography & Interactive Elements
-   ========================================================================== */
+
 a {
   color: #ffffff;
   text-decoration: none;
@@ -63,9 +52,7 @@ img, video {
   display: block;
 }
 
-/* ==========================================================================
-   3. Application Frame Architecture (Responsive Layout Grid)
-   ========================================================================== */
+
 .page-container {
   display: flex;
   flex-direction: column;
@@ -77,16 +64,14 @@ img, video {
   display: flex;
   flex-direction: column;
   width: 100%;
-  flex: 1 0 auto; /* Ensures main container yields structure on mobile views */
+  flex: 1 0 auto; 
 }
 
-/* ==========================================================================
-   4. Desktop High-Performance Optimization (Viewport Containment)
-   ========================================================================== */
+
 @media screen and (min-width: 1025px) {
   html, body {
     height: 100%;
-    overflow: hidden; /* Lock root window scrolling exclusively for desktop apps */
+    overflow: hidden; 
   }
 
   .page-container {
@@ -97,13 +82,11 @@ img, video {
   .content-wrapper {
     flex: 1 1 0%;
     min-height: 0;
-    overflow: hidden; /* Enforces sub-pane component scrolling (.scroll) */
+    overflow: hidden; 
   }
 }
 
-/* ==========================================================================
-   5. System Preference Mappings
-   ========================================================================== */
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

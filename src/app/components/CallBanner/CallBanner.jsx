@@ -1,4 +1,4 @@
-// components/CallBanner.jsx
+
 export default function CallBanner({ conversationId, isOngoing }) {
     if (!isOngoing) return null;
 

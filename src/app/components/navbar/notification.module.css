@@ -44,7 +44,7 @@
   box-shadow: 0 0 0 2px #111b21;
 }
 
-/* Premium Glassmorphism Dropdown Panel */
+
 .notifDropdown {
   position: absolute;
   top: calc(100% + 12px);
@@ -107,7 +107,7 @@
   margin: 0;
 }
 
-/* Individual Notification Items Container */
+
 .notifItem {
   padding: 1.15rem 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -123,7 +123,7 @@
   background-color: rgba(255, 255, 255, 0.03); 
 }
 
-/* Unread State Accentuation */
+
 .unreadItem {
   background-color: rgba(59, 130, 246, 0.04);
   position: relative;
@@ -152,7 +152,6 @@
   font-weight: 600; 
 }
 
-/* High-End Pro Gradient Badge */
 .proBadge {
   background: linear-gradient(135deg, #a855f7, #6366f1);
   color: #ffffff;
@@ -187,7 +186,6 @@
   font-weight: 500;
 }
 
-/* Modern Fixed Mobile View Overlay */
 @media (max-width: 768px) {
   .notifDropdown {
     position: fixed;
@@ -200,7 +198,7 @@
   }
 }
 
-/* Smooth Scale Easing Animation */
+
 @keyframes premiumPop {
   from { 
     opacity: 0; 

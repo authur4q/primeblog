@@ -1,5 +1,5 @@
 .container {
-  /* Dynamic radial glow background layout for high-end glass refraction */
+
   background: radial-gradient(circle at 80% 20%, rgba(4, 194, 30, 0.06), transparent 50%),
               linear-gradient(to bottom, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.86)), 
               url('../../../public/cube.png');
@@ -35,7 +35,7 @@
   flex-shrink: 0;
 }
 
-/* Glassmorphic Search Field Overlay */
+
 .searchInput {
   width: 100%;
   padding: 14px 20px;
@@ -75,7 +75,7 @@
   display: none;
 }
 
-/* Premium Filter Pills */
+
 .catBtn, .activeCat {
   padding: 8px 18px;
   border-radius: 20px;
@@ -123,7 +123,7 @@
   box-sizing: border-box;
 }
 
-/* Modern Minimalist Scrollbar Customization */
+
 .VirtuosoScrollContainer {
   scrollbar-width: thin;
   scrollbar-color: rgba(4, 194, 30, 0.25) transparent;
@@ -133,7 +133,7 @@
 .VirtuosoScrollContainer::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.08); border-radius: 10px; }
 .VirtuosoScrollContainer::-webkit-scrollbar-thumb:hover { background-color: rgba(4, 194, 30, 0.4); }
 
-/* Premium Frosted Feed Cards */
+
 .post {
   background-color: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(16px);
@@ -219,7 +219,7 @@
   line-height: 1.5;
 }
 
-/* High-End Decorative Banner Card */
+
 .text {
   background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.8)), url('../../../public/people.jpg');
   background-size: cover;
@@ -247,7 +247,7 @@
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-/* Premium Radial Dynamic Pro Badge */
+
 .proBadge {
   background: linear-gradient(135deg, #ff3b30, #e0a);
   color: #ffffff;
@@ -268,7 +268,7 @@
   font-size: 0.95rem;
 }
 
-/* Modern Tablet & Smartphone Adaptation Layer */
+
 @media screen and (max-width: 1024px) {
   .container { 
     height: auto; 

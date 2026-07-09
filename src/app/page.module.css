@@ -1,5 +1,5 @@
 .container {
-  /* Added deep radial glow behind the glass structures for rich distortion contrast */
+
   background: radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.1), transparent 50%),
               linear-gradient(to bottom, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.82)), 
               url('../../public/cube.png');
@@ -17,7 +17,7 @@
   align-items: center;
 }
 
-/* Glassmorphism Notification Bar */
+
 .reminderBanner {
   background: rgba(26, 26, 30, 0.4);
   backdrop-filter: blur(12px);
@@ -42,7 +42,7 @@
   margin-left: 6px;
 }
 
-/* Deep Purple Frosted Incentive Strip */
+
 .incentiveBanner {
   background: linear-gradient(135deg, rgba(46, 16, 101, 0.4) 0%, rgba(30, 27, 75, 0.4) 100%);
   backdrop-filter: blur(16px);
@@ -138,7 +138,7 @@
   margin: 0 auto 24px auto;
 }
 
-/* Call-To-Action Button Refinements */
+
 .button {
   width: 100%;
   max-width: 200px;
@@ -208,7 +208,6 @@
   gap: 24px;
 }
 
-/* Premium High-End Frosted Cards */
 .homeCard {
   background: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(20px);
@@ -292,7 +291,7 @@
   padding-top: 8px;
 }
 
-/* Stats Highlight Strip Mesh Panel */
+
 .highlightsBar {
   display: flex;
   justify-content: space-around;
@@ -402,7 +401,7 @@
   box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
 }
 
-/* Floating Action Button Design Sync */
+
 .fab {
   position: fixed;
   bottom: 80px;
@@ -427,7 +426,7 @@
   box-shadow: 0 12px 28px rgba(2, 163, 10, 0.5);
 }
 
-/* Responsive Adjustments */
+
 @media (max-width: 640px) {
   .incentiveBanner {
     flex-direction: column;

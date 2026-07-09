@@ -1,5 +1,5 @@
 .container {
-  /* Ultra-modern deep aesthetic with crisp radial accent lighting */
+ 
   background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.05), transparent 40%),
               linear-gradient(to bottom, rgba(0, 0, 0, 0.94), rgba(0, 0, 0, 0.88)), 
               url('../../../public/cube.png');
@@ -33,7 +33,7 @@
   box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
 }
 
-/* Master Pane: Left Column Listing List */
+
 .posts {
   display: flex;
   flex-direction: column;
@@ -41,7 +41,7 @@
   background-color: rgba(0, 0, 0, 0.15);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
   height: 100%;
-  min-width: 0; /* Prevents text elements from breaking layout containment */
+  min-width: 0; 
 }
 
 .posts h1 {
@@ -94,7 +94,7 @@
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
-/* Scroll Container for Dashboard Feeds */
+
 .scroll {
   flex: 1;
   display: flex;
@@ -110,7 +110,7 @@
 .scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 10px; }
 .scroll::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.4); }
 
-/* Clean Dashboard List Items */
+
 .post {
   padding: 18px 20px;
   background-color: rgba(255, 255, 255, 0.01);
@@ -148,7 +148,7 @@
   gap: 8px;
 }
 
-/* Micro-interaction control elements */
+
 .btn {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -170,7 +170,7 @@
   border-color: rgba(255, 255, 255, 0.18);
 }
 
-/* Detail Form Window: Right Column Management Window */
+
 .form {
   display: flex;
   flex-direction: column;
@@ -200,7 +200,7 @@
   gap: 18px;
 }
 
-/* Input Fields Overhaul */
+
 .input, .textarea, .select {
   padding: 12px 16px;
   border-radius: 10px;
@@ -245,7 +245,7 @@
   background-color: #121214;
 }
 
-/* Master Action Button */
+
 .button {
   padding: 12px 24px;
   border-radius: 10px;
@@ -277,7 +277,7 @@
   font-style: italic;
 }
 
-/* High-Performance Responsive Architecture Layer */
+
 @media screen and (max-width: 1024px) {
   .container { 
     padding: 80px 16px 24px 16px; 

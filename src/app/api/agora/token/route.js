@@ -12,12 +12,12 @@ export async function GET(req) {
   const appID = process.env.AGORA_APP_ID;
   const appCertificate = process.env.AGORA_APP_CERTIFICATE;
   
-  // Expire in 1 hour
+ 
   const expirationTimeInSeconds = 3600;
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
 
-  // The new library uses buildTokenWithUid
+
   const token = RtcTokenBuilder.buildTokenWithUid(
     appID,
     appCertificate,

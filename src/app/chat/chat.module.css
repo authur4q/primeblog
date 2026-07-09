@@ -1,6 +1,4 @@
-/* ==========================================================================
-   1. Root Layout Structural Containment
-   ========================================================================== */
+
 .container {
   --navbar-height: 60px;
   --wa-header: #202c33;      
@@ -28,7 +26,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100dvh; /* Use dynamic viewport height to secure mobile toolbars */
+  height: 100dvh; 
   overflow: hidden;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--wa-text-primary);
@@ -60,9 +58,7 @@
   font-size: 0.95rem;
 }
 
-/* ==========================================================================
-   2. Split-Pane Chat Framework Workspace
-   ========================================================================== */
+
 .chatWrapper {
   flex: 1;
   display: flex;
@@ -119,9 +115,6 @@
   border-radius: 10px;
 }
 
-/* ==========================================================================
-   4. Chat Navigation Cards
-   ========================================================================== */
 .chatCard {
   display: flex;
   align-items: center;
@@ -193,9 +186,6 @@
   text-overflow: ellipsis;
 }
 
-/* ==========================================================================
-   5. Detail Stream Workspace (Main Window Subsystem)
-   ========================================================================== */
 .chatMain {
   flex: 1;
   display: flex;
@@ -253,11 +243,9 @@
   flex-shrink: 0;
 }
 
-/* ==========================================================================
-   6. Live Interaction Overlay Banner Components
-   ========================================================================== */
+
 .callBanner {
-  position: absolute; /* Swap to absolute containment inside chat main layer */
+  position: absolute;
   top: 68px; 
   left: 16px;
   right: 16px;         
@@ -289,9 +277,6 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* ==========================================================================
-   7. Real-Time Conversation Stream Box
-   ========================================================================== */
 .messagesContainer {
   flex: 1; 
   overflow-y: auto; 
@@ -351,9 +336,7 @@
   margin-top: 3px;
 }
 
-/* ==========================================================================
-   8. Chat Operational Control Input Deck
-   ========================================================================== */
+
 .messageForm {
   display: flex;
   align-items: center;
@@ -465,16 +448,13 @@
   border-radius: 50%;
 }
 
-/* ==========================================================================
-   9. High-Performance Mobile Layout Shifts
-   ========================================================================== */
 @media (max-width: 768px) {
   .chatSidebar {
     width: 100%;
     border-right: none;
   }
 
-  /* Absolute viewport overlay deck without calculations traps */
+ 
   .chatMain {
     position: absolute;
     top: 0;
@@ -488,7 +468,7 @@
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Smooth layout state shifting */
+  
   .wrapperHasActive .chatSidebar {
     display: none;
   }
