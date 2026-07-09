@@ -1,5 +1,8 @@
 .container {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.904), rgba(0, 0, 0, 0.836)), url('../../public/cube.png');
+  /* Added deep radial glow behind the glass structures for rich distortion contrast */
+  background: radial-gradient(circle at 50% 10%, rgba(99, 102, 241, 0.1), transparent 50%),
+              linear-gradient(to bottom, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.82)), 
+              url('../../public/cube.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -7,7 +10,6 @@
   min-height: 100vh;
   width: 100vw;
   box-sizing: border-box;
- 
   padding: 70px 20px 80px 20px; 
   overflow-x: hidden;
   display: flex;
@@ -15,11 +17,13 @@
   align-items: center;
 }
 
+/* Glassmorphism Notification Bar */
 .reminderBanner {
-  background: #1a1a1e;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(26, 26, 30, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   padding: 12px 24px;
- 
   text-align: center;
   font-size: 0.9rem;
   color: #a0a0a5;
@@ -38,11 +42,13 @@
   margin-left: 6px;
 }
 
+/* Deep Purple Frosted Incentive Strip */
 .incentiveBanner {
-  background: linear-gradient(135deg, #2e1065 0%, #1e1b4b 100%);
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, rgba(46, 16, 101, 0.4) 0%, rgba(30, 27, 75, 0.4) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
   padding: 14px 24px;
- 
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,12 +65,12 @@
 }
 
 .proTag {
-  background: #8b5cf6;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
   letter-spacing: 0.05em;
 }
 
@@ -81,17 +87,18 @@
 .incentiveBtn {
   background: #fff;
   color: #1e1b4b;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 }
 
 .incentiveBtn:hover {
   background: #f1f5f9;
+  transform: translateY(-1px);
 }
 
 .hero {
@@ -131,15 +138,16 @@
   margin: 0 auto 24px auto;
 }
 
+/* Call-To-Action Button Refinements */
 .button {
   width: 100%;
   max-width: 200px;
   padding: 14px 28px;
-  background-color: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50px;
   outline: none;
   margin: 12px auto 0;
@@ -149,13 +157,15 @@
   letter-spacing: 0.03em;
   will-change: transform;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .button:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
   transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4), 
+              0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .feedShowcase {
@@ -198,27 +208,33 @@
   gap: 24px;
 }
 
+/* Premium High-End Frosted Cards */
 .homeCard {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5);
 }
 
 .homeCard:hover {
-  transform: translateY(-4px);
-  
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
 .cardImage {
   width: 100%;
-  height: 160px;
+  height: 170px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 4px;
 }
 
@@ -276,6 +292,7 @@
   padding-top: 8px;
 }
 
+/* Stats Highlight Strip Mesh Panel */
 .highlightsBar {
   display: flex;
   justify-content: space-around;
@@ -284,12 +301,15 @@
   width: 100%;
   max-width: 1100px;
   margin: 60px auto 20px auto;
-  padding: 30px 20px;
-  background: rgba(255, 255, 255, 0.01);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 36px 24px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   gap: 30px;
   box-sizing: border-box;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
 }
 
 .statItem {
@@ -299,7 +319,8 @@
 .statItem h3 {
   color: #dfb6b2;
   margin: 0 0 6px 0;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
 .statItem p {
@@ -319,7 +340,7 @@
 
 .footerDivider {
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.07) 20%, rgba(255, 255, 255, 0.07) 80%, transparent);
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08) 20%, rgba(255, 255, 255, 0.08) 80%, transparent);
   margin-bottom: 2rem;
 }
 
@@ -349,51 +370,64 @@
   font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  transition: all 0.15s ease;
+  padding: 0.65rem 1.4rem;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
 }
 
 .supportLinkWhatsapp {
-  background-color: rgba(16, 185, 129, 0.06);
+  background-color: rgba(16, 185, 129, 0.05);
   border-color: rgba(16, 185, 129, 0.15);
   color: #10b981;
 }
 
 .supportLinkWhatsapp:hover {
-  background-color: rgba(16, 185, 129, 0.12);
+  background-color: rgba(16, 185, 129, 0.14);
   border-color: #10b981;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
 }
 
 .supportLinkEmail {
-  background-color: rgba(99, 102, 241, 0.06);
+  background-color: rgba(99, 102, 241, 0.05);
   border-color: rgba(99, 102, 241, 0.15);
   color: #6366f1;
 }
 
 .supportLinkEmail:hover {
-  background-color: rgba(99, 102, 241, 0.12);
+  background-color: rgba(99, 102, 241, 0.14);
   border-color: #6366f1;
-}
-.fab {
-    position: fixed;
-    bottom: 80px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-color: #02a30a;
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    cursor: pointer;
-    z-index: 100;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
 }
 
+/* Floating Action Button Design Sync */
+.fab {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #02c70d, #02a30a);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(2, 163, 10, 0.35);
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(2, 163, 10, 0.5);
+}
+
+/* Responsive Adjustments */
 @media (max-width: 640px) {
   .incentiveBanner {
     flex-direction: column;

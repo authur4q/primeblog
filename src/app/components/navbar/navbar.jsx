@@ -69,42 +69,60 @@ const Navbar = ({ showFab = false }) => {
           {status === "authenticated" && (
             <>
             
-              <div className={notifStyles.notificationWrapper}>
-                <button onClick={() => {
-                  setIsNotifOpen(!isNotifOpen);
-                  if (!isNotifOpen && unreadCount > 0) handleMarkAsRead();
-                }} className={notifStyles.notifButton}>
-                  <Bell size={24} />
-                  {unreadCount > 0 && <span className={notifStyles.badge}>{unreadCount}</span>}
-                </button>
-                {isNotifOpen && (
-                  <div className={notifStyles.notifDropdown}>
-                    <div className={notifStyles.notifHeader}><h4>Notifications</h4></div>
-                    <div className={notifStyles.notifList}>
-                      {notifications.length === 0 ? <p className={notifStyles.emptyText}>No notifications.</p> :
-                        notifications.map(item => (
-                          <Link key={item._id} href={item.link || '/chat'} className={notifStyles.notifItem} onClick={() => setIsNotifOpen(false)}>
-                            <h5>{item.title}</h5>
-                            {item.sender?.name && (
-                              <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                From  {item.sender.name}  {item.sender.isPremium && <span className={notifStyles.proBadge}>PRO</span>}
-                              </p>
-                            )}
-                            <p>{item.message}</p>
-                            <span className={notifStyles.timestamp}>
-                              {new Date(item.createdAt).toLocaleString(undefined, { 
-                                month: 'short', 
-                                day: 'numeric', 
-                                hour: 'numeric', 
-                                minute: '2-digit' 
-                              })}
-                            </span>
-                          </Link>
-                        ))}
-                    </div>
+            <div className={notifStyles.notificationWrapper}>
+    <button 
+      onClick={() => {
+        setIsNotifOpen(!isNotifOpen);
+        if (!isNotifOpen && unreadCount > 0) handleMarkAsRead();
+      }} 
+      className={notifStyles.notifButton}
+    >
+      <Bell size={24} />
+      {unreadCount > 0 && <span className={notifStyles.badge}>{unreadCount}</span>}
+    </button>
+    
+    {isNotifOpen && (
+      <div className={notifStyles.notifDropdown}>
+        <div className={notifStyles.notifHeader}>
+          <h4>Notifications</h4>
+        </div>
+        <div className={notifStyles.notifList}>
+          {notifications.length === 0 ? (
+            <p className={notifStyles.emptyText}>No notifications.</p>
+          ) : (
+            notifications.map(item => (
+              <Link 
+                key={item._id} 
+                href={item.link || '/chat'} 
+                className={`${notifStyles.notifItem} ${!item.isRead ? notifStyles.unreadItem : ''}`} 
+                onClick={() => setIsNotifOpen(false)}
+              >
+                <h5 className={notifStyles.notifTitle}>{item.title}</h5>
+                
+                {item.sender?.name && (
+                  <div className={notifStyles.notifSenderRow}>
+                    <span className={notifStyles.senderName}>From {item.sender.name}</span>
+                    {item.sender.isPremium && <span className={notifStyles.proBadge}>PRO</span>}
                   </div>
                 )}
-              </div>
+                
+                <p>{item.message}</p>
+                
+                <span className={notifStyles.timestamp}>
+                  {new Date(item.createdAt).toLocaleString(undefined, { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                  })}
+                </span>
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+    )}
+</div>
 
               
               <div className={styles.userMenuWrapper}>

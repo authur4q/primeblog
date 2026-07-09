@@ -159,7 +159,7 @@ export default function CallPageContent() {
             {isJoining ? (
                 <div className={styles.loadingOverlay}>
                     <Loader2 className={styles.spinner} />
-                    <p>Connecting to secure line...</p>
+                    <p>Connecting...</p>
                     <button onClick={cleanupResources} className={styles.btnCancel}>Cancel</button>
                 </div>
             ) : (
