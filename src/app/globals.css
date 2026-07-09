@@ -2,7 +2,7 @@
    1. Core Reset & Variable Baselines
    ========================================================================== */
 html, body {
-  min-height: 100%;
+  height: 100dvh;
   margin: 0;
   padding: 0;
   background-color: #0b0d13;

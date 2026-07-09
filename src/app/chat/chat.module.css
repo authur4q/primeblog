@@ -23,6 +23,10 @@
 
   display: flex;
   flex-direction: column;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100dvh; /* Use dynamic viewport height to secure mobile toolbars */
   overflow: hidden;
@@ -485,6 +489,7 @@
     height:100%;
     z-index: 500;
     transform: translateX(100%);
+    margin-bottom: 0;
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
