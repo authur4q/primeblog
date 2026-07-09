@@ -73,9 +73,7 @@
   position: relative;
 }
 
-/* ==========================================================================
-   3. Master Navigation Pane (Sidebar Subsystem)
-   ========================================================================== */
+
 .chatSidebar {
   width: 400px;
   flex-shrink: 0;
@@ -88,8 +86,8 @@
 }
 
 .sidebarSearchInput {
-  margin: 8px 16px 12px 16px;
-  padding: 10px 18px;
+  margin: 0px 16px 12px 16px;
+  padding: 14px 18px;
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   background: var(--wa-bg-active);
@@ -103,10 +101,7 @@
   color: var(--wa-text-tertiary);
 }
 
-.sidebarSearchInput:focus {
-  background: var(--wa-bg-hover);
-  border-color: rgba(0, 168, 132, 0.3);
-}
+
 
 .conversationsList {
   flex: 1;
@@ -374,7 +369,7 @@
   resize: none;
   height: 55px;
   max-height: 120px;
-  padding: 18px 18px;
+  padding: 6px 18px;
   border: none;
   border-radius: var(--radius-pill);
   background: var(--wa-bg-active);
