@@ -399,6 +399,7 @@
 @media (max-width: 768px) {
   .chatWrapper {
     position: relative;
+    
     overflow: hidden;
   }
 
@@ -412,6 +413,7 @@
     position: absolute;
     top: 0;
     left: 0;
+    padding-top: 20px;
     
     right: 0;
     bottom: 0;
@@ -474,13 +476,6 @@
   }
 }
 
-.mainHeader {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    gap: 15px;
-}
 
 .mainHeader strong {
     display: block;
