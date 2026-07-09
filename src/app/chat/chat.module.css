@@ -412,6 +412,7 @@
     position: absolute;
     top: 0;
     left: 0;
+    
     right: 0;
     bottom: 0;
     transform: translateX(100%);
@@ -425,16 +426,14 @@
   .wrapperHasActive .chatMain {
     transform: translateX(0);
   }
-  .mainHeader {
+.mainHeader {
   display: flex;
-flex-shrink: 0;
-  position: fixed; 
-
+  flex-shrink: 0;
+  
+  /* Modern Sticky Lock */
+  position: sticky; 
   top: 0;
-  left: 0;
-
   width: 100%;
- 
   z-index: 1000; 
 
   align-items: center;
@@ -442,7 +441,6 @@ flex-shrink: 0;
   gap: 12px;
   padding: 0 16px;
   height: 60px;
-  flex-shrink: 0;
   background: var(--wa-bg-panel);
   border-bottom: none;
   font-size: 1rem;
