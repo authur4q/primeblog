@@ -1,44 +1,89 @@
-html, body { 
-  height: 100%; 
-  margin: 0; 
-  padding: 0; 
-  background-color: #0b0d13; 
-  color: #fff; 
-  font-family: system-ui, -apple-system, sans-serif;
-  overflow: hidden; 
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
+/* ==========================================================================
+   1. Core Reset & Variable Baselines
+   ========================================================================== */
+html, body {
+  min-height: 100%;
   margin: 0;
+  padding: 0;
+  background-color: #0b0d13;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden; /* Prevents unwanted horizontal swiping shifts */
 }
 
+/* 
+   Safe universal reset: Avoid resetting padding/margin globally with '*' 
+   as it strips native element metrics from form inputs and buttons.
+*/
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   2. Base Typography & Interactive Elements
+   ========================================================================== */
+a {
+  color: #ffffff;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ==========================================================================
+   3. Application Frame Architecture (Responsive Layout Grid)
+   ========================================================================== */
 .page-container {
-  height: 100dvh;   
-  min-height: 0;
-  width: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  width: 100%;
+  min-height: 100dvh;
 }
 
 .content-wrapper {
-  
-  width: 100%;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  flex: 1; 
-  min-height: 0; 
-  overflow: hidden;
+  width: 100%;
+  flex: 1 0 auto; /* Ensures main container yields structure on mobile views */
 }
 
-a {
-  color: white;
-  text-decoration: none;
+/* ==========================================================================
+   4. Desktop High-Performance Optimization (Viewport Containment)
+   ========================================================================== */
+@media screen and (min-width: 1025px) {
+  html, body {
+    height: 100%;
+    overflow: hidden; /* Lock root window scrolling exclusively for desktop apps */
+  }
+
+  .page-container {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .content-wrapper {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden; /* Enforces sub-pane component scrolling (.scroll) */
+  }
 }
 
+/* ==========================================================================
+   5. System Preference Mappings
+   ========================================================================== */
 @media (prefers-color-scheme: dark) {
-  html { color-scheme: dark; }
+  html {
+    color-scheme: dark;
+  }
 }
