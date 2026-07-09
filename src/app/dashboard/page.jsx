@@ -98,7 +98,7 @@ const DashboardPage = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
+        console.log(res)
         if (res.ok) {
             setFormData({ title: "", description: "", content: "", id: "", imageUrl: "", category: "", tags: "" });
             getData(); 

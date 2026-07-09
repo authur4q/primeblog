@@ -6,12 +6,14 @@ import redis from "../../../../lib/redis";
 
 export const POST = async (req) => {
     try {
-        const cacheKey = `posts:${query.status}:${userId || 'all'}`;
         const { title, description, content, userId, name, status, imageUrl, tags, category } = await req.json();
         if (!title || !userId) return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
 
         await connectMongoDb();
         const user = await User.findById(userId);
+        
+        const targetStatus = status || 'published';
+        
         const post = {
             title, 
             description, 
@@ -21,13 +23,21 @@ export const POST = async (req) => {
             imageUrl,
             tags,
             category,
-            status: status || 'published',
+            status: targetStatus,
             isPremium: user ? user.isPremium : false
         };
         await Post.create(post);
-        await redis.del(cacheKey);
+
+        const specificCacheKey = `posts:${targetStatus}:${userId}`;
+        const globalCacheKey = `posts:${targetStatus}:all`;
+        
+        await Promise.all([
+            redis.del(specificCacheKey),
+            redis.del(globalCacheKey)
+        ]);
+        
         return NextResponse.json({ message: "Post created successfully" }, { status: 201 });
-    } catch{
+    } catch {
         return NextResponse.json({ message: "Post not created" }, { status: 500 });
     }
 };
@@ -41,33 +51,31 @@ export const GET = async (req) => {
         await connectMongoDb();
         
         const query = {};
-        
         if (userId) {
             query.userId = userId;
         }
-
         query.status = status === "draft" ? "draft" : "published";
 
-      
         const cacheKey = `posts:${query.status}:${userId || 'all'}`;
         
- const cachedPosts = await redis.get(cacheKey);
+        const cachedPosts = await redis.get(cacheKey);
         if (cachedPosts) {
             console.log("Returning cached posts");
             try {
-
                 return NextResponse.json(typeof cachedPosts === 'string' ? JSON.parse(cachedPosts) : cachedPosts, { status: 200 });
             } catch (e) {
                 console.error("Failed to parse cache, clearing key:", e);
                 await redis.del(cacheKey); 
             }
         }
+        
         const posts = await Post.find(query)
             .sort({ createdAt: -1 })
             .lean();
 
-       
         await redis.set(cacheKey, JSON.stringify(posts), { ex: 3600 }); 
+
+        console.log(posts);
 
         return NextResponse.json(posts, { status: 200 });
     } catch (error) {
