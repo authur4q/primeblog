@@ -414,6 +414,9 @@
     top: 0;
     left: 0;
     padding-top: 20px;
+    overflow-y: hidden;
+    background-color: red;
+    height: 100vh;
     
     right: 0;
     bottom: 0;
