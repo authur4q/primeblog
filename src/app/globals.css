@@ -3,6 +3,8 @@
    ========================================================================== */
 html, body {
   height: 100dvh;
+    scrollbar-width: none; /* Hides scrollbar completely */
+  -ms-overflow-style: none; 
   margin: 0;
   padding: 0;
   background-color: #0b0d13;
@@ -24,13 +26,8 @@ html, body {
   height: 0 !important;
 }
 
-/* 2. Firefox and Standard W3C Specifications */
-html, body {
-  scrollbar-width: none; /* Hides scrollbar completely */
-  -ms-overflow-style: none; /* IE and Old Edge fallback */
-}
 
-/* 3. Global element utility fallback */
+
 * {
   scrollbar-width: none;
   -ms-overflow-style: none;
