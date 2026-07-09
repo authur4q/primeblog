@@ -223,7 +223,7 @@
   height: 60px;
   flex-shrink: 0; 
   background:transparent;
-  border-bottom: 1px solid var(--wa-border);
+  border-bottom:none;
   font-size: 1rem;
   font-weight: 500;
   color: var(--wa-text-primary);
