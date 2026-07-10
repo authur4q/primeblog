@@ -64,6 +64,23 @@ const ChatPage = () => {
 
         return () => pusherRef.current.unsubscribe(`private-${selectedChat._id}`);
     }, [selectedChat, userId]);
+    useEffect(() => {
+    if (!userId || !pusherRef.current) return;
+
+    const userChannel = pusherRef.current.subscribe(`user-${userId}-conversations`);
+
+    userChannel.bind("new-conversation", (newConvo) => {
+        setConversations((prev) => {
+            const exists = prev.some((c) => c._id === newConvo._id);
+            if (exists) return prev;
+            return [newConvo, ...prev];
+        });
+    });
+
+    return () => {
+        pusherRef.current?.unsubscribe(`user-${userId}-conversations`);
+    };
+}, [userId]);
 
     const handleDeleteMessage = async (messageId, senderId) => {
         console.log("Attempting to delete message:", messageId);
@@ -194,7 +211,7 @@ const ChatPage = () => {
                                     <div className={styles.avatar}>{chat.participants.find(p => p._id !== userId)?.name?.charAt(0).toUpperCase() || "?"}</div>
                                     <div className={styles.chatCardContent}>
                                         <div className={styles.chatCardHeader}>
-                                            <strong className={styles.username}>{chat.participants.find(p => p._id !== userId)?.name}</strong>
+                                            <strong className={styles.username}>{chat.participants?.find(p => p._id !== userId)?.name || "New Chat"}</strong>
                                             <span className={styles.timestamp}>{chat.updatedAt ? new Date(chat.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
                                         </div>
                                         <p className={styles.lastMessage}>{chat.lastMessage}</p>
@@ -211,6 +228,7 @@ const ChatPage = () => {
                                 <div className={styles.backUserName}>
                                     <button className={styles.mobileBackButton} onClick={() => setSelectedChat(null)}><ArrowLeft /></button>
                                     <strong>{selectedChat.participants?.find(p => p._id !== userId)?.name}</strong>
+                                    
                                 </div>
                                 {isTyping && <span className={styles.typingIndicator}>typing...</span>}
                                 <div className={styles.callButtons}>

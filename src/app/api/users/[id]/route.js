@@ -120,6 +120,8 @@ export async function PATCH(req, { params }) {
     }
 
     if (body.name) user.name = body.name
+    if (body.hasOwnProperty('bio')) user.bio = body.bio || ""
+    if (body.hasOwnProperty('bannerGradient')) user.bannerGradient = body.bannerGradient || "linear-gradient(135deg, #6366f1, #a855f7)"
     if (body.hasOwnProperty('username')) user.username = body.username || ""
     if (body.hasOwnProperty('primaryPhone')) user.primaryPhone = body.primaryPhone || undefined
 
@@ -129,6 +131,7 @@ export async function PATCH(req, { params }) {
     }
 
     await user.save()
+    console.log(user)
 
     if (isAdmin && !isOwner) {
       try {

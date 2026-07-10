@@ -10,7 +10,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { username, whatsapp } = await req.json();
+    const { username, whatsapp, } = await req.json();
 
     if (!username || typeof username !== "string") {
       return NextResponse.json({ error: "A valid unique username is required" }, { status: 400 });

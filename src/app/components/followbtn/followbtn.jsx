@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import styles from "./followbutton.module.css"; 
+import {  UserPlus, UserCheck} from 'lucide-react';
 
 export default function FollowButton({ targetUserId, onSuccess }) {
     const [isFollowing, setIsFollowing] = useState(false);
@@ -47,7 +48,7 @@ export default function FollowButton({ targetUserId, onSuccess }) {
             disabled={loading}
             className={isFollowing ? styles.followingBtn : styles.followBtn}
         >
-            {loading ? "..." : (isFollowing ? "Following" : "Follow")}
+           <UserPlus size={18}/> {loading ? "..." : (isFollowing ? "Following" : "Follow")}
         </button>
     );
 }

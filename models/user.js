@@ -85,6 +85,15 @@ biometricsEnabled: {
   trim: true,
   default: "Hello! I'm here."
 },
+bio: {
+    type: String,
+    default: "",
+    maxlength: [160, "Bio cannot exceed 160 characters."], 
+  },
+  bannerGradient: {
+    type: String,
+    default: "linear-gradient(135deg, #6366f1, #a855f7)",
+  },
 fcmToken: { type: String, default: null },
 devices: [Object],
   Instagram: {
