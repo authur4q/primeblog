@@ -6,7 +6,6 @@ import connectMongoDb from "../../../../../lib/mongodb";
 import redis from "../../../../../lib/redis";
 import Pusher from "pusher";
 
-
 const pusherServer = new Pusher({
   appId: process.env.PUSHER_APP_ID,
   key: process.env.PUSHER_KEY,
@@ -29,7 +28,6 @@ export async function GET(req) {
       return NextResponse.json({ error: "Missing conversationId" }, { status: 400 });
     }
 
-  
     const cachedMessages = await redis.get(cacheKey);
     if (cachedMessages) {
       try {
@@ -53,7 +51,6 @@ export async function GET(req) {
       return NextResponse.json({ error: "No messages found" }, { status: 404 });
     }
 
-   
     await redis.set(cacheKey, JSON.stringify(messages), { ex: 30 });
     return NextResponse.json(messages.reverse(), { status: 200 });
 
@@ -74,22 +71,18 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const newMessage = await Message.create({
+    const cleanText = text.trim();
+    const generatedId = new mongoose.Types.ObjectId();
+
+    const newMessage = {
+      _id: generatedId,
       conversationId,
       senderId,
-      text: text.trim(),
-    });
-
-
-    await pusherServer.trigger(conversationId, "new-message", newMessage);
-
-  
-    await mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
-      lastMessage: text.trim(),
+      text: cleanText,
+      createdAt: new Date(),
       updatedAt: new Date()
-    });
+    };
 
-   
     let determinedRecipient = recipientId;
     if (!determinedRecipient && mongoose.models.Conversation) {
       const activeConvo = await mongoose.models.Conversation.findById(conversationId).lean();
@@ -100,16 +93,29 @@ export async function POST(req) {
       }
     }
 
+    const productionTasks = [
+      Message.create(newMessage),
+      pusherServer.trigger(conversationId, "new-message", newMessage),
+      mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
+        lastMessage: cleanText,
+        updatedAt: new Date()
+      })
+    ];
+
     if (determinedRecipient) {
-      await Notification.create({
-        recipient: new mongoose.Types.ObjectId(String(determinedRecipient)),
-        sender: new mongoose.Types.ObjectId(String(senderId)),
-        type: "USER_ACTIVITY",
-        title: "New Message Received",
-        message: text.trim().length > 40 ? `${text.trim().substring(0, 40)}...` : text.trim(),
-        read: false,
-      });
+      productionTasks.push(
+        Notification.create({
+          recipient: new mongoose.Types.ObjectId(String(determinedRecipient)),
+          sender: new mongoose.Types.ObjectId(String(senderId)),
+          type: "USER_ACTIVITY",
+          title: "New Message Received",
+          message: cleanText.length > 40 ? `${cleanText.substring(0, 40)}...` : cleanText,
+          read: false,
+        })
+      );
     }
+
+    await Promise.all(productionTasks);
 
     return NextResponse.json(newMessage, { status: 201 });
   } catch (error) {

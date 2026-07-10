@@ -5,7 +5,7 @@ import styles from "./chat.module.css";
 import ShareLocationButton from '../components/ShareLocationButton/ShareLocationButton';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { SendHorizontal, Phone, Video,ArrowLeft,MapPin } from 'lucide-react';
+import { SendHorizontal, Phone, Video, ArrowLeft, MapPin } from 'lucide-react';
 import Pusher from 'pusher-js';
 import { useCall } from '@/context/CallContext';
 
@@ -23,7 +23,6 @@ const ChatPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const pusherRef = useRef(null);
     const messagesEndRef = useRef(null);
-    
 
     useEffect(() => { 
         if (status === "unauthenticated") router.push("/login"); 
@@ -46,18 +45,33 @@ const ChatPage = () => {
                 setTimeout(() => setIsTyping(false), 2000);
             }
         });
+
+        channel.bind("new-message", (incomingMsg) => {
+            setMessages((prev) => {
+                const messageExists = prev.some((msg) => msg._id === incomingMsg._id);
+                if (messageExists) return prev;
+                return [...prev, incomingMsg];
+            });
+            
+            setConversations((prevConvos) =>
+                prevConvos.map((convo) =>
+                    convo._id === selectedChat._id
+                        ? { ...convo, lastMessage: incomingMsg.text, updatedAt: incomingMsg.createdAt }
+                        : convo
+                ).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+            );
+        });
+
         return () => pusherRef.current.unsubscribe(`private-${selectedChat._id}`);
     }, [selectedChat, userId]);
 
-const handleDeleteMessage = async (messageId, senderId) => {
-    console.log("Attempting to delete message:", messageId);
-   
-    if (senderId !== userId) return; 
-
-    if (!selectedChat) return;
-    await fetch(`/api/chats/messages/${messageId}`, { method: "DELETE" });
-    setMessages(prev => prev.filter(msg => msg._id !== messageId));
-}
+    const handleDeleteMessage = async (messageId, senderId) => {
+        console.log("Attempting to delete message:", messageId);
+        if (senderId !== userId) return; 
+        if (!selectedChat) return;
+        await fetch(`/api/chats/messages/${messageId}`, { method: "DELETE" });
+        setMessages(prev => prev.filter(msg => msg._id !== messageId));
+    };
 
     const handleTyping = (e) => {
         setNewMessageText(e.target.value);
@@ -72,15 +86,36 @@ const handleDeleteMessage = async (messageId, senderId) => {
         if (!newMessageText.trim() || !selectedChat) return;
         
         const tempId = Date.now().toString();
-        const optimisticMsg = { _id: tempId, senderId: userId, text: newMessageText.trim(), createdAt: new Date().toISOString() };
+        const optimisticMsg = { 
+            _id: tempId, 
+            senderId: userId, 
+            text: newMessageText.trim(), 
+            createdAt: new Date().toISOString() 
+        };
+        
         setMessages((prev) => [...prev, optimisticMsg]);
         setNewMessageText("");
 
-        await fetch("/api/chats/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ conversationId: selectedChat._id, text: optimisticMsg.text, senderId: userId })
-        });
+        try {
+            const response = await fetch("/api/chats/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    conversationId: selectedChat._id, 
+                    text: optimisticMsg.text, 
+                    senderId: userId 
+                })
+            });
+
+            if (response.ok) {
+                const savedMsg = await response.json();
+                setMessages((prev) =>
+                    prev.map((msg) => (msg._id === tempId ? savedMsg : msg))
+                );
+            }
+        } catch (error) {
+            console.error("Failed to send message:", error);
+        }
     };
 
     const initiateCall = async (mediaType = 'audio') => {
@@ -128,33 +163,30 @@ const handleDeleteMessage = async (messageId, senderId) => {
     const handleGoBack = () => {
         if (window.location.pathname === '/chat') {
             router.push('/');
-        return; 
-        
-      
-    } else {
-      
-        router.back();
-    }
-    }
-        useEffect(() => {
+            return; 
+        } else {
+            router.back();
+        }
+    };
+
+    useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+
     const showbanner = isCallOngoing && activeConversationId === selectedChat?._id;
 
     if (status === "loading") return <div className={styles.loadingContainer}>Loading...</div>;
 
     return (
         <div className={styles.container}>
-
-            
             <div className={`${styles.chatWrapper} ${selectedChat ? styles.wrapperHasActive : ''}`}>
                 <div className={styles.chatSidebar}>
-                                <div className={styles.header}>
-                <ArrowLeft onClick={handleGoBack} /> 
-                <h1 className={styles.headerTitle}>chats </h1>
-            </div>
+                    <div className={styles.header}>
+                        <ArrowLeft onClick={handleGoBack} /> 
+                        <h1 className={styles.headerTitle}>chats </h1>
+                    </div>
                     <input className={styles.sidebarSearchInput} placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                     <div className={styles.conversationsList}>
+                    <div className={styles.conversationsList}>
                         {Array.isArray(conversations) && conversations
                             .filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())))
                             .map(chat => (
@@ -188,31 +220,31 @@ const handleDeleteMessage = async (messageId, senderId) => {
                             </div>
                             <div className={styles.messagesContainer}>
                                 {showbanner && (
-                <div className={styles.callBanner}>
-                    <span>Ongoing Call</span>
-                    <button onClick={() => router.push(`/call/${activeConversationId}`)}>
-                        Return
-                    </button>
-                </div>
-            )}
-                               {(messages ?? []).map(msg => (
-    <div key={msg._id} className={`${styles.messageGroup} ${msg.senderId === userId ? styles.groupMe : ''}`}>
-        <div 
-            onDoubleClick={() => handleDeleteMessage(msg._id)} 
-            className={`${styles.messageBubble} ${msg.senderId === userId ? styles.messageMe : styles.messageThem}`}
-        >
-            {msg.text.startsWith('http') ? (
-                <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
-                    <MapPin size={34}/>
-                </a>
-            ) : (msg.text)}
-        </div>
-    </div>
-))}
-                                 <div ref={messagesEndRef} />
+                                    <div className={styles.callBanner}>
+                                        <span>Ongoing Call</span>
+                                        <button onClick={() => router.push(`/call/${activeConversationId}`)}>
+                                            Return
+                                        </button>
+                                    </div>
+                                )}
+                                {(messages ?? []).map(msg => (
+                                    <div key={msg._id} className={`${styles.messageGroup} ${msg.senderId === userId ? styles.groupMe : ''}`}>
+                                        <div 
+                                            onDoubleClick={() => handleDeleteMessage(msg._id, msg.senderId)} 
+                                            className={`${styles.messageBubble} ${msg.senderId === userId ? styles.messageMe : styles.messageThem}`}
+                                        >
+                                            {msg.text.startsWith('http') ? (
+                                                <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
+                                                    <MapPin size={34}/>
+                                                </a>
+                                            ) : (msg.text)}
+                                        </div>
+                                    </div>
+                                ))}
+                                <div ref={messagesEndRef} />
                             </div>
                             <form onSubmit={handleSendMessage} className={styles.messageForm}>
-                                 <ShareLocationButton className={styles.shareLocation} onLocationShare={(link) => setNewMessageText(prev => prev + " " + link)} />
+                                <ShareLocationButton className={styles.shareLocation} onLocationShare={(link) => setNewMessageText(prev => prev + " " + link)} />
                                 <textarea className={styles.messageInput} value={newMessageText} onChange={handleTyping} placeholder="Message..." />
                                 <button type="submit" className={styles.sendButton}><SendHorizontal size={30} /></button>
                             </form>
