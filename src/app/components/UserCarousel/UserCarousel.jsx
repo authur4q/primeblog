@@ -31,23 +31,36 @@ export default function UserCarousel() {
     <div className={styles.carouselContainer}>
       <h3>Discover Creators</h3>
       
-      <div className={`${styles.scrollWrapper} ${expanded ? styles.expanded : ''}`}>
-        <div className={styles.userGrid}>
-          {users.map((user) => (
-            <div key={user._id} className={styles.userCard}>
-              <div className={styles.avatar}>
-                {(user.name || "U")[0].toUpperCase()}
-              </div>
-              <span className={styles.userName}>{user.name}</span>
-            
-              <FollowButton 
-                targetUserId={user._id} 
-                onSuccess={() => setUsers(prev => prev.filter(u => u._id !== user._id))}
-              />
-            </div>
-          ))}
+<div className={`${styles.scrollWrapper} ${expanded ? styles.expanded : ''}`}>
+  <div className={styles.userGrid}>
+    {users.map((user) => (
+      <div key={user._id} className={styles.userCard}>
+        <div className={styles.avatar}>
+          {user.profilePicture ? (
+            <img 
+              src={user.profilePicture} 
+              alt={user.name} 
+              className={styles.avatarImage} 
+              onError={(e) => {
+               
+                e.target.style.display = 'none';
+                e.target.parentElement.innerText = (user.name || "U")[0].toUpperCase();
+              }}
+            />
+          ) : (
+            (user.name || "U")[0].toUpperCase()
+          )}
         </div>
+        <span className={styles.userName}>{user.name}</span>
+      
+        <FollowButton 
+          targetUserId={user._id} 
+          onSuccess={() => setUsers(prev => prev.filter(u => u._id !== user._id))}
+        />
       </div>
+    ))}
+  </div>
+</div>
 
       <button className={styles.viewMoreBtn} onClick={() => setExpanded(!expanded)}>
         {expanded ? "Show Less" : "View More Creators"}

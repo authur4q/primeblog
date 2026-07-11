@@ -8,13 +8,19 @@ import Loading from '@/app/components/loading/page';
 import Link from 'next/link';
 import Image from 'next/image';
 import MessageButton from '../../components/messageButton/page';
+import MiniAvatar from '@/app/components/MiniAvatar/MiniAvatar';
 import { Heart, Bookmark, Play, Pause, CornerDownRight, ChevronDown } from 'lucide-react';
 
 const CommentItem = ({ comment, session, handleCommentDelete, setReplyingTo }) => (
   <div className={styles.commentCard}>
     <div className={styles.commentHeader}>
       <Link href={`/profile/${comment.user?._id || comment.user}`} className={styles.avatarLink}>
-        <div className={styles.avatar}>{comment.user?.name?.charAt(0).toUpperCase() || "A"}</div>
+       
+        <MiniAvatar 
+          name={comment.user?.name || "User"}
+          profilePicture={comment.user?.profilePicture}
+          className={styles.avatar}
+        />
         <div className={styles.avatarName}>{comment.user?.name || "User"}</div>
       </Link>
       {session?.user?.id && (comment.user?._id === session.user.id || comment.user === session.user.id) && (
@@ -226,29 +232,29 @@ const BlogPost = () => {
               </div>
             </div>
 
-{session?.user?.isPremium && (
-  <div className={styles.audioNarratorCard}>
-    <h4 className={styles.audioNarratorHeader}>Listen Hand-Free with Prime Voice Narrator</h4>
-    
-    <button onClick={handleSpeechControl} className={styles.audioBtnSimple}>
-    
-      {isPlaying && !isPaused ? (
-        <div className={styles.waveContainer}>
-          <div className={styles.waveBar} />
-          <div className={styles.waveBar} />
-          <div className={styles.waveBar} />
-          <div className={styles.waveBar} />
-        </div>
-      ) : (
-        isPlaying && isPaused ? <Pause size={20} /> : <Play size={20} />
-      )}
-      
-      <span>
-        {isPlaying ? (isPaused ? "Resuming..." : "Playing") : "Listen with Voice Narrator"}
-      </span>
-    </button>
-  </div>
-)}
+            {session?.user?.isPremium && (
+              <div className={styles.audioNarratorCard}>
+                <h4 className={styles.audioNarratorHeader}>Listen Hand-Free with Prime Voice Narrator</h4>
+                
+                <button onClick={handleSpeechControl} className={styles.audioBtnSimple}>
+                
+                  {isPlaying && !isPaused ? (
+                    <div className={styles.waveContainer}>
+                      <div className={styles.waveBar} />
+                      <div className={styles.waveBar} />
+                      <div className={styles.waveBar} />
+                      <div className={styles.waveBar} />
+                    </div>
+                  ) : (
+                    isPlaying && isPaused ? <Pause size={20} /> : <Play size={20} />
+                  )}
+                  
+                  <span>
+                    {isPlaying ? (isPaused ? "Resuming..." : "Playing") : "Listen with Voice Narrator"}
+                  </span>
+                </button>
+              </div>
+            )}
 
             <div className={styles.content}>{formatContent(data.content)}</div>
             <hr className={styles.divider} />

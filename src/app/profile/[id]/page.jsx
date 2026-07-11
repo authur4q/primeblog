@@ -1,17 +1,20 @@
 "use client"
 import React, { useEffect, useState, useMemo } from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import Navbar from '@/app/components/navbar/navbar'
+import Navbar from '../../components/navbar/navbar'
 import Link from 'next/link'
 import styles from './profile.module.css'
 import MessageButton from '../../components/messageButton/page'
-import { ArrowRight, MessageCircle, Twitter, Instagram, Settings, X, ShieldAlert, CreditCard, LifeBuoy, UserPlus, UserCheck, Search } from 'lucide-react';
 
-const UserProfile = ({ params: paramsPromise }) => {
-  const params = React.use(paramsPromise)
-  const profileId = params.id
+import { UploadButton } from '@uploadthing/react'
+import { ArrowRight, MessageCircle, Twitter, Instagram, Settings, X, ShieldAlert, CreditCard, LifeBuoy, UserPlus, UserCheck, Search, Pencil, Loader2 } from 'lucide-react';
 
-  const { data: session, status } = useSession()
+const UserProfile = ({ params }) => {
+
+  const unwrappedParams = params ? React.use(params) : null
+  const profileId = unwrappedParams?.id
+
+  const { data: session, status, update } = useSession()
   const currentUserId = session?.user?.id
 
   const [profileUser, setProfileUser] = useState(null)
@@ -34,6 +37,7 @@ const UserProfile = ({ params: paramsPromise }) => {
   const [editInstagram, setEditInstagram] = useState("")
   const [editBannerGradient, setEditBannerGradient] = useState("linear-gradient(135deg, #6366f1, #a855f7)")
   const [saving, setSaving] = useState(false)
+  const [isAvatarUpdating, setIsAvatarUpdating] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -82,7 +86,8 @@ const UserProfile = ({ params: paramsPromise }) => {
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      if (!profileId) return
+      if (!profileId) return;
+      
       try {
         const [userRes, postsRes, followRes, followingRes] = await Promise.all([
           fetch(`/api/users/${profileId}`),
@@ -119,8 +124,11 @@ const UserProfile = ({ params: paramsPromise }) => {
         setLoading(false)
       }
     }
-    fetchProfileData()
-  }, [profileId, currentUserId])
+
+    if (status !== "loading" && profileId) {
+      fetchProfileData()
+    }
+  }, [profileId, currentUserId, status])
 
   const handleFollowToggle = async () => {
     if (!currentUserId) return alert("Please log in to follow users.")
@@ -183,6 +191,32 @@ const UserProfile = ({ params: paramsPromise }) => {
     }
   }
 
+const handleAvatarUploaded = async (url) => {
+  setIsAvatarUpdating(true)
+  try {
+    const res = await fetch(`/api/users/${profileUser._id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profilePicture: url })
+    })
+    if (res.ok) {
+      const updatedUser = await res.json()
+      setProfileUser(updatedUser)
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          image: url 
+        }
+      })
+    }
+  } catch (err) {
+    console.error("Error saving updated profile avatar:", err)
+  } finally {
+    setIsAvatarUpdating(false)
+  }
+}
+
   const filteredPosts = useMemo(() => {
     return userPosts.filter(post => 
       post.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -190,7 +224,28 @@ const UserProfile = ({ params: paramsPromise }) => {
     )
   }, [userPosts, searchQuery])
 
-  if (status === "loading" || loading) return <div className={styles.container}><Navbar /><div className={styles.loaderContainer}><div className={styles.spinner}></div></div></div>
+  if (status === "loading" || loading) {
+    return (
+      <div className={styles.container}>
+        <Navbar />
+        <div className={styles.loaderContainer}>
+          <div className={styles.spinner}></div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <Navbar />
+        <div className={styles.emptyState} style={{ padding: '4rem 2rem' }}>
+          <p>Error loading profile: {error}</p>
+          <Link href="/dashboard" className={styles.createBtn}>Return to Dashboard</Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.container}>
@@ -204,8 +259,43 @@ const UserProfile = ({ params: paramsPromise }) => {
           />
           
           <div className={styles.avatarSection}>
-            <div className={`${styles.avatarPlaceholder} ${profileUser?.isPremium ? styles.premiumAvatarRing : ''}`}>
-              {profileUser?.name?.charAt(0).toUpperCase()}
+            <div className={styles.avatarContainerRelative}>
+              <div className={`${styles.avatarPlaceholder} ${profileUser?.isPremium ? styles.premiumAvatarRing : ''}`}>
+                {profileUser?.profilePicture ? (
+                  <img src={profileUser.profilePicture} alt={profileUser.name} className={styles.avatarImage} />
+                ) : (
+                  profileUser?.name?.charAt(0).toUpperCase()
+                )}
+              </div>
+              
+              {isAvatarUpdating && (
+                <div className={styles.avatarLoadingOverlay}>
+                  <Loader2 className={styles.avatarSpinner} />
+                </div>
+              )}
+
+              {isOwnProfile && (
+                <div className={styles.editIconBadge}>
+                  <Pencil size={14} />
+                  <UploadButton
+                    endpoint="profilePicture"
+                    onUploadProgress={() => setIsAvatarUpdating(true)}
+                    onClientUploadComplete={(res) => {
+                      if (res?.[0]?.url) {
+                        handleAvatarUploaded(res[0].url)
+                      }
+                    }}
+                    onUploadError={(error) => {
+                      setIsAvatarUpdating(false)
+                      alert(`Upload error: ${error.message}`)
+                    }}
+                    appearance={{
+                      button: styles.invisibleUploadButton,
+                      allowedContent: styles.hiddenAllowedContent
+                    }}
+                  />
+                </div>
+              )}
             </div>
             
             <div className={styles.metaInfo}>
@@ -224,7 +314,7 @@ const UserProfile = ({ params: paramsPromise }) => {
               {profileUser?.bio && <p className={styles.bioDisplay}>{profileUser.bio}</p>}
               
               <div style={{ display: "flex", gap: "10px", marginTop: "10px", flexWrap: "wrap" }}>
-                {profileUser?.primaryPhone && <span className={styles.phoneDisplay}>{profileUser.primaryPhone}</span>}
+                
                 {profileUser?.isPremium && profileUser?.primaryPhone && (
                   <a href={formatWhatsAppUrl(profileUser.primaryPhone)} target="_blank" rel="noopener noreferrer" className={styles.whatsappLink}>
                     <MessageCircle size={16} /> WhatsApp

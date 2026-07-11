@@ -11,7 +11,7 @@ export default function CallPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     
-    // FORCE video mode if specified, or default intelligently to ensure tracks are requested
+   
     const mediaType = searchParams.get('type') || 'video';
     
     const [joined, setJoined] = useState(false);
@@ -81,7 +81,6 @@ export default function CallPageContent() {
         });
     }, []);
 
-    // Handle Remote Users Video Playback
     useEffect(() => {
         if (!joined) return;
         Object.values(remoteUsers).forEach(user => {
@@ -95,7 +94,7 @@ export default function CallPageContent() {
         });
     }, [remoteUsers, joined]);
 
-    // Handle Local User Video Playback (Your Small Box)
+
     useEffect(() => {
         if (joined && tracksRef.current.video) {
             const container = document.getElementById("local-video-container");
@@ -124,7 +123,7 @@ export default function CallPageContent() {
             
             await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID, conversationId, token, null);
 
-            // Create both tracks unconditionally if mediaType says video
+           
             const [audio, video] = await Promise.all([
                 AgoraRTC.createMicrophoneAudioTrack(),
                 mediaType === 'video' ? AgoraRTC.createCameraVideoTrack() : null
@@ -175,7 +174,7 @@ export default function CallPageContent() {
                 {getWifiIcon(networkQuality)}
             </div>
 
-            {/* Large full screen container for Remote Users */}
+     
             <div className={styles.remoteView}>
                 {Object.values(remoteUsers).map(user => (
                     <div 
@@ -186,7 +185,7 @@ export default function CallPageContent() {
                 ))}
             </div>
 
-            {/* Small floating corner box for Local User (You) */}
+          
             <div className={styles.localView} id="local-video-container" />
 
             <div className={styles.controls}>

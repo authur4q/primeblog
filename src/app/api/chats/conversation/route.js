@@ -2,71 +2,88 @@ import { NextResponse } from "next/server";
 import { auth } from "@/app/api/auth/[...nextauth]/options";
 import connectMongoDb from "../../../../../lib/mongodb";
 import Conversation from "../../../../../models/conversation";
+import Message from "../../../../../models/messages"; 
+import redis from "../../../../../lib/redis";
 import mongoose from "mongoose";
-import Pusher from "pusher";
-
-const pusherServer = new Pusher({
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.PUSHER_KEY,
-  secret: process.env.PUSHER_SECRET,
-  cluster: process.env.PUSHER_CLUSTER,
-  useTLS: true,
-});
-
-export async function POST(req) {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const currentUserId = String(session.user.id);
-    const { recipientId } = await req.json();
-
-    if (!recipientId || currentUserId === recipientId) {
-      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
-    }
-
-    await connectMongoDb();
-
-    const currentObjId = new mongoose.Types.ObjectId(currentUserId);
-    const recipientObjId = new mongoose.Types.ObjectId(recipientId);
-
-    let conversation = await Conversation.findOne({
-      participants: { $all: [currentObjId, recipientObjId] }
-    }).populate("participants", "name username isPremium");
-
-    if (!conversation) {
-      const newConvoDoc = await Conversation.create({
-        participants: [currentObjId, recipientObjId]
-      });
-      
-      conversation = await Conversation.findById(newConvoDoc._id)
-        .populate("participants", "name username isPremium");
-
-      await pusherServer.trigger(`user-${recipientId}-conversations`, "new-conversation", conversation);
-    }
-
-    return NextResponse.json(conversation, { status: 200 });
-  } catch (error) {
-    console.error("Error in conversation POST:", error);
-    return NextResponse.json({ error: "Internal Error" }, { status: 500 });
-  }
-}
 
 export async function GET(req) {
   try {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await connectMongoDb();
-    
-    const userObjId = new mongoose.Types.ObjectId(String(session.user.id));
+    const userId = String(session.user.id);
+    const cacheKey = `user:${userId}:chats`;
 
-    const conversations = await Conversation.find({
-      participants: userObjId
-    })
-      .populate("participants", "name username isPremium")
+   
+    try {
+      let cachedData = await redis.get(cacheKey);
+      
+      if (cachedData) {
+        const parsedChats = typeof cachedData === "string" ? JSON.parse(cachedData) : cachedData;
+        if (parsedChats && Array.isArray(parsedChats)) {
+          console.log("Serving sidebar list directly from Redis cache layer");
+          return NextResponse.json(parsedChats, { status: 200 });
+        }
+      }
+    } catch (cacheError) {
+      console.error("Redis read/parse failed, falling back to MongoDB:", cacheError);
+      try { await redis.del(cacheKey); } catch (_) {}
+    }
+
+    
+    await connectMongoDb();
+    const userObjId = new mongoose.Types.ObjectId(userId);
+
+  
+    const rawConversations = await Conversation.find({ participants: userObjId })
+      .populate("participants", "name username isPremium profilePicture")
       .sort({ updatedAt: -1 })
       .lean();
+
+
+    const conversations = await Promise.all(
+      rawConversations.map(async (convo) => {
+        if (!convo.lastMessage) {
+          const fallbackMsg = await Message.findOne({ conversationId: convo._id })
+            .sort({ createdAt: -1 })
+            .select("text createdAt senderId seen")
+            .populate({
+              path: "senderId",
+              select: "profilePicture name"
+            })
+            .lean();
+
+          return {
+            ...convo,
+            lastMessage: fallbackMsg || null
+          };
+        }
+        
+      
+        const populatedMsg = await Message.findById(convo.lastMessage)
+          .select("text createdAt senderId seen")
+          .populate({
+            path: "senderId",
+            select: "profilePicture name"
+          })
+          .lean();
+
+        console.log(populatedMsg)
+          
+        return {
+          ...convo,
+          lastMessage: populatedMsg || null
+        };
+      })
+    );
+
+   
+    try {
+      const stringifiedData = JSON.stringify(conversations);
+      await redis.setex(cacheKey, 600, stringifiedData);
+    } catch (cacheWriteError) {
+      console.error("Failed to write fresh dataset to Redis:", cacheWriteError);
+    }
 
     return NextResponse.json(conversations, { status: 200 });
   } catch (error) {

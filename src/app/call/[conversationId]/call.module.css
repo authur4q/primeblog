@@ -10,7 +10,6 @@
     overflow: hidden;
 }
 
-/* Remote Video Backdrop: Pure full screen */
 .remoteView {
     position: absolute;
     top: 0;
@@ -27,7 +26,6 @@
     background: #141318;
 }
 
-/* Force video elements to stretch fully */
 .remoteView div, .localView div {
     width: 100% !important;
     height: 100% !important;
@@ -37,7 +35,7 @@
     object-fit: cover !important;
 }
 
-/* Subtle dark gradient overlay to make text and controls pop */
+
 .callPageContainer::after {
     content: '';
     position: absolute;
@@ -50,7 +48,6 @@
     pointer-events: none;
 }
 
-/* Top Calling Info Wrapper */
 .networkIndicator {
     position: absolute;
     top: 60px;
@@ -96,7 +93,6 @@
     font-weight: 400;
 }
 
-/* Floating Local PIP (Rounded and compact like real mobile apps) */
 .localView {
     position: absolute;
     top: 60px;
@@ -111,7 +107,7 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Bottom Control Capsule Bar */
+
 .controls {
     position: absolute;
     bottom: 40px;
@@ -155,23 +151,21 @@
     transform: scale(0.95);
 }
 
-/* Center-docked Speaker/Main Action Button */
+
 .controls button.speakerActive {
     background: #ffffff;
     color: #141318;
 }
 
-/* End Call Circle Option */
 .btnEnd {
     background: #f43f5e !important;
-    transform: rotate(135deg); /* Angles the phone icon perfectly downward */
+    transform: rotate(135deg);
 }
 
 .btnEnd:hover {
     background: #e11d48 !important;
 }
 
-/* Lobby Styling Remains Untouched */
 .lobby {
     height: 100vh;
     display: flex;

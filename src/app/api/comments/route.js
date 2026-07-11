@@ -42,7 +42,7 @@ export const GET = async (req) => {
        
    
         const comments = await Comment.find({ post: id })
-            .populate("user", "name")
+            .populate("user", "name profilePicture")
             .sort({ createdAt: 1 }) 
             
         return NextResponse.json(comments, { status: 200 })

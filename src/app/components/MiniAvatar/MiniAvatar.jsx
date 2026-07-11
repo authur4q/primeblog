@@ -1,20 +1,23 @@
-import React from 'react';
+"use client"
+import React, { useState } from 'react';
 import styles from './MiniAvatar.module.css';
 
-const MiniAvatar = ({ name, imageUrl, className = "" }) => {
- 
-  const getInitials = (name) => {
-    return name ? name.charAt(0).toUpperCase() : '?';
+const MiniAvatar = ({ name, profilePicture, className = "" }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const getInitials = (userName) => {
+    return userName ? userName.charAt(0).toUpperCase() : '?';
   };
 
   return (
     <div className={`${styles.avatarContainer} ${className}`}>
-      {imageUrl ? (
+      {profilePicture && !imageError ? (
         <img 
-          src={imageUrl} 
+          src={profilePicture} 
           alt={name} 
           className={styles.avatarImage}
           loading="lazy"
+          onError={() => setImageError(true)}
         />
       ) : (
         <div className={styles.avatarPlaceholder}>

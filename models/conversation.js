@@ -9,10 +9,7 @@ const ConversationSchema = new mongoose.Schema(
         required: true,
       },
     ],
-    lastMessage: {
-      type: String,
-      default: "",
-    },
+lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', default: null },
     lastMessageAt: {
       type: Date,
       default: Date.now,

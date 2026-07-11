@@ -56,7 +56,7 @@ const ChatPage = () => {
             setConversations((prevConvos) =>
                 prevConvos.map((convo) =>
                     convo._id === selectedChat._id
-                        ? { ...convo, lastMessage: incomingMsg.text, updatedAt: incomingMsg.createdAt }
+                        ? { ...convo, lastMessage: incomingMsg, updatedAt: incomingMsg.createdAt }
                         : convo
                 ).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
             );
@@ -64,23 +64,24 @@ const ChatPage = () => {
 
         return () => pusherRef.current.unsubscribe(`private-${selectedChat._id}`);
     }, [selectedChat, userId]);
+
     useEffect(() => {
-    if (!userId || !pusherRef.current) return;
+        if (!userId || !pusherRef.current) return;
 
-    const userChannel = pusherRef.current.subscribe(`user-${userId}-conversations`);
+        const userChannel = pusherRef.current.subscribe(`user-${userId}-conversations`);
 
-    userChannel.bind("new-conversation", (newConvo) => {
-        setConversations((prev) => {
-            const exists = prev.some((c) => c._id === newConvo._id);
-            if (exists) return prev;
-            return [newConvo, ...prev];
+        userChannel.bind("new-conversation", (newConvo) => {
+            setConversations((prev) => {
+                const exists = prev.some((c) => c._id === newConvo._id);
+                if (exists) return prev;
+                return [newConvo, ...prev];
+            });
         });
-    });
 
-    return () => {
-        pusherRef.current?.unsubscribe(`user-${userId}-conversations`);
-    };
-}, [userId]);
+        return () => {
+            pusherRef.current?.unsubscribe(`user-${userId}-conversations`);
+        };
+    }, [userId]);
 
     const handleDeleteMessage = async (messageId, senderId) => {
         console.log("Attempting to delete message:", messageId);
@@ -206,18 +207,31 @@ const ChatPage = () => {
                     <div className={styles.conversationsList}>
                         {Array.isArray(conversations) && conversations
                             .filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())))
-                            .map(chat => (
-                                <div key={chat._id} onClick={() => setSelectedChat(chat)} className={`${styles.chatCard} ${selectedChat?._id === chat._id ? styles.chatCardActive : ''}`}>
-                                    <div className={styles.avatar}>{chat.participants.find(p => p._id !== userId)?.name?.charAt(0).toUpperCase() || "?"}</div>
-                                    <div className={styles.chatCardContent}>
-                                        <div className={styles.chatCardHeader}>
-                                            <strong className={styles.username}>{chat.participants?.find(p => p._id !== userId)?.name || "New Chat"}</strong>
-                                            <span className={styles.timestamp}>{chat.updatedAt ? new Date(chat.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
+                            .map(chat => {
+                                const targetUser = chat.participants.find(p => p._id !== userId);
+                                return (
+                                    <div key={chat._id} onClick={() => setSelectedChat(chat)} className={`${styles.chatCard} ${selectedChat?._id === chat._id ? styles.chatCardActive : ''}`}>
+                                        <div className={styles.avatar}>
+                                            {targetUser?.profilePicture ? (
+                                                <img src={targetUser.profilePicture} alt={targetUser?.name} className={styles.avatarImage} />
+                                            ) : (
+                                                targetUser?.name?.charAt(0).toUpperCase() || "?"
+                                            )}
                                         </div>
-                                        <p className={styles.lastMessage}>{chat.lastMessage}</p>
+                                        <div className={styles.chatCardContent}>
+                                            <div className={styles.chatCardHeader}>
+                                                <strong className={styles.username}>{targetUser?.name || "New Chat"}</strong>
+                                                <span className={styles.timestamp}>{chat.updatedAt ? new Date(chat.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
+                                            </div>
+                                            <p className={styles.lastMessage}>
+                                                {chat.lastMessage && typeof chat.lastMessage === 'object'
+                                                    ? chat.lastMessage.text
+                                                    : ""}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                     </div>
                 </div>
 
@@ -227,8 +241,20 @@ const ChatPage = () => {
                             <div className={styles.mainHeader}>
                                 <div className={styles.backUserName}>
                                     <button className={styles.mobileBackButton} onClick={() => setSelectedChat(null)}><ArrowLeft /></button>
+                                    <div className={styles.mainHeaderAvatar}>
+                                        {selectedChat.participants?.find(p => p._id !== userId)?.profilePicture ? (
+                                            <img 
+                                                src={selectedChat.participants.find(p => p._id !== userId).profilePicture} 
+                                                alt="Profile" 
+                                                className={styles.avatarImage} 
+                                            />
+                                        ) : (
+                                            <div className={styles.avatarFallback}>
+                                                {selectedChat.participants?.find(p => p._id !== userId)?.name?.charAt(0).toUpperCase() || "?"}
+                                            </div>
+                                        )}
+                                    </div>
                                     <strong>{selectedChat.participants?.find(p => p._id !== userId)?.name}</strong>
-                                    
                                 </div>
                                 {isTyping && <span className={styles.typingIndicator}>typing...</span>}
                                 <div className={styles.callButtons}>
@@ -247,15 +273,20 @@ const ChatPage = () => {
                                 )}
                                 {(messages ?? []).map(msg => (
                                     <div key={msg._id} className={`${styles.messageGroup} ${msg.senderId === userId ? styles.groupMe : ''}`}>
-                                        <div 
-                                            onDoubleClick={() => handleDeleteMessage(msg._id, msg.senderId)} 
-                                            className={`${styles.messageBubble} ${msg.senderId === userId ? styles.messageMe : styles.messageThem}`}
-                                        >
-                                            {msg.text.startsWith('http') ? (
-                                                <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
-                                                    <MapPin size={34}/>
-                                                </a>
-                                            ) : (msg.text)}
+                                        <div className={styles.messageBubbleContainer}>
+                                            <div 
+                                                onDoubleClick={() => handleDeleteMessage(msg._id, msg.senderId)} 
+                                                className={`${styles.messageBubble} ${msg.senderId === userId ? styles.messageMe : styles.messageThem}`}
+                                            >
+                                                {msg.text.startsWith('http') ? (
+                                                    <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
+                                                        <MapPin size={34}/>
+                                                    </a>
+                                                ) : (msg.text)}
+                                            </div>
+                                            <span className={styles.messageTimestamp}>
+                                                {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                                            </span>
                                         </div>
                                     </div>
                                 ))}

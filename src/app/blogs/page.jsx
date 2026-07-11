@@ -5,6 +5,7 @@ import Navbar from '../components/navbar/navbar';
 import styles from "./blogs.module.css";
 import Link from 'next/link';
 import Image from 'next/image'; 
+import MiniAvatar from '../components/MiniAvatar/MiniAvatar';
 import { format, parseISO } from 'date-fns';
 import { useRouter } from 'next/navigation';
 
@@ -81,33 +82,38 @@ const Blogs = () => {
                   const item = filteredPosts[index];
                   const authorName = item.name || "Anonymous";
                   return (
-                    <div key={item._id} className={styles.post}>
-                      <div className={styles.postHeader}>
-                        <div className={styles.authorMeta}>
-                          <div className={styles.avatar}>{authorName.charAt(0).toUpperCase()}</div>
-                          <span className={styles.author}>pb/{authorName}</span>
-                          <span className={styles.proBadge}>✔</span>
-                        </div>
-                        {item.createdAt && <p className={styles.time}>{format(parseISO(item.createdAt), 'MM/dd/yyyy')}</p>}
-                      </div>
-                      
-                      <Link href={`/blogs/${item._id || ''}`} className={styles.postContentLink}>
-                        {item.imageUrl && (
-                          <div className={styles.imageWrapper} style={{ position: 'relative', height: '200px' }}>
-                            <Image 
-                              src={item.imageUrl} 
-                              alt={item.title} 
-                              fill 
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              style={{ objectFit: 'cover' }} 
-                              loading="lazy" 
-                            />
-                          </div>
-                        )}
-                        <h1>{item.title}</h1>
-                        <h3>{item.description}</h3>
-                      </Link>
-                    </div>
+<div key={item._id} className={styles.post}>
+  <div className={styles.postHeader}>
+    <div className={styles.authorMeta}>
+      
+      <MiniAvatar 
+        name={authorName} 
+        profilePicture={item.userId?.profilePicture} 
+        className={styles.avatar} 
+      />
+      <span className={styles.author}>pb/{authorName}</span>
+      <span className={styles.proBadge}>✔</span>
+    </div>
+    {item.createdAt && <p className={styles.time}>{format(parseISO(item.createdAt), 'MM/dd/yyyy')}</p>}
+  </div>
+  
+  <Link href={`/blogs/${item._id || ''}`} className={styles.postContentLink}>
+    {item.imageUrl && (
+      <div className={styles.imageWrapper} style={{ position: 'relative', height: '200px' }}>
+        <Image 
+          src={item.imageUrl} 
+          alt={item.title} 
+          fill 
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          style={{ objectFit: 'cover' }} 
+          loading="lazy" 
+        />
+      </div>
+    )}
+    <h1>{item.title}</h1>
+    <h3>{item.description}</h3>
+  </Link>
+</div>
                   );
                 }}
               />

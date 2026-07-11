@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import { useSession } from 'next-auth/react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import styles from './nearbymap.module.css';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -12,10 +12,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const getMarkerIcon = (status) => {
-  const color = status?.toLowerCase().includes("coffee") ? "green" : "blue";
+const getCustomIcon = (statusString) => {
+  const isCoffee = statusString?.toLowerCase().includes("coffee");
+  const markerColor = isCoffee ? "green" : "blue";
   return new L.Icon({
-    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
     shadowUrl: 'https://leafletjs.com/examples/custom-icons/leaf-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -24,119 +25,101 @@ const getMarkerIcon = (status) => {
   });
 };
 
-function StatusUpdater({ user, currentUserId }) {
-  const [status, setStatus] = useState(user.status || "");
-  const [isEditing, setIsEditing] = useState(false);
-  const isOwner = user._id === currentUserId;
-
- 
-  const distanceKm = user.distInMeters 
-    ? (user.distInMeters / 1000).toFixed(1) 
-    : null;
-
-  const saveStatus = async () => {
-    const res = await fetch("/api/users/update-status", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-
-    if (res.ok) {
-      setIsEditing(false);
+function MapRecenter({ centerCoordinates }) {
+  const activeMapInstance = useMap();
+  useEffect(() => {
+    if (centerCoordinates) {
+      activeMapInstance.setView(centerCoordinates, activeMapInstance.getZoom());
     }
-  };
-
-  return (
-    <div style={{ textAlign: 'center', minWidth: '150px' }}>
-      <strong style={{ fontSize: '1.1em' }}>{user.name}</strong>
-      {distanceKm && <p style={{ fontSize: '0.75em', color: '#080808', margin: '2px 0' }}>{distanceKm} km away</p>}
-      
-      {isEditing ? (
-        <div style={{ margin: '10px 0' }}>
-          <input 
-            value={status} 
-            onChange={(e) => setStatus(e.target.value)} 
-            maxLength={30}
-            style={{ width: '90%', color: "black", border: "none", padding: '5px', backgroundColor: '#eee', outline: "none", borderRadius: "10px" }}
-          />
-          <button onClick={saveStatus} style={{ marginTop: '5px', backgroundColor: "black", color: "white", borderRadius: "10px", padding: "4px 8px", cursor: "pointer" }}>
-            Save
-          </button>
-        </div>
-      ) : (
-        <div>
-          <p style={{ fontStyle: 'italic', margin: '5px 0' }}>"{status || "Hello! I'm here."}"</p>
-          {isOwner && (
-            <button onClick={() => setIsEditing(true)} style={{ fontSize: '0.8em', marginBottom: '5px' }}>Edit Status</button>
-          )}
-          {!isOwner && (
-            <>
-              <br />
-              <button 
-                onClick={() => window.location.href = `/profile/${user._id}`}
-                style={{ padding: '5px 10px', backgroundColor: '#df00f3', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-              >
-                Say Hi
-              </button>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  }, [centerCoordinates, activeMapInstance]);
+  return null;
 }
 
-export default function NearbyMap() {
-  const { data: session } = useSession();
-  const currentUserId = session?.user?.id;
-  const [position, setPosition] = useState(null);
-  const [nearbyUsers, setNearbyUsers] = useState([]);
+export default function NearbyMap({ 
+  userCoordinates, 
+  searchRadius, 
+  onMarkerSelected, 
+  onDatasetSync, 
+  authenticatedUserId 
+}) {
+  const [localUsers, setLocalUsers] = useState([]);
 
-  const fetchNearby = async (lat, lng) => {
-    try {
-      const res = await fetch(`/api/users/nearby?lat=${lat}&lng=${lng}`);
-      const data = await res.json();
-      setNearbyUsers(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("NearbyMap: API fetch failed:", error);
-    }
-  };
+useEffect(() => {
+    if (!userCoordinates) return;
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setPosition([latitude, longitude]);
-        fetchNearby(latitude, longitude);
-      },
-      (err) => {
-        const defaultPos = [-1.2921, 36.8219];
-        setPosition(defaultPos);
-        fetchNearby(defaultPos[0], defaultPos[1]);
-      }
-    );
-  }, []);
+    const pullNearbyUsers = async () => {
+      try {
+        const queryUrl = `/api/users/nearby?lat=${userCoordinates[0]}&lng=${userCoordinates[1]}&radius=${searchRadius}`;
+        console.log("Fetching from URL:", queryUrl);
 
-  if (!position) return <p>Loading map...</p>;
-
-  return (
-    <MapContainer center={position} zoom={13} style={{ height: "400px", width: "100%" }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {nearbyUsers?.map(user => {
-        if (!user.location?.coordinates) return null;
+        const rawResponse = await fetch(queryUrl);
         
-        return (
-          <Marker 
-            key={user._id} 
-            position={[user.location.coordinates[1], user.location.coordinates[0]]}
-            icon={getMarkerIcon(user.status)}
-          >
-            <Popup>
-              <StatusUpdater user={user} currentUserId={currentUserId} />
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
+        if (!rawResponse.ok) {
+          console.error(`API response error status: ${rawResponse.status}`);
+          return;
+        }
+
+        const parsedData = await rawResponse.json();
+        console.log("Raw Data received from backend API:", parsedData); 
+
+        const verifiedArray = Array.isArray(parsedData) ? parsedData : [];
+        
+        setLocalUsers(verifiedArray);
+        if (onDatasetSync) {
+          onDatasetSync(verifiedArray);
+        }
+      } catch (fetchError) {
+        console.error("Failed syncing nearby user metrics:", fetchError);
+      }
+    };
+
+    pullNearbyUsers();
+  }, [userCoordinates, searchRadius, onDatasetSync]);
+  return (
+    <div className={styles.canvasContainer}>
+      <MapContainer 
+        center={userCoordinates} 
+        zoom={13} 
+        className={styles.leafletCoreContainer}
+      >
+        <MapRecenter centerCoordinates={userCoordinates} />
+        <TileLayer 
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" 
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+
+        {localUsers.map((item) => {
+          if (!item.location?.coordinates) return null;
+          const leafLatLng = [item.location.coordinates[1], item.location.coordinates[0]];
+          const isCurrentUser = item._id === authenticatedUserId;
+
+          return (
+            <Marker
+              key={item._id}
+              position={leafLatLng}
+              icon={getCustomIcon(item.status)}
+              eventHandlers={{
+                click: () => onMarkerSelected && onMarkerSelected(item)
+              }}
+            >
+              <Popup>
+                <div className={styles.miniPopupCard}>
+                  <strong>{item.name}</strong>
+                  <p className={styles.miniPopupStatus}>"{item.status || "Active Now"}"</p>
+                  {!isCurrentUser && (
+                    <button 
+                      className={styles.popupActionBtn}
+                      onClick={() => window.location.href = `/profile/${item._id}`}
+                    >
+                      View Profile
+                    </button>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+    </div>
   );
 }

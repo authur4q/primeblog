@@ -1,6 +1,6 @@
 "use client";
 
-export default function UpdateLocationButton() {
+export default function UpdateLocationButton({ onLocationUpdated }) {
   const updateLocation = async () => {
     console.log("Button clicked!");
 
@@ -11,15 +11,16 @@ export default function UpdateLocationButton() {
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        console.log("Position acquired:", pos.coords.latitude, pos.coords.longitude);
+        const { latitude, longitude } = pos.coords;
+        console.log("Position acquired:", latitude, longitude);
         
         try {
           const res = await fetch("/api/users/update-location", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
-              lat: pos.coords.latitude, 
-              lng: pos.coords.longitude 
+              lat: latitude, 
+              lng: longitude 
             }),
           });
 
@@ -27,18 +28,24 @@ export default function UpdateLocationButton() {
           console.log("API Response:", result);
           
           if (res.ok) {
+           
+            if (onLocationUpdated) {
+              onLocationUpdated();
+            }
             alert("Location updated successfully!");
           } else {
-            alert("Failed to update: " + result.error);
+            alert("Failed to update: " + (result.error || "Unknown server error"));
           }
         } catch (error) {
           console.error("Fetch error:", error);
+          alert("Network error updating location.");
         }
       },
       (err) => {
         console.error("Geolocation Error:", err);
         alert("Permission denied or error: " + err.message);
-      }
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
     );
   };
 

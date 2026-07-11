@@ -5,6 +5,10 @@ import mongoose from "mongoose"
 import connectMongoDb from "../../../../../lib/mongodb"
 import { auth } from "@/app/api/auth/[...nextauth]/options"
 import redis from "../../../../../lib/redis"
+import { UTApi } from "uploadthing/server"
+
+
+const utapi = new UTApi();
 
 const buildUserQuery = (id) => {
     if (mongoose.Types.ObjectId.isValid(id)) {
@@ -27,10 +31,8 @@ export const GET = async (req, { params }) => {
             return NextResponse.json({ error: "Route handled by search endpoint" }, { status: 404 });
         }
 
-        
         const cachedProfile = await redis.get(cacheKey);
         if (cachedProfile) {
-            
             try {
                 const data = typeof cachedProfile === 'string' ? JSON.parse(cachedProfile) : cachedProfile;
                 console.log("Returning cachedprofie")
@@ -40,7 +42,6 @@ export const GET = async (req, { params }) => {
             }
         }
 
-        
         await connectMongoDb();
         const queryCondition = buildUserQuery(id);
         const user = await User.findOne(queryCondition).select("-password").lean();
@@ -50,7 +51,6 @@ export const GET = async (req, { params }) => {
             return NextResponse.json({ error: "User profile not found" }, { status: 404 });
         }
 
-        
         await redis.set(cacheKey, JSON.stringify(user), { ex: 3600 });
         
         return NextResponse.json(user, { status: 200 });
@@ -119,6 +119,23 @@ export async function PATCH(req, { params }) {
       }
     }
 
+    if (body.hasOwnProperty('profilePicture')) {
+      if (user.profilePicture && user.profilePicture !== body.profilePicture) {
+        if (user.profilePicture.includes("utfs.io")) {
+          const fileKey = user.profilePicture.split("/f/")[1];
+          if (fileKey) {
+            try {
+              await utapi.deleteFiles(fileKey);
+              console.log(`Successfully purged old asset: ${fileKey} from Uploadthing`);
+            } catch (err) {
+              console.error("Failed to delete asset from Uploadthing server storage:", err);
+            }
+          }
+        }
+      }
+      user.profilePicture = body.profilePicture || "";
+    }
+
     if (body.name) user.name = body.name
     if (body.hasOwnProperty('bio')) user.bio = body.bio || ""
     if (body.hasOwnProperty('bannerGradient')) user.bannerGradient = body.bannerGradient || "linear-gradient(135deg, #6366f1, #a855f7)"
@@ -132,6 +149,12 @@ export async function PATCH(req, { params }) {
 
     await user.save()
     console.log(user)
+
+    const baseCacheKey = `user:${user._id}:profile`;
+    await redis.del(baseCacheKey);
+    if (user.username) {
+        await redis.del(`user:${user.username}:profile`);
+    }
 
     if (isAdmin && !isOwner) {
       try {
@@ -192,7 +215,24 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Forbidden: Insufficient operation access permissions" }, { status: 403 })
     }
 
+    if (userToDelete.profilePicture && userToDelete.profilePicture.includes("utfs.io")) {
+      const fileKey = userToDelete.profilePicture.split("/f/")[1];
+      if (fileKey) {
+        try {
+          await utapi.deleteFiles(fileKey);
+          console.log(`Successfully purged profile asset: ${fileKey} on account deletion`);
+        } catch (err) {
+          console.error("Failed to clear asset from Uploadthing during deletion route execution:", err);
+        }
+      }
+    }
+
     await User.deleteOne({ _id: userToDelete._id })
+
+    await redis.del(`user:${userToDelete._id}:profile`);
+    if (userToDelete.username) {
+        await redis.del(`user:${userToDelete.username}:profile`);
+    }
 
     return NextResponse.json({ message: "Account context and cascade records purged successfully" }, { status: 200 })
   } catch (error) {

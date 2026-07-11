@@ -70,6 +70,7 @@ export const GET = async (req) => {
         }
         
         const posts = await Post.find(query)
+        .populate("userId", "name username profilePicture")
             .sort({ createdAt: -1 })
             .lean();
 

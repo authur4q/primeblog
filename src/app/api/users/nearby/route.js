@@ -7,7 +7,8 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const lat = parseFloat(searchParams.get("lat"));
     const lng = parseFloat(searchParams.get("lng"));
-    const radius = parseInt(searchParams.get("radius")) || 10000;
+    // Read radius as km from frontend, default to 10km if missing
+    const radiusInKm = parseFloat(searchParams.get("radius")) || 10; 
 
     if (isNaN(lat) || isNaN(lng)) {
       return NextResponse.json({ error: "Invalid or missing coordinates" }, { status: 400 });
@@ -20,7 +21,7 @@ export async function GET(req) {
         $geoNear: {
           near: { type: "Point", coordinates: [lng, lat] },
           distanceField: "distInMeters",
-          maxDistance: radius,
+          maxDistance: radiusInKm * 1000, // Convert kilometers to meters for MongoDB
           spherical: true,
         },
       },
@@ -30,6 +31,7 @@ export async function GET(req) {
           status: 1,
           username: 1,
           location: 1,
+          profilePicture:1,
           distInMeters: 1,
           distInKm: { $divide: ["$distInMeters", 1000] }
         },

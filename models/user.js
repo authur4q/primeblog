@@ -90,7 +90,11 @@ bio: {
     default: "",
     maxlength: [160, "Bio cannot exceed 160 characters."], 
   },
-  bannerGradient: {
+  profilePicture: {
+  type: String,
+  default: ""
+},
+bannerGradient: {
     type: String,
     default: "linear-gradient(135deg, #6366f1, #a855f7)",
   },

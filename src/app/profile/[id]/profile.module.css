@@ -15,14 +15,14 @@
 .wrapper {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 70px 20px;
+  padding: 70px 8px;
   overflow-y: scroll;
 }
 
 .profileCard {
   background-color: #161925;
   border: 1px solid #222533;
-  border-radius: 16px;
+  
   padding: 2.5rem;
   display: flex;
   justify-content: space-between;
@@ -394,19 +394,16 @@
   .profileCard {
     flex-direction: column;
     align-items: flex-start;
+    padding: 10px;
   }
   .statsGrid {
     width: 100%;
     justify-content: space-between;
     border-top: 1px solid #222533;
-    padding-top: 1.5rem;
+    padding: 1.5rem;
+    font-weight: 100;
   }
 }
-
-
-
-
-
 
 .titleRow {
   display: flex;
@@ -434,9 +431,6 @@
   color: #ffffff;
 }
 
-/* ==========================================================================
-   Full-Screen Settings Sheet Container
-   ========================================================================== */
 .fullScreenSettings {
   position: fixed;
   top: 0;
@@ -506,9 +500,6 @@
   align-items: center;
 }
 
-/* ==========================================================================
-   Premium Tier Cards & Documentation Blocks
-   ========================================================================== */
 .subscriptionContainer {
   width: 100%;
 }
@@ -522,7 +513,6 @@
 }
 
 .activePlan {
-  
   box-shadow: 0 0 16px rgba(139, 92, 246, 0.15);
 }
 
@@ -601,6 +591,7 @@
   line-height: 1.5;
   margin-bottom: 16px;
 }
+
 .supportBox {
   background: #111b21;
   border-radius: 12px;
@@ -632,13 +623,13 @@
   background: #00a884;
   color: #ffffff;
 }
-/* Banner Styling */
+
 .profileBanner {
   height: 160px;
   width: 100%;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  margin-bottom: -60px; /* Pulls avatar layout up onto the banner */
+  margin-bottom: -60px;
 }
 
 .profileCard {
@@ -668,9 +659,10 @@
   justify-content: center;
   font-size: 2.2rem;
   font-weight: 700;
-  border: 4px solid #111b21; /* Keeps cutout separation crisp */
+  border: 4px solid #111b21;
   flex-shrink: 0;
   z-index: 2;
+  overflow: hidden;
 }
 
 .premiumAvatarRing {
@@ -686,7 +678,6 @@
   max-width: 600px;
 }
 
-/* Follow Button Styles */
 .followBtn {
   display: flex;
   align-items: center;
@@ -706,7 +697,6 @@
   opacity: 0.9;
 }
 
-/* Article Filter Search Bar Layout */
 .contentHeaderArea {
   display: flex;
   align-items: center;
@@ -749,7 +739,6 @@
   border-color: #00a884;
 }
 
-/* Extra Form Elements inside Settings Modal */
 .dashboardTextarea {
   width: 100%;
   background: #111b21;
@@ -775,4 +764,78 @@
   outline: none;
   margin-bottom: 12px;
   cursor: pointer;
+}
+
+.avatarContainerRelative {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.editIconBadge {
+  position: absolute;
+  bottom: 0px;
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #6366f1;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  transition: transform 0.1s ease, background-color 0.2s ease;
+  overflow: hidden;
+  z-index: 3;
+}
+
+.editIconBadge:hover {
+  background-color: #4f46e5;
+  transform: scale(1.05);
+}
+
+.invisibleUploadButton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.hiddenAllowedContent {
+  display: none !important;
+}
+
+.avatarLoadingOverlay {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  border-radius: 50%;
+  background-color: rgba(11, 20, 26, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+
+.avatarSpinner {
+  animation: spin 1s linear infinite;
+  color: #6366f1;
 }

@@ -12,19 +12,19 @@ export async function GET() {
     let excludedIds = [];
 
     if (session?.user?.id) {
-      const followingRecords = await Follow.find({ follower: session.user.id })
-        .select("following")
-        .lean();
-      
-      excludedIds = followingRecords.map((r) => r.following);
-     
-      excludedIds.push(session.user.id);
-    }
+  const followingRecords = await Follow.find({ follower: session.user.id })
+    .select("following")
+    .lean();
+  
+  excludedIds = followingRecords.map((r) => r.following);
+ 
+  excludedIds.push(session.user.id);
+}
 
-    const users = await User.find({ _id: { $nin: excludedIds } })
-      .select("name username _id")
-      .limit(70)
-      .lean();
+const users = await User.find({ _id: { $nin: excludedIds } })
+  .select("name username _id profilePicture") 
+  .limit(70)
+  .lean();
 
     return NextResponse.json(users, { status: 200 });
   } catch (error) {

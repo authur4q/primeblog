@@ -217,6 +217,9 @@ export default function PremiumPage() {
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Connect X, Instagram </li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Clickable WhatsApp redirect integration</li>
                 <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Exclusive Prime Voice narrator</li>
+                <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Ads free Experience</li>
+                <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Advanced Security Features i.e Biometrics</li>
+                <li className={styles.featureItem}><span className={styles.iconCheck}>✓</span> Premium creator Badge</li>
               </ul>
               <button className={styles.premiumButton} onClick={handleSubscribeClick}>Upgrade to Pro Tier</button>
             </div>
