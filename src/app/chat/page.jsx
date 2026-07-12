@@ -204,35 +204,48 @@ const ChatPage = () => {
                         <h1 className={styles.headerTitle}>chats </h1>
                     </div>
                     <input className={styles.sidebarSearchInput} placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-                    <div className={styles.conversationsList}>
-                        {Array.isArray(conversations) && conversations
-                            .filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())))
-                            .map(chat => {
-                                const targetUser = chat.participants.find(p => p._id !== userId);
-                                return (
-                                    <div key={chat._id} onClick={() => setSelectedChat(chat)} className={`${styles.chatCard} ${selectedChat?._id === chat._id ? styles.chatCardActive : ''}`}>
-                                        <div className={styles.avatar}>
-                                            {targetUser?.profilePicture ? (
-                                                <img src={targetUser.profilePicture} alt={targetUser?.name} className={styles.avatarImage} />
-                                            ) : (
-                                                targetUser?.name?.charAt(0).toUpperCase() || "?"
-                                            )}
-                                        </div>
-                                        <div className={styles.chatCardContent}>
-                                            <div className={styles.chatCardHeader}>
-                                                <strong className={styles.username}>{targetUser?.name || "New Chat"}</strong>
-                                                <span className={styles.timestamp}>{chat.updatedAt ? new Date(chat.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}</span>
-                                            </div>
-                                            <p className={styles.lastMessage}>
-                                                {chat.lastMessage && typeof chat.lastMessage === 'object'
-                                                    ? chat.lastMessage.text
-                                                    : ""}
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+<div className={styles.conversationsList}>
+    {Array.isArray(conversations) && conversations
+        .filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())))
+        // 1. Sort the conversations dynamically by the last message time (or updatedAt fallback)
+        .sort((a, b) => {
+            const timeA = new Date(a.lastMessage?.createdAt || a.updatedAt);
+            const timeB = new Date(b.lastMessage?.createdAt || b.updatedAt);
+            return timeB - timeA;
+        })
+        .map(chat => {
+            const targetUser = chat.participants.find(p => p._id !== userId);
+            
+            
+            const displayTime = chat.lastMessage?.createdAt || chat.updatedAt;
+
+            return (
+                <div key={chat._id} onClick={() => setSelectedChat(chat)} className={`${styles.chatCard} ${selectedChat?._id === chat._id ? styles.chatCardActive : ''}`}>
+                    <div className={styles.avatar}>
+                        {targetUser?.profilePicture ? (
+                            <img src={targetUser.profilePicture} alt={targetUser?.name} className={styles.avatarImage} />
+                        ) : (
+                            targetUser?.name?.charAt(0).toUpperCase() || "?"
+                        )}
                     </div>
+                    <div className={styles.chatCardContent}>
+                        <div className={styles.chatCardHeader}>
+                            <strong className={styles.username}>{targetUser?.name || "New Chat"}</strong>
+                           
+                            <span className={styles.timestamp}>
+                                {displayTime ? new Date(displayTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}
+                            </span>
+                        </div>
+                        <p className={styles.lastMessage}>
+                            {chat.lastMessage && typeof chat.lastMessage === 'object'
+                                ? chat.lastMessage.text
+                                : ""}
+                        </p>
+                    </div>
+                </div>
+            );
+        })}
+</div>
                 </div>
 
                 <div className={styles.chatMain}>

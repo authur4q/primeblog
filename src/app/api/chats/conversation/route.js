@@ -6,6 +6,38 @@ import Message from "../../../../../models/messages";
 import redis from "../../../../../lib/redis";
 import mongoose from "mongoose";
 
+export async function POST(req) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectMongoDb();
+    const { recipientId } = await req.json();
+
+    if (!recipientId) {
+      return NextResponse.json({ error: "Recipient ID required" }, { status: 400 });
+    }
+
+  
+    let conversation = await Conversation.findOne({
+      participants: { $all: [session.user.id, recipientId] }
+    });
+
+    if (!conversation) {
+      conversation = await Conversation.create({
+        participants: [session.user.id, recipientId]
+      });
+    }
+
+    return NextResponse.json(conversation, { status: 200 });
+  } catch (error) {
+    console.error("Failed to initialize conversation:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
 export async function GET(req) {
   try {
     const session = await auth();

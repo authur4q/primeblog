@@ -72,16 +72,20 @@ export async function POST(req) {
     }
 
     const cleanText = text.trim();
-    const generatedId = new mongoose.Types.ObjectId();
 
-    const newMessage = {
-      _id: generatedId,
+    const createdMessage = await Message.create({
       conversationId,
       senderId,
-      text: cleanText,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+      text: cleanText
+    });
+
+    const populatedMessage = await Message.findById(createdMessage._id)
+      .select("text createdAt senderId seen")
+      .populate({
+        path: "senderId",
+        select: "profilePicture name"
+      })
+      .lean();
 
     let determinedRecipient = recipientId;
     if (!determinedRecipient && mongoose.models.Conversation) {
@@ -94,10 +98,9 @@ export async function POST(req) {
     }
 
     const productionTasks = [
-      Message.create(newMessage),
-      pusherServer.trigger(conversationId, "new-message", newMessage),
+      pusherServer.trigger(conversationId, "new-message", populatedMessage),
       mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
-        lastMessage: cleanText,
+        lastMessage: createdMessage._id,
         updatedAt: new Date()
       })
     ];
@@ -115,9 +118,18 @@ export async function POST(req) {
       );
     }
 
+    try {
+      await redis.del(`user:${senderId}:chats`);
+      if (determinedRecipient) {
+        await redis.del(`user:${determinedRecipient}:chats`);
+      }
+    } catch (cacheError) {
+      console.error("Cache clear failure in message controller:", cacheError);
+    }
+
     await Promise.all(productionTasks);
 
-    return NextResponse.json(newMessage, { status: 201 });
+    return NextResponse.json(populatedMessage, { status: 201 });
   } catch (error) {
     console.error("Error in POST /api/chats/messages:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
