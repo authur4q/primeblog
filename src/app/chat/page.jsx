@@ -284,25 +284,34 @@ const ChatPage = () => {
                                         </button>
                                     </div>
                                 )}
-                                {(messages ?? []).map(msg => (
-                                    <div key={msg._id} className={`${styles.messageGroup} ${msg.senderId === userId ? styles.groupMe : ''}`}>
-                                        <div className={styles.messageBubbleContainer}>
-                                            <div 
-                                                onDoubleClick={() => handleDeleteMessage(msg._id, msg.senderId)} 
-                                                className={`${styles.messageBubble} ${msg.senderId === userId ? styles.messageMe : styles.messageThem}`}
-                                            >
-                                                {msg.text.startsWith('http') ? (
-                                                    <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
-                                                        <MapPin size={34}/>
-                                                    </a>
-                                                ) : (msg.text)}
-                                            </div>
-                                            <span className={styles.messageTimestamp}>
-                                                {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
+                                    {(messages ?? []).map(msg => {
+   
+    const msgSenderId = typeof msg.senderId === 'object' && msg.senderId !== null 
+        ? msg.senderId._id 
+        : msg.senderId;
+        
+    const isOwnMessage = String(msgSenderId) === String(userId);
+
+    return (
+        <div key={msg._id} className={`${styles.messageGroup} ${isOwnMessage ? styles.groupMe : ''}`}>
+            <div className={styles.messageBubbleContainer}>
+                <div 
+                    onDoubleClick={() => handleDeleteMessage(msg._id, msg.senderId)} 
+                    className={`${styles.messageBubble} ${isOwnMessage ? styles.messageMe : styles.messageThem}`}
+                >
+                    {msg.text.startsWith('http') ? (
+                        <a href={msg.text} target="_blank" rel="noopener noreferrer" style={{ color: 'red', textDecoration: 'underline' }}>
+                            <MapPin size={34}/>
+                        </a>
+                    ) : (msg.text)}
+                </div>
+                <span className={styles.messageTimestamp}>
+                    {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                </span>
+            </div>
+        </div>
+    );
+})}
                                 <div ref={messagesEndRef} />
                             </div>
                             <form onSubmit={handleSendMessage} className={styles.messageForm}>
