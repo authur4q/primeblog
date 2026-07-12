@@ -47,16 +47,18 @@ const ChatPage = () => {
         });
 
         channel.bind("new-message", (incomingMsg) => {
-            setMessages((prev) => {
-                const messageExists = prev.some((msg) => msg._id === incomingMsg._id);
-                if (messageExists) return prev;
-                return [...prev, incomingMsg];
-            });
+            if (incomingMsg.conversationId === selectedChat._id) {
+                setMessages((prev) => {
+                    const messageExists = prev.some((msg) => msg._id === incomingMsg._id);
+                    if (messageExists) return prev;
+                    return [...prev, incomingMsg];
+                });
+            }
             
             setConversations((prevConvos) =>
                 prevConvos.map((convo) =>
-                    convo._id === selectedChat._id
-                        ? { ...convo, lastMessage: incomingMsg, updatedAt: incomingMsg.createdAt }
+                    convo._id === incomingMsg.conversationId
+                        ? { ...convo, lastMessage: incomingMsg, updatedAt: incomingMsg.createdAt || new Date().toISOString() }
                         : convo
                 ).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
             );
@@ -83,22 +85,6 @@ const ChatPage = () => {
         };
     }, [userId]);
 
-    const handleDeleteMessage = async (messageId, senderId) => {
-        console.log("Attempting to delete message:", messageId);
-        if (senderId !== userId) return; 
-        if (!selectedChat) return;
-        await fetch(`/api/chats/messages/${messageId}`, { method: "DELETE" });
-        setMessages(prev => prev.filter(msg => msg._id !== messageId));
-    };
-
-    const handleTyping = (e) => {
-        setNewMessageText(e.target.value);
-        if (selectedChat) {
-            const channel = pusherRef.current.subscribe(`private-${selectedChat._id}`);
-            channel.trigger("client-typing", { senderId: userId });
-        }
-    };
-
     const handleSendMessage = async (e) => {
         e?.preventDefault?.();
         if (!newMessageText.trim() || !selectedChat) return;
@@ -114,6 +100,19 @@ const ChatPage = () => {
         setMessages((prev) => [...prev, optimisticMsg]);
         setNewMessageText("");
 
+        setConversations((prevConversations) =>
+            prevConversations.map((chat) => {
+                if (chat._id === selectedChat._id) {
+                    return {
+                        ...chat,
+                        lastMessage: optimisticMsg,
+                        updatedAt: optimisticMsg.createdAt
+                    };
+                }
+                return chat;
+            }).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+        );
+
         try {
             const response = await fetch("/api/chats/messages", {
                 method: "POST",
@@ -127,12 +126,42 @@ const ChatPage = () => {
 
             if (response.ok) {
                 const savedMsg = await response.json();
+                
                 setMessages((prev) =>
                     prev.map((msg) => (msg._id === tempId ? savedMsg : msg))
+                );
+
+                setConversations((prevConversations) =>
+                    prevConversations.map((chat) => {
+                        if (chat._id === selectedChat._id) {
+                            return {
+                                ...chat,
+                                lastMessage: savedMsg,
+                                updatedAt: savedMsg.createdAt || new Date().toISOString()
+                            };
+                        }
+                        return chat;
+                    }).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
                 );
             }
         } catch (error) {
             console.error("Failed to send message:", error);
+        }
+    };
+
+    const handleDeleteMessage = async (messageId, senderId) => {
+        console.log("Attempting to delete message:", messageId);
+        if (senderId !== userId) return; 
+        if (!selectedChat) return;
+        await fetch(`/api/chats/messages/${messageId}`, { method: "DELETE" });
+        setMessages(prev => prev.filter(msg => msg._id !== messageId));
+    };
+
+    const handleTyping = (e) => {
+        setNewMessageText(e.target.value);
+        if (selectedChat) {
+            const channel = pusherRef.current.subscribe(`private-${selectedChat._id}`);
+            channel.trigger("client-typing", { senderId: userId });
         }
     };
 
@@ -207,7 +236,7 @@ const ChatPage = () => {
 <div className={styles.conversationsList}>
     {Array.isArray(conversations) && conversations
         .filter(c => c.participants?.some(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase())))
-        // 1. Sort the conversations dynamically by the last message time (or updatedAt fallback)
+      
         .sort((a, b) => {
             const timeA = new Date(a.lastMessage?.createdAt || a.updatedAt);
             const timeB = new Date(b.lastMessage?.createdAt || b.updatedAt);
