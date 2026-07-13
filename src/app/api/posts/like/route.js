@@ -3,6 +3,7 @@ import connectDB from "../../../../../lib/mongodb";
 import Post from "../../../../../models/post";
 import mongoose from "mongoose";
 import Notification from "../../../../../models/Notification";
+import User from "../../../../../models/user";
 
 export async function POST(req) {
     try {
@@ -16,8 +17,9 @@ export async function POST(req) {
             : { $pull: { likes: userObjectId } };
 
         const updatedPost = await Post.findByIdAndUpdate(postId, update, { new: true })
-            .populate("UserId")
-            .populate("user");
+            .populate("userId")
+            
+            
         
         if (!updatedPost) {
             return NextResponse.json({ error: "Post not found" }, { status: 404 });
@@ -28,13 +30,17 @@ export async function POST(req) {
     const postAuthorId = updatedPost.userId?._id || updatedPost.userId;
 
     if (postAuthorId && postAuthorId.toString() !== userId.toString()) {
+        const liker = await User.findById(userId).select("name").lean()
+                const likerName = liker?.name || "Someone";
         await Notification.create({
             recipient: new mongoose.Types.ObjectId(String(postAuthorId)),
             sender: userObjectId,
             type: "USER_ACTIVITY",
             title: "New Like on Your Post",
-            message: "Someone liked your post.",
-            read: false,
+            title: "New Like on Your Post",
+                    message: `${likerName} liked your post.`, 
+                    targetLink: `/blogs/${postId}`, 
+                    read: false,
         });
     }
 }

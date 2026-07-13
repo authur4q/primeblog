@@ -112,6 +112,7 @@ export async function POST(req) {
           sender: new mongoose.Types.ObjectId(String(senderId)),
           type: "USER_ACTIVITY",
           title: "New Message Received",
+          targetLink: `/chat?id=${conversationId}`, 
           message: cleanText.length > 40 ? `${cleanText.substring(0, 40)}...` : cleanText,
           read: false,
         })

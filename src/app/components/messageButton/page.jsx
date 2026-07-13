@@ -15,7 +15,6 @@ const MessageButton = ({ recipientId, recipientName }) => {
         setLoading(true)
 
         try {
-           
             const res = await fetch("/api/chats/conversation", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -23,7 +22,14 @@ const MessageButton = ({ recipientId, recipientName }) => {
             })
 
             if (res.ok) {
-                router.push("/chat")
+                const conversation = await res.json()
+                
+             
+                if (conversation && conversation._id) {
+                    router.push(`/chat?id=${conversation._id}`)
+                } else {
+                    router.push("/chat")
+                }
             } else {
                 console.error("Failed to initialize conversation")
             }

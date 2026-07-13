@@ -33,9 +33,7 @@ const NotificationSchema = new mongoose.Schema(
       default: false,
       index: true
     },
-    targetLink: {
-      type: String
-    }
+    targetLink: { type: String, default: "" }
   },
   { timestamps: true }
 )

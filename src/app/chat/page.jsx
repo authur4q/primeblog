@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { SendHorizontal, Phone, Video, ArrowLeft, MapPin } from 'lucide-react';
 import Pusher from 'pusher-js';
 import { useCall } from '@/context/CallContext';
+ import { useSearchParams } from "next/navigation";
 
 const ChatPage = () => {
     const router = useRouter();
@@ -23,6 +24,28 @@ const ChatPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const pusherRef = useRef(null);
     const messagesEndRef = useRef(null);
+
+    const searchParams = useSearchParams();
+const directChatId = searchParams.get("id");
+
+useEffect(() => {
+    if (directChatId && conversations.length > 0) {
+        const targetChat = conversations.find(c => c._id === directChatId);
+        if (targetChat) {
+            setSelectedChat(targetChat);
+        }
+    }
+}, [directChatId, conversations, setSelectedChat]);
+
+useEffect(() => {
+    if (selectedChat?._id && selectedChat._id !== directChatId) {
+        router.replace(`/chat?id=${selectedChat._id}`);
+    }
+}, [selectedChat, directChatId, router]);
+
+   
+
+
 
     useEffect(() => { 
         if (status === "unauthenticated") router.push("/login"); 

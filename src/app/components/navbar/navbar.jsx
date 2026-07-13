@@ -93,7 +93,7 @@ const Navbar = ({ showFab = false }) => {
             notifications.map(item => (
               <Link 
                 key={item._id} 
-                href={item.link || '/chat'} 
+                href={item.targetLink || ""} 
                 className={`${notifStyles.notifItem} ${!item.isRead ? notifStyles.unreadItem : ''}`} 
                 onClick={() => setIsNotifOpen(false)}
               >
@@ -101,7 +101,7 @@ const Navbar = ({ showFab = false }) => {
                 
                 {item.sender?.name && (
                   <div className={notifStyles.notifSenderRow}>
-                    <span className={notifStyles.senderName}>From {item.sender.name}</span>
+                    <span className={notifStyles.senderName}>{item.sender.name}</span>
                     {item.sender.isPremium && <span className={notifStyles.proBadge}>PRO</span>}
                   </div>
                 )}

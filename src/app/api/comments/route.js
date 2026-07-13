@@ -30,6 +30,7 @@ export const POST = async (req) => {
         
         if (populatedComment && populatedComment.post) {
             const postAuthorId = populatedComment.post.userId 
+            const actualPostId = populatedComment.post._id || populatedComment.post;
 
             if (postAuthorId && postAuthorId.toString() !== userId.toString()) {
                 const cleanText = text.trim();
@@ -38,6 +39,7 @@ export const POST = async (req) => {
                     sender: new mongoose.Types.ObjectId(String(userId)),
                     type: "USER_ACTIVITY",
                     title: "New Comment on Your Post",
+                    targetLink: `/blogs/${actualPostId}`,
                     message: cleanText.length > 40 ? `${cleanText.substring(0, 40)}...` : cleanText,
                     read: false,
                 });

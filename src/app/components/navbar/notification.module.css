@@ -2,7 +2,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  background-color: #111b21c7;
+  
 }
 
 .notifButton {
@@ -52,7 +52,7 @@
   right: 0;
   width: 360px;
   max-height: 480px;
-  background: rgba(22, 22, 26, 0.75);
+  background: rgba(22, 22, 26, 0.966);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);

@@ -20,7 +20,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "Recipient ID required" }, { status: 400 });
     }
 
-  
     let conversation = await Conversation.findOne({
       participants: { $all: [session.user.id, recipientId] }
     });
@@ -29,6 +28,13 @@ export async function POST(req) {
       conversation = await Conversation.create({
         participants: [session.user.id, recipientId]
       });
+    }
+
+    try {
+      await redis.del(`user:${session.user.id}:chats`);
+      await redis.del(`user:${recipientId}:chats`);
+    } catch (cacheError) {
+      console.error("Cache clear failure in conversation controller:", cacheError);
     }
 
     return NextResponse.json(conversation, { status: 200 });
