@@ -21,7 +21,7 @@ export async function GET(req) {
         { username: { $regex: searchRegex } }
       ]
     })
-    .select("name username isPremium")
+    .select("name username isPremium profilePicture")
     .limit(10);
 
     return NextResponse.json(users, { status: 200 });

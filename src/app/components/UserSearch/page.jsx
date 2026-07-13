@@ -34,6 +34,7 @@ export default function UserSearch() {
                 const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
                 if (res.ok) {
                     const data = await res.json()
+                   
                     setResults(data)
                 }
             } catch (err) {
@@ -76,32 +77,41 @@ export default function UserSearch() {
             {showDropdown && status === "authenticated" && query.trim() && (
                 <div className={styles.dropdown}>
                     {results.length > 0 ? (
-                        results.map((user) => {
-                            const initial = (user.name || "U").charAt(0).toUpperCase()
-                            return (
-                                <Link 
-                                    key={user._id} 
-                                    href={`/profile/${user._id}`}
-                                    className={styles.resultItem}
-                                    onClick={() => {
-                                        setShowDropdown(false)
-                                        setQuery("")
-                                    }}
-                                >
-                                    <div className={styles.avatar}>{initial}</div>
-                                    <div className={styles.userInfo}>
-                                        <span className={styles.name}>
-                                            {user.name}
-                                            {user.isPremium && <span className={styles.proBadge}>PRO</span>}
-                                        </span>
-                                        {user.username && <span className={styles.handle}>@{user.username}</span>}
-                                    </div>
-                                </Link>
-                            )
-                        })
-                    ) : (
-                        !loading && <div className={styles.noResults}>No users found</div>
-                    )}
+    results.map((user) => {
+        const initial = (user.name || "U").charAt(0).toUpperCase()
+        return (
+            <Link 
+                key={user._id} 
+                href={`/profile/${user._id}`}
+                className={styles.resultItem}
+                onClick={() => {
+                    setShowDropdown(false)
+                    setQuery("")
+                }}
+            >
+                {user.profilePicture ? (
+                    <img 
+                        src={user.profilePicture} 
+                        alt={user.name || "User profile"} 
+                        className={styles.searchAvatarImage} 
+                    />
+                ) : (
+                    <div className={styles.avatar}>{initial}</div>
+                )}
+                
+                <div className={styles.userInfo}>
+                    <span className={styles.name}>
+                        {user.name}
+                        {user.isPremium && <span className={styles.proBadge}>PRO</span>}
+                    </span>
+                    {user.username && <span className={styles.handle}>@{user.username}</span>}
+                </div>
+            </Link>
+        )
+    })
+) : (
+    !loading && <div className={styles.noResults}>No users found</div>
+)}
                 </div>
             )}
         </div>

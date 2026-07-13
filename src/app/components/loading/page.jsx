@@ -1,11 +1,13 @@
-import React from 'react'
+import styles from "./loading.module.css";
 
-function Loading() {
+export default function Loading({ message = "Loading content" }) {
   return (
-<div className="loaderContainer">
-  <div className="spinner"></div>
-</div>
-  )
+    <div className={styles.overlay}>
+      <div className={styles.spinnerContainer}>
+        <div className={styles.spinner} />
+        <div className={styles.pulseRing} />
+      </div>
+      <p className={styles.text}>{message}...</p>
+    </div>
+  );
 }
-
-export default Loading

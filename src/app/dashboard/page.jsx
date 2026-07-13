@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UploadButton } from "@uploadthing/react";
 import { Bold, Italic, Heading1 } from 'lucide-react';
+import Loading from '../components/loading/page';
 
 const CATEGORY_OPTIONS = ["Sports", "Beauty", "Tech", "Lifestyle", "Finance", "Education"];
 
@@ -112,7 +113,10 @@ const DashboardPage = () => {
         if (!res.ok) setData(previousData);
     };
 
-    if (status === "loading") return <div className={styles.container}>Loading Session...</div>;
+       if (status === "loading") {
+            return <Loading message="Loading Dashboard..." />;
+        }
+    
 
     return (
         <div className={styles.container}>

@@ -157,13 +157,20 @@ const ChatPage = () => {
         setMessages(prev => prev.filter(msg => msg._id !== messageId));
     };
 
-    const handleTyping = (e) => {
-        setNewMessageText(e.target.value);
-        if (selectedChat) {
-            const channel = pusherRef.current.subscribe(`private-${selectedChat._id}`);
+const handleTyping = (e) => {
+    setNewMessageText(e.target.value);
+    
+    if (selectedChat && pusherRef.current) {
+     
+        const channelName = `private-${selectedChat._id}`;
+        const channel = pusherRef.current.channel(channelName) || pusherRef.current.subscribe(channelName);
+        
+        
+        if (channel.subscribed) {
             channel.trigger("client-typing", { senderId: userId });
         }
-    };
+    }
+};
 
     const initiateCall = async (mediaType = 'audio') => {
         if (!selectedChat || isCalling) return;

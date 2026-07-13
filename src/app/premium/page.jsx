@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import styles from "./premium.module.css";
 import Navbar from "../components/navbar/navbar";
 import BiometricToggle from "@/app/components/BiometricToggle";
+import Loading from "../components/loading/page";
 
 function SecuritySettingsModal({ onClose, isPremium, userId }) {
   const [biometricsEnabled, setBiometricsEnabled] = useState(false);
@@ -65,7 +66,7 @@ function SecuritySettingsModal({ onClose, isPremium, userId }) {
 }
 
 export default function PremiumPage() {
-  const { data: session, update } = useSession();
+  const { data: session, update, status } = useSession();
   const router = useRouter();
 
   const [username, setUsername] = useState("");
@@ -76,6 +77,7 @@ export default function PremiumPage() {
   const [paymentMethod, setPaymentMethod] = useState("mpesa");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [processingUpgrade, setProcessingUpgrade] = useState(false);
+  const [showPaymentDevNotice, setShowPaymentDevNotice] = useState(false);
 
   useEffect(() => {
     if (session?.user) {
@@ -119,6 +121,7 @@ export default function PremiumPage() {
     e.preventDefault();
     if (!session?.user?.id) return;
     setProcessingUpgrade(true);
+    setShowPaymentDevNotice(false);
     try {
       const res = await fetch(`/api/users/${session.user.id}`, {
         method: "PATCH",
@@ -131,14 +134,18 @@ export default function PremiumPage() {
         await update();
         alert("Welcome to Prime Pro! Your subscription has been activated successfully.");
       } else {
-        alert("Payment initialization failed.");
+        setShowPaymentDevNotice(true);
       }
     } catch (err) {
-      alert("Error processing your payment payload request.");
+      setShowPaymentDevNotice(true);
     } finally {
       setProcessingUpgrade(false);
     }
   };
+
+  if (status === "loading") {
+    return <Loading message="Loading..." />;
+  }
 
   return (
     <div className={styles.container}>
@@ -243,6 +250,28 @@ export default function PremiumPage() {
               <h3 className={styles.modalTitle}>Upgrade to Prime Pro</h3>
               <p className={styles.modalSubtitle}>Unlock professional integrations</p>
             </div>
+
+            {showPaymentDevNotice && (
+              <div className={styles.noticeBanner}>
+                <div className={styles.noticeHeader}>
+                  <strong className={styles.noticeTitle}>Payment Integration in Progress</strong>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPaymentDevNotice(false)} 
+                    className={styles.noticeCloseBtn}
+                  >
+                    &times;
+                  </button>
+                </div>
+                <p className={styles.noticeText}>
+                  Automated checkout is currently in development. Please contact our support team for a manual upgrade.
+                </p>
+                <a href="mailto:support@primetek.co.ke" className={styles.noticeSupportLink}>
+                  Contact Support
+                </a>
+              </div>
+            )}
+
             <form onSubmit={handleProcessUpgrade}>
               <div className={styles.providerGroup}>
                 <label className={styles.providerLabel}>Select Payment Provider</label>
@@ -257,7 +286,7 @@ export default function PremiumPage() {
                   <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="e.g. 2547XXXXXXXX" className={styles.modalInput} required />
                 </div>
               )}
-              <button type="submit" disabled={processingUpgrade} className={styles.modalSubmitBtn}>
+              <button type="submit" disabled={processingUpgrade || showPaymentDevNotice} className={styles.modalSubmitBtn}>
                 {processingUpgrade ? "Processing..." : `Pay KES 49 with ${paymentMethod === "mpesa" ? "M-Pesa" : "Card"}`}
               </button>
             </form>

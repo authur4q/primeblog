@@ -16,12 +16,23 @@ import RotatingAd from "./components/RotatingAds/RotatingAds";
 async function getLatestPostsDirectly() {
   try {
     await connectMongoDb();
-    return await Post.find({ status: { $in: ["published", "archived"] } })
+    
+    const posts = await Post.find({ status: { $in: ["published", "archived"] } })
       .sort({ createdAt: -1 })
       .limit(4)
-      .select("title description name imageUrl")
+      .select("title description name imageUrl userId")
+      .populate("userId", "profilePicture")             
       .lean();
+
+     
+
+    return posts.map(post => ({
+      ...post,
+      profilePicture: post.userId?.profilePicture || null
+    }));
+    
   } catch (error) {
+    console.error("Error fetching latest posts:", error);
     return [];
   }
 }
@@ -30,7 +41,7 @@ async function getPremiumExpirationDirectly(email) {
   if (!email) return null;
   try {
     await connectMongoDb();
-    const user = await User.findOne({ email }).select("premiumUntil isPremium").lean();
+    const user = await User.findOne({ email }).select("premiumUntil isPremium profilePicture").lean();
     if (user?.isPremium && user.premiumUntil) {
       const diffTime = new Date(user.premiumUntil) - new Date();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -82,7 +93,15 @@ async function LatestPostsList() {
             )}
             <div className={styles.cardHeader}>
               <div className={styles.authorGroup}>
-                <MiniAvatar name={post.name} className={styles.miniAvatar} />
+{post.profilePicture ? (
+                  <img 
+                    src={post.profilePicture} 
+                    alt={post.name || "User profile"} 
+                    className={styles.miniProfilePhoto} 
+                  />
+                ) : (
+                  <MiniAvatar name={post.name} className={styles.miniAvatar} />
+                )}
                 <span>pb/{post.name || "Anonymous"}</span>
               </div>
             </div>

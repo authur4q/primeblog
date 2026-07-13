@@ -5,17 +5,26 @@ import Navbar from '../../components/navbar/navbar'
 import Link from 'next/link'
 import styles from './profile.module.css'
 import MessageButton from '../../components/messageButton/page'
+import { useRouter } from 'next/navigation'
+import Loading from '@/app/components/loading/page'
 
 import { UploadButton } from '@uploadthing/react'
 import { ArrowRight, MessageCircle, Twitter, Instagram, Settings, X, ShieldAlert, CreditCard, LifeBuoy, UserPlus, UserCheck, Search, Pencil, Loader2 } from 'lucide-react';
 
 const UserProfile = ({ params }) => {
+  const router = useRouter()
 
   const unwrappedParams = params ? React.use(params) : null
   const profileId = unwrappedParams?.id
 
   const { data: session, status, update } = useSession()
   const currentUserId = session?.user?.id
+
+  useEffect(()=>{
+    if(status === "unauthenticated"){
+      router.push("/login")
+    }
+  },[status,router])
 
   const [profileUser, setProfileUser] = useState(null)
   const [userPosts, setUserPosts] = useState([])
@@ -211,7 +220,7 @@ const handleAvatarUploaded = async (url) => {
       })
     }
   } catch (err) {
-    console.error("Error saving updated profile avatar:", err)
+    console.error("Error saving updated profile avatar:")
   } finally {
     setIsAvatarUpdating(false)
   }
@@ -228,9 +237,10 @@ const handleAvatarUploaded = async (url) => {
     return (
       <div className={styles.container}>
         <Navbar />
-        <div className={styles.loaderContainer}>
-          <div className={styles.spinner}></div>
-        </div>
+          
+                return <Loading message="Loading profile..." />;
+            
+        
       </div>
     )
   }
@@ -240,7 +250,7 @@ const handleAvatarUploaded = async (url) => {
       <div className={styles.container}>
         <Navbar />
         <div className={styles.emptyState} style={{ padding: '4rem 2rem' }}>
-          <p>Error loading profile: {error}</p>
+          <p>Error loading profile</p>
           <Link href="/dashboard" className={styles.createBtn}>Return to Dashboard</Link>
         </div>
       </div>
@@ -443,7 +453,7 @@ const handleAvatarUploaded = async (url) => {
                       <li>Encrypted Live Location Broadcast Channels</li>
                     </ul>
                     <button className={styles.planActionBtn} disabled={profileUser?.isPremium}>
-                      {profileUser?.isPremium ? "Active Subscription" : "Upgrade to Premium"}
+                      {profileUser?.isPremium ? "Active Subscription" :<Link href={"/premium"}>"Upgrade to Premium"</Link> }
                     </button>
                   </div>
                 </div>

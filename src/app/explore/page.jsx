@@ -10,9 +10,17 @@ import UpdateLocationButton from '../components/NearbyMap/UpdateLocationButton/U
 const DynamicMapCanvas = lazy(() => import('../components/NearbyMap/NearbyMap'));
 
 export default function ExplorePage() {
-  const { data: appSession } = useSession();
+  const { data: appSession,status } = useSession();
   const currentUserId = appSession?.user?.id;
   const router = useRouter();
+
+  useEffect(()=>{
+      if(status === "unauthenticated"){
+    router.push("/login")
+  }
+  },[router,status])
+
+
 
   const [currentPosition, setCurrentPosition] = useState(null);
   const [focusedProfile, setFocusedProfile] = useState(null);

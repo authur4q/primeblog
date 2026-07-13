@@ -1,34 +1,79 @@
-.loaderContainer {
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: 200px; 
-  width: 100%;
+  justify-content: center;
+  background-color: #000103; 
+  z-index: 99999;
+}
+
+.spinnerContainer {
+  position: relative;
+  width: 64px;
+  height: 64px;
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 100%;
+  border: 4px solid rgba(0, 0, 0, 0.527);
+  border-top-color: #ff3b30; 
   border-radius: 50%;
-  background-color: antiquewhite;
-  display: inline-block;
-  position: relative;
-  box-sizing: border-box;
-  
- 
-  border: 4px solid rgba(223, 182, 178, 0.1);
-  border-top-color: #dfb6b2;
-  
- 
-  will-change: transform;
-  animation: rotation 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: spin 1s cubic-bezier(0.55, 0.055, 0.675, 0.19) infinite;
 }
 
-@keyframes rotation {
+.pulseRing {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 80px;
+  height: 80px;
+  border: 2px solid rgba(255, 61, 0, 0.2);
+  border-radius: 50%;
+  animation: pulse 2s ease-out infinite;
+}
+
+.text {
+  margin-top: 24px;
+  color: #a0aec0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  animation: fadeText 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
   0% {
-    transform: rotate(0deg);
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
   }
   100% {
-    transform: rotate(360deg);
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeText {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
   }
 }

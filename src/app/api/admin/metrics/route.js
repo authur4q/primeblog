@@ -3,6 +3,7 @@ import { auth } from "@/app/api/auth/[...nextauth]/options"
 import connectMongoDb from "../../../../../lib/mongodb"
 import User from "../../../../../models/user"
 import Post from "../../../../../models/post"
+import redis from "../../../../../lib/redis"
 
 export const GET = async (req) => {
   try {
