@@ -266,7 +266,7 @@ export default function PremiumPage() {
                 <p className={styles.noticeText}>
                   Automated checkout is currently in development. Please contact our support team for a manual upgrade.
                 </p>
-                <a href="mailto:support@primetek.co.ke" className={styles.noticeSupportLink}>
+                <a href="mailto:authurbass@gmail.com" className={styles.noticeSupportLink}>
                   Contact Support
                 </a>
               </div>
