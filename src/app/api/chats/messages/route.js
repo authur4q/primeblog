@@ -98,7 +98,7 @@ export async function POST(req) {
     }
 
     const productionTasks = [
-      pusherServer.trigger(conversationId, "new-message", populatedMessage),
+      pusherServer.trigger(`private-${conversationId}`, "new-message", populatedMessage),
       mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
         lastMessage: createdMessage._id,
         updatedAt: new Date()

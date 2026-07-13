@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import connectMongoDb from "../../../../lib/mongodb"
 import Comment from "../../../../models/comments"
-
+import Notification from "../../../../models/Notification"
+import mongoose from "mongoose"
 
 export const POST = async (req) => {
     try {
@@ -20,9 +21,35 @@ export const POST = async (req) => {
             parentId: parentId || null 
         })
         
-        const populatedComment = await Comment.findById(comment._id).populate("user", "name")
+        const populatedComment = await Comment.findById(comment._id)
+            .populate("user", "name")
+            .populate({
+                path: "post",
+                select: "userId" 
+            })
         
-        return NextResponse.json(populatedComment, { status: 201 })
+        if (populatedComment && populatedComment.post) {
+            const postAuthorId = populatedComment.post.userId 
+
+            if (postAuthorId && postAuthorId.toString() !== userId.toString()) {
+                const cleanText = text.trim();
+                await Notification.create({
+                    recipient: new mongoose.Types.ObjectId(String(postAuthorId)),
+                    sender: new mongoose.Types.ObjectId(String(userId)),
+                    type: "USER_ACTIVITY",
+                    title: "New Comment on Your Post",
+                    message: cleanText.length > 40 ? `${cleanText.substring(0, 40)}...` : cleanText,
+                    read: false,
+                });
+            }
+        }
+        
+        const responseComment = populatedComment.toObject();
+        if (responseComment.post) {
+            responseComment.post = responseComment.post._id;
+        }
+
+        return NextResponse.json(responseComment, { status: 201 })
     } catch (error) {
         console.error("Error creating comment:", error)
         return NextResponse.json({ error: "Failed to create comment" }, { status: 500 })
@@ -40,7 +67,6 @@ export const GET = async (req) => {
     try {
         await connectMongoDb()
        
-   
         const comments = await Comment.find({ post: id })
             .populate("user", "name profilePicture")
             .sort({ createdAt: 1 }) 
