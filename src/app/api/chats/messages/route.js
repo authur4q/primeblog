@@ -87,6 +87,11 @@ export async function POST(req) {
       })
       .lean();
 
+    const payloadResponse = {
+      ...populatedMessage,
+      senderIdString: String(senderId)
+    };
+
     let determinedRecipient = recipientId;
     if (!determinedRecipient && mongoose.models.Conversation) {
       const activeConvo = await mongoose.models.Conversation.findById(conversationId).lean();
@@ -98,7 +103,7 @@ export async function POST(req) {
     }
 
     const productionTasks = [
-      pusherServer.trigger(`private-${conversationId}`, "new-message", populatedMessage),
+      pusherServer.trigger(`private-${conversationId}`, "new-message", payloadResponse),
       mongoose.models.Conversation.findByIdAndUpdate(conversationId, {
         lastMessage: createdMessage._id,
         updatedAt: new Date()
@@ -120,17 +125,22 @@ export async function POST(req) {
     }
 
     try {
+      // Evict user conversation cards cache
       await redis.del(`user:${senderId}:chats`);
       if (determinedRecipient) {
         await redis.del(`user:${determinedRecipient}:chats`);
       }
+      
+      // Evict the active message stream cache layers matching the GET query parameters
+      await redis.del(`messages:${conversationId}:latest:20`);
+      await redis.del(`messages:${conversationId}:latest:10`);
     } catch (cacheError) {
       console.error("Cache clear failure in message controller:", cacheError);
     }
 
     await Promise.all(productionTasks);
 
-    return NextResponse.json(populatedMessage, { status: 201 });
+    return NextResponse.json(payloadResponse, { status: 201 });
   } catch (error) {
     console.error("Error in POST /api/chats/messages:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

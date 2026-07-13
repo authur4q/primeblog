@@ -51,6 +51,8 @@
 .mapViewportContainer {
   width: 100%;
   flex: 1;
+  margin:0;
+
   position: relative;
 }
 
