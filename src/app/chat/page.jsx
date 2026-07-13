@@ -9,8 +9,9 @@ import { SendHorizontal, Phone, Video, ArrowLeft, MapPin } from 'lucide-react';
 import Pusher from 'pusher-js';
 import { useCall } from '@/context/CallContext';
  import { useSearchParams } from "next/navigation";
+ import { Suspense } from 'react';
 
-const ChatPage = () => {
+const ChatContent = () => {
     const router = useRouter();
     const { isCallOngoing, activeConversationId } = useCall();
     const { data: session, status } = useSession();
@@ -385,6 +386,15 @@ const handleTyping = (e) => {
                 </div>
             </div>
         </div>
+    );
+};
+
+
+const ChatPage = () => {
+    return (
+        <Suspense fallback={<div>Loading workspace...</div>}>
+            <ChatContent />
+        </Suspense>
     );
 };
 
